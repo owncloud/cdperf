@@ -61,8 +61,49 @@ const files: {
     unit: any;
 }[] = [
     // 83,68% under 1mb
-    ...times(1, () => ({ size: 100, unit: 'KB' })),
-
+    ...times(92, () => ({ size: 100, unit: 'KB' })),
+    ...times(92, () => ({ size: 200, unit: 'KB' })),
+    ...times(92, () => ({ size: 300, unit: 'KB' })),
+    ...times(92, () => ({ size: 400, unit: 'KB' })),
+    ...times(92, () => ({ size: 500, unit: 'KB' })),
+    ...times(92, () => ({ size: 600, unit: 'KB' })),
+    ...times(92, () => ({ size: 700, unit: 'KB' })),
+    ...times(92, () => ({ size: 800, unit: 'KB' })),
+    ...times(92, () => ({ size: 900, unit: 'KB' })),
+    ...times(92, () => ({ size: 1, unit: 'MB' })),
+    // 12,57% between 1mb and 10mb
+    ...times(13, () => ({ size: 1, unit: 'MB' })),
+    ...times(13, () => ({ size: 2, unit: 'MB' })),
+    ...times(13, () => ({ size: 3, unit: 'MB' })),
+    ...times(13, () => ({ size: 4, unit: 'MB' })),
+    ...times(13, () => ({ size: 5, unit: 'MB' })),
+    ...times(13, () => ({ size: 6, unit: 'MB' })),
+    ...times(13, () => ({ size: 7, unit: 'MB' })),
+    ...times(13, () => ({ size: 8, unit: 'MB' })),
+    ...times(13, () => ({ size: 9, unit: 'MB' })),
+    ...times(13, () => ({ size: 10, unit: 'MB' })),
+    // 2,96% between 1mb and 100mb
+    ...times(3, () => ({ size: 10, unit: 'MB' })),
+    ...times(3, () => ({ size: 20, unit: 'MB' })),
+    ...times(3, () => ({ size: 30, unit: 'MB' })),
+    ...times(3, () => ({ size: 40, unit: 'MB' })),
+    ...times(3, () => ({ size: 50, unit: 'MB' })),
+    ...times(3, () => ({ size: 60, unit: 'MB' })),
+    ...times(3, () => ({ size: 70, unit: 'MB' })),
+    ...times(3, () => ({ size: 80, unit: 'MB' })),
+    ...times(3, () => ({ size: 90, unit: 'MB' })),
+    ...times(3, () => ({ size: 100, unit: 'MB' })),
+    // 0,78% larger then 100mb
+    { size: 120, unit: 'MB' },
+    { size: 140, unit: 'MB' },
+    { size: 160, unit: 'MB' },
+    { size: 180, unit: 'MB' },
+    { size: 200, unit: 'MB' },
+    { size: 220, unit: 'MB' },
+    { size: 240, unit: 'MB' },
+    { size: 260, unit: 'MB' },
+    { size: 280, unit: 'MB' },
+    { size: 300, unit: 'MB' },
 ];
 
 const authFactory = new auth(utils.buildAccount({login: defaults.ACCOUNTS.EINSTEIN}));
