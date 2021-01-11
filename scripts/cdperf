@@ -1,0 +1,304 @@
+#!/bin/bash
+
+with_cloud_oidc=${CDPERF_WITH_CLOUD_OIDC:-"false"}
+with_cloud_docker=${CDPERF_WITH_CLOUD_DOCKER:-"false"}
+cloud_vendor=${CDPERF_CLOUD_VENDOR:-"ocis"}
+cloud_oidc_issuer=${CDPERF_CLOUD_OIDC_ISSUER:-}
+cloud_id=${CDPERF_CLOUD_ID:-}
+cloud_login="admin"
+cloud_password="admin"
+cloud_image=""
+cloud_host=""
+cloud_docker_host=${CDPERF_CLOUD_DOCKER_HOST:-}
+cloud_docker_publish=""
+k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../dist/k6/test\-*.js")}
+k6_duration=${CDPERF_K6_DURATION:-"1h0m0s"}
+k6_iterations=${CDPERF_K6_ITERATIONS:-"3"}
+k6_vus=${CDPERF_K6_VUS:-"3"}
+k6_quiet=${CDPERF_K6_QUIET:-}
+k6_mode=${CDPERF_K6_MODE:-"binary"}
+k6_out=${CDPERF_K6_OUT:-}
+host_docker_host=${DOCKER_HOST:-}
+
+usage(){
+  echo "cdPerf: ownCloud cloud performance test"
+  echo " "
+  echo "options:"
+  echo " --with-cloud-oidc              Use oidc issuer"
+  echo "                                Supported values: ( true | false )"
+  echo "                                Default: to false"
+  echo "                                ENV: CDPERF_WITH_CLOUD_OIDC"
+  echo "                                --"
+  echo " --with-cloud-docker            Use docker to run preconfigured clouds"
+  echo "                                Supported values: ( true | false )"
+  echo "                                Default: false"
+  echo "                                ENV: CDPERF_WITH_CLOUD_DOCKER"
+  echo "                                --"
+  echo " --cloud-vendor                 Key of the cloud to use"
+  echo "                                Supported values: ( ocis | oc10 | nextcloud )"
+  echo "                                Default: ocis"
+  echo "                                --"
+  echo " --cloud-oidc-issuer            OIDC issuer url"
+  echo "                                ENV: CDPERF_CLOUD_OIDC_ISSUER"
+  echo "                                --"
+  echo " --cloud-id                     Id of the cloud"
+  echo "                                ENV: CDPERF_CLOUD_ID"
+  echo "                                --"
+  echo " --cloud-login                  Login-Name of the cloud user"
+  echo "                                Default: admin"
+  echo "                                --"
+  echo " --cloud-password               Login-Password of the cloud user"
+  echo "                                Default: admin"
+  echo "                                --"
+  echo " --cloud-image                  Docker image to use if --with-cloud-docker is set to true"
+  echo "                                Default:"
+  echo "                                --cloud-vendor=ocis | owncloud/ocis"
+  echo "                                --cloud-vendor=oc10 | owncloud/server"
+  echo "                                --cloud-vendor=nextcloud | nextcloud"
+  echo "                                --"
+  echo " --cloud-host                   Host of the cloud"
+  echo "                                Default:"
+  echo "                                --cloud-vendor=ocis | https://localhost:9200"
+  echo "                                --cloud-vendor=oc10 | http://localhost:9200"
+  echo "                                --cloud-vendor=nextcloud | http://localhost:9200"
+  echo "                                --"
+  echo " --cloud-docker-host            Docker host to run the cloud if --with-cloud-docker is set to true"
+  echo "                                ENV: CDPERF_CLOUD_DOCKER_HOST"
+  echo "                                --"
+  echo " --cloud-docker-publish         Docker published port if --with-cloud-docker is set to true"
+  echo "                                Default:"
+  echo "                                --cloud-vendor=ocis | 9200:9200"
+  echo "                                --cloud-vendor=oc10 | 9200:8080"
+  echo "                                --cloud-vendor=nextcloud | 9200:80"
+  echo "                                --"
+  echo " --k6-scripts                   K6 scripts to run"
+  echo "                                Default: ./dist/k6/test\-*.js"
+  echo "                                ENV: CDPERF_K6_SCRIPTS"
+  echo "                                --"
+  echo " --k6-duration                  K6 test duration limit"
+  echo "                                Default: 1h0m0s"
+  echo "                                ENV: CDPERF_K6_DURATION"
+  echo "                                --"
+  echo " --k6-iterations                K6 script total iteration limit (among all VUs)"
+  echo "                                Default: 3"
+  echo "                                ENV: CDPERF_K6_ITERATIONS"
+  echo "                                --"
+  echo " --k6-vus                       K6 number of virtual users"
+  echo "                                Default: 3"
+  echo "                                ENV: CDPERF_K6_VUS"
+  echo "                                --"
+  echo " --k6-quiet                     K6 disable progress updates"
+  echo "                                ENV: CDPERF_K6_QUIET"
+  echo "                                --"
+  echo " --k6-mode                      K6 as local binary or in docker"
+  echo "                                Supported values: ( binary | docker )"
+  echo "                                Default: binary"
+  echo "                                ENV: CDPERF_K6_MODE"
+  echo "                                --"
+  echo " --k6-out                       K6 uri for an external metrics database"
+  echo "                                See https://k6.io/docs/getting-started/results-output"
+  echo "                                ENV: CDPERF_K6_OUT"
+  echo "                                --"
+  echo " --help                         Show help"
+}
+
+while test $# -gt 0; do
+    case "$1" in
+        --with-cloud-oidc=*)
+            with_cloud_oidc="${1#*=}"
+            shift
+            ;;
+        --with-cloud-docker=*)
+            with_cloud_docker="${1#*=}"
+            shift
+            ;;
+        --cloud-vendor=*)
+            cloud_vendor="${1#*=}"
+            shift
+            ;;
+        --cloud-oidc-issuer=*)
+            cloud_oidc_issuer="${1#*=}"
+            shift
+            ;;
+        --cloud-id=*)
+            cloud_id="${1#*=}"
+            shift
+            ;;
+        --cloud-login=*)
+            cloud_login="${1#*=}"
+            shift
+            ;;
+        --cloud-password=*)
+            cloud_password="${1#*=}"
+            shift
+            ;;
+        --cloud-image=*)
+            cloud_image="${1#*=}"
+            shift
+            ;;
+        --cloud-host=*)
+            cloud_host="${1#*=}"
+            shift
+            ;;
+        --cloud-docker-host=*)
+            cloud_docker_host="${1#*=}"
+            shift
+            ;;
+        --cloud-docker-publish=*)
+            cloud_docker_publish="${1#*=}"
+            shift
+            ;;
+        --k6-scripts=*)
+            k6_scripts="${1#*=}"
+            shift
+            ;;
+        --k6-duration=*)
+            k6_duration="${1#*=}"
+            shift
+            ;;
+        --k6-iterations=*)
+            k6_iterations="${1#*=}"
+            shift
+            ;;
+        --k6-vus=*)
+            k6_vus="${1#*=}"
+            shift
+            ;;
+        --k6-quiet=*)
+            k6_quiet="${1#*=}"
+            shift
+            ;;
+        --k6-mode=*)
+            k6_mode="${1#*=}"
+            shift
+            ;;
+        --k6-out=*)
+            k6_out="${1#*=}"
+            shift
+            ;;
+        --help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            break
+            ;;
+    esac
+done
+
+[[ $cloud_vendor !=  "ocis" && $cloud_vendor !=  "oc10" && $cloud_vendor != "nextcloud" ]] && echo 'Error: cloud_vendor not set. --cloud-vendor=( ocis | oc10 | nextcloud )' && exit 1
+[[ $k6_mode !=  "binary" && $k6_mode !=  "docker" ]] && echo 'Error: k6_mode not set. --k6-mode=( binary | docker )' && exit 1
+
+if [[ $cloud_vendor == 'ocis' ]]
+then
+  [[ ! $cloud_image ]] && cloud_image='owncloud/ocis'
+  [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:9200'
+  [[ ! $cloud_host ]] && cloud_host="https://localhost:9200"
+elif [[ $cloud_vendor == 'oc10' ]]
+then
+  [[ ! $cloud_image ]] && cloud_image='owncloud/server'
+  [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:8080'
+  [[ ! $cloud_host ]] && cloud_host="http://localhost:9200"
+elif [[ $cloud_vendor == 'nextcloud' ]]
+then
+  [[ ! $cloud_image ]] && cloud_image='nextcloud'
+  [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:80'
+  [[ ! $cloud_host ]] && cloud_host="http://localhost:9200"
+fi
+
+function prepare_docker_host() {
+  if [[ $1 ]]
+  then
+    export DOCKER_HOST=$1
+  elif [[ $host_docker_host ]]
+  then
+    export DOCKER_HOST=$host_docker_host
+  else
+    unset DOCKER_HOST
+  fi
+}
+
+function cloud_stop() {
+  prepare_docker_host "$cloud_docker_host"
+
+  # stop old container
+  cloud_container=$(docker ps -q --filter ancestor=$cloud_image)
+  [[ $cloud_container ]] && docker stop "$cloud_container"
+}
+
+function cloud_start() {
+  prepare_docker_host "$cloud_docker_host"
+  cloud_stop
+
+  # start new container
+  cloud_container=$(docker run --rm --detach --pull always --publish $cloud_docker_publish $cloud_image)
+}
+
+function k6_run(){
+  prepare_docker_host
+
+  k6_params=()
+  [[ $k6_duration ]] && k6_params+=("--duration=$k6_duration")
+  [[ $k6_iterations ]] && k6_params+=("--iterations=$k6_iterations")
+  [[ $k6_vus ]] && k6_params+=("--vus=$k6_vus")
+  [[ $k6_out ]] && k6_params+=("--out=$k6_out")
+  [[ $k6_quiet == true ]] && k6_params+=("--quiet")
+
+  k6_env=()
+  [[ $with_cloud_oidc == true ]] && k6_env+=("CLOUD_OIDC_ENABLED=$with_cloud_oidc")
+  [[ $cloud_vendor ]] && k6_env+=("CLOUD_VENDOR=$cloud_vendor")
+  [[ $cloud_id ]] && k6_env+=("CLOUD_ID=$cloud_id")
+  [[ $cloud_host ]] && k6_env+=("CLOUD_HOST=$cloud_host")
+  [[ $cloud_login ]] && k6_env+=("CLOUD_LOGIN=$cloud_login")
+  [[ $cloud_password ]] && k6_env+=("CLOUD_PASSWORD=$cloud_password")
+  [[ $cloud_oidc_issuer ]] && k6_env+=("CLOUD_OIDC_ISSUER=$cloud_oidc_issuer")
+
+  k6_docker_env=()
+
+  for i in "${!k6_env[@]}"
+  do
+    export "${k6_env[$i]}"
+    k6_docker_env+=(--env "${k6_env[$i]}")
+  done
+
+  # run k6
+  for t in $(realpath "$k6_scripts");
+  do
+    trap "clean; exit;" SIGINT SIGTERM
+    if [[ -f $t ]]
+    then
+      if [[ $k6_mode = "docker" ]]
+      then
+        docker run "${k6_docker_env[@]}" --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+      else
+        k6 run "${k6_params[@]}" "$t"
+      fi
+    else
+       echo "Error: k6 test file '$t' does not exist"
+    fi
+  done
+}
+
+function prepare() {
+  [[ $with_cloud_docker != false ]] && cloud_start
+}
+
+function run() {
+  # wait for cloud container to be ready
+  until curl --output /dev/null --head --fail --silent --insecure "$cloud_host"; do
+    echo "waiting for '$cloud_vendor' on '$cloud_host'"
+    sleep 1
+  done
+
+  k6_run
+}
+
+function clean() {
+  [[ $with_cloud_docker != false ]] && cloud_stop
+}
+
+prepare
+run
+clean
