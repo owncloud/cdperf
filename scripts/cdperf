@@ -1,7 +1,10 @@
 #!/bin/bash
 
 with_cloud_oidc=${CDPERF_WITH_CLOUD_OIDC:-"false"}
-with_cloud_docker=${CDPERF_WITH_CLOUD_DOCKER:-"false"}
+with_cloud_docker=${CDPERF_WITH_CLOUD_DOCKER:-"true"}
+with_cloud_docker_host=${CDPERF_WITH_CLOUD_DOCKER_HOST:-}
+with_k6_docker=${CDPERF_WITH_K6_DOCKER:-"true"}
+with_host_docker_host=${DOCKER_HOST:-}
 cloud_vendor=${CDPERF_CLOUD_VENDOR:-"ocis"}
 cloud_oidc_issuer=${CDPERF_CLOUD_OIDC_ISSUER:-}
 cloud_id=${CDPERF_CLOUD_ID:-}
@@ -9,16 +12,13 @@ cloud_login="admin"
 cloud_password="admin"
 cloud_image=""
 cloud_host=""
-cloud_docker_host=${CDPERF_CLOUD_DOCKER_HOST:-}
 cloud_docker_publish=""
 k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../dist/k6/test\-*.js")}
 k6_duration=${CDPERF_K6_DURATION:-"1h0m0s"}
 k6_iterations=${CDPERF_K6_ITERATIONS:-"3"}
 k6_vus=${CDPERF_K6_VUS:-"3"}
 k6_quiet=${CDPERF_K6_QUIET:-}
-k6_mode=${CDPERF_K6_MODE:-"binary"}
 k6_out=${CDPERF_K6_OUT:-}
-host_docker_host=${DOCKER_HOST:-}
 
 usage(){
   echo "cdPerf: ownCloud cloud performance test"
@@ -31,8 +31,16 @@ usage(){
   echo "                                --"
   echo " --with-cloud-docker            Use docker to run preconfigured clouds"
   echo "                                Supported values: ( true | false )"
-  echo "                                Default: false"
+  echo "                                Default: true"
   echo "                                ENV: CDPERF_WITH_CLOUD_DOCKER"
+  echo "                                --"
+  echo " --with-cloud-docker-host       Docker host to run the cloud if --with-cloud-docker is set to true"
+  echo "                                ENV: CDPERF_WITH_CLOUD_DOCKER_HOST"
+  echo "                                --"
+  echo " --with-k6-docker               Use docker to run k6"
+  echo "                                Supported values: ( true | false )"
+  echo "                                Default: true"
+  echo "                                ENV: CDPERF_WITH_K6_DOCKER"
   echo "                                --"
   echo " --cloud-vendor                 Key of the cloud to use"
   echo "                                Supported values: ( ocis | oc10 | nextcloud )"
@@ -58,12 +66,9 @@ usage(){
   echo "                                --"
   echo " --cloud-host                   Host of the cloud"
   echo "                                Default:"
-  echo "                                --cloud-vendor=ocis | https://localhost:9200"
-  echo "                                --cloud-vendor=oc10 | http://localhost:9200"
-  echo "                                --cloud-vendor=nextcloud | http://localhost:9200"
-  echo "                                --"
-  echo " --cloud-docker-host            Docker host to run the cloud if --with-cloud-docker is set to true"
-  echo "                                ENV: CDPERF_CLOUD_DOCKER_HOST"
+  echo "                                --cloud-vendor=ocis | https://host.docker.internal:9200"
+  echo "                                --cloud-vendor=oc10 | http://host.docker.internal:9200"
+  echo "                                --cloud-vendor=nextcloud | http://host.docker.internal:9200"
   echo "                                --"
   echo " --cloud-docker-publish         Docker published port if --with-cloud-docker is set to true"
   echo "                                Default:"
@@ -90,11 +95,6 @@ usage(){
   echo " --k6-quiet                     K6 disable progress updates"
   echo "                                ENV: CDPERF_K6_QUIET"
   echo "                                --"
-  echo " --k6-mode                      K6 as local binary or in docker"
-  echo "                                Supported values: ( binary | docker )"
-  echo "                                Default: binary"
-  echo "                                ENV: CDPERF_K6_MODE"
-  echo "                                --"
   echo " --k6-out                       K6 uri for an external metrics database"
   echo "                                See https://k6.io/docs/getting-started/results-output"
   echo "                                ENV: CDPERF_K6_OUT"
@@ -110,6 +110,14 @@ while test $# -gt 0; do
             ;;
         --with-cloud-docker=*)
             with_cloud_docker="${1#*=}"
+            shift
+            ;;
+        --with-cloud-docker-host=*)
+            with_cloud_docker_host="${1#*=}"
+            shift
+            ;;
+        --with-k6-docker=*)
+            with_k6_docker="${1#*=}"
             shift
             ;;
         --cloud-vendor=*)
@@ -140,10 +148,6 @@ while test $# -gt 0; do
             cloud_host="${1#*=}"
             shift
             ;;
-        --cloud-docker-host=*)
-            cloud_docker_host="${1#*=}"
-            shift
-            ;;
         --cloud-docker-publish=*)
             cloud_docker_publish="${1#*=}"
             shift
@@ -168,10 +172,6 @@ while test $# -gt 0; do
             k6_quiet="${1#*=}"
             shift
             ;;
-        --k6-mode=*)
-            k6_mode="${1#*=}"
-            shift
-            ;;
         --k6-out=*)
             k6_out="${1#*=}"
             shift
@@ -189,39 +189,42 @@ while test $# -gt 0; do
 done
 
 [[ $cloud_vendor !=  "ocis" && $cloud_vendor !=  "oc10" && $cloud_vendor != "nextcloud" ]] && echo 'Error: cloud_vendor not set. --cloud-vendor=( ocis | oc10 | nextcloud )' && exit 1
-[[ $k6_mode !=  "binary" && $k6_mode !=  "docker" ]] && echo 'Error: k6_mode not set. --k6-mode=( binary | docker )' && exit 1
 
 if [[ $cloud_vendor == 'ocis' ]]
 then
   [[ ! $cloud_image ]] && cloud_image='owncloud/ocis'
   [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:9200'
-  [[ ! $cloud_host ]] && cloud_host="https://localhost:9200"
+  [[ ! $cloud_host ]] && cloud_host="https://host.docker.internal:9200"
 elif [[ $cloud_vendor == 'oc10' ]]
 then
   [[ ! $cloud_image ]] && cloud_image='owncloud/server'
   [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:8080'
-  [[ ! $cloud_host ]] && cloud_host="http://localhost:9200"
+  [[ ! $cloud_host ]] && cloud_host="http://host.docker.internal:9200"
 elif [[ $cloud_vendor == 'nextcloud' ]]
 then
   [[ ! $cloud_image ]] && cloud_image='nextcloud'
   [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:80'
-  [[ ! $cloud_host ]] && cloud_host="http://localhost:9200"
+  [[ ! $cloud_host ]] && cloud_host="http://host.docker.internal:9200"
 fi
+
+trap "clean; exit;" SIGINT SIGTERM
+cloud_outer_host=${cloud_host/host.docker.internal/localhost}
+[[ $with_k6_docker == false ]] && cloud_host=$cloud_outer_host
 
 function prepare_docker_host() {
   if [[ $1 ]]
   then
     export DOCKER_HOST=$1
-  elif [[ $host_docker_host ]]
+  elif [[ $with_host_docker_host ]]
   then
-    export DOCKER_HOST=$host_docker_host
+    export DOCKER_HOST=$with_host_docker_host
   else
     unset DOCKER_HOST
   fi
 }
 
 function cloud_stop() {
-  prepare_docker_host "$cloud_docker_host"
+  prepare_docker_host "$with_cloud_docker_host"
 
   # stop old container
   cloud_container=$(docker ps -q --filter ancestor=$cloud_image)
@@ -229,7 +232,7 @@ function cloud_stop() {
 }
 
 function cloud_start() {
-  prepare_docker_host "$cloud_docker_host"
+  prepare_docker_host "$with_cloud_docker_host"
   cloud_stop
 
   # start new container
@@ -266,12 +269,11 @@ function k6_run(){
   # run k6
   for t in $(realpath "$k6_scripts");
   do
-    trap "clean; exit;" SIGINT SIGTERM
     if [[ -f $t ]]
     then
-      if [[ $k6_mode = "docker" ]]
+      if [[ $with_k6_docker == true ]]
       then
-        docker run "${k6_docker_env[@]}" --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        docker run "${k6_docker_env[@]}" --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
       else
         k6 run "${k6_params[@]}" "$t"
       fi
@@ -287,8 +289,8 @@ function prepare() {
 
 function run() {
   # wait for cloud container to be ready
-  until curl --output /dev/null --head --fail --silent --insecure "$cloud_host"; do
-    echo "waiting for '$cloud_vendor' on '$cloud_host'"
+  until curl --output /dev/null --head --fail --silent --insecure $cloud_outer_host; do
+    echo "waiting for '$cloud_vendor' on '$cloud_outer_host'"
     sleep 1
   done
 
