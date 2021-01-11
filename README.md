@@ -1,6 +1,6 @@
 # ownCloud cloud testing toolbox
-this repository contains the tools we use to test the performance of different cloud systems over time.
-Supported systems are:
+This repository contains the tools we use to test the performance of different cloud systems.
+Supported clouds are:
 * [ownCloud](https://github.com/owncloud/core)
 * [ocis](https://github.com/owncloud/core)
 * [nextCloud](https://github.com/nextcloud/server/)
@@ -10,7 +10,7 @@ Supported systems are:
 *  [Docker](https://docs.docker.com/)
 
 ## Usage
-for all options run ./scripts/cdperf --help
+To see available options run ./scripts/cdperf --help
 
 ### With existing cloud installation
 ```
@@ -31,7 +31,7 @@ $ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200 --wit
 ```
 
 ### With dashboard
-you can get a prepared grafana and influxdb installation [here](https://github.com/owncloud-devops/k6-benchmark-visualization)
+You can get a prepared grafana and influxdb installation [here](https://github.com/owncloud-devops/k6-benchmark-visualization)
 
 ```
 $ make clean build
