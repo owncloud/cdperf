@@ -61,7 +61,7 @@ const files: {
     unit: any;
 }[] = [
     // 83,68% under 1mb
-    ...times(10, () => ({size: 100, unit: 'KB'})),
+    ...times(1, () => ({ size: 100, unit: 'KB' })),
 
 ];
 

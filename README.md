@@ -12,22 +12,28 @@ Supported clouds are:
 ## Usage
 To see available options run ./scripts/cdperf --help
 
-### With existing cloud installation
-```
-$ make clean build
-$ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200
-```
-
 ### With cloud in docker
 ```
 $ make clean build
-$ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200 --with-cloud-docker=true
+$ ./scripts/cdperf --cloud-vendor=ocis
+```
+
+### With local k6
+```
+$ make clean build
+$ ./scripts/cdperf --with-k6-docker=false --cloud-vendor=ocis
+```
+
+### With existing cloud installation
+```
+$ make clean build
+$ ./scripts/cdperf --with-cloud-docker=false --cloud-vendor=ocis --cloud-host=https://your-host:9200
 ```
 
 ### With cloud in remote docker
 ```
 $ make clean build
-$ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200 --with-cloud-docker=true --cloud-docker-host=ssh://user@your-host
+$ ./scripts/cdperf --with-cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --cloud-host=https://your-host:9200
 ```
 
 ### With dashboard
@@ -35,5 +41,5 @@ You can get a prepared grafana and influxdb installation [here](https://github.c
 
 ```
 $ make clean build
-$ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200 --with-cloud-docker=true --cloud-docker-host=ssh://user@host --k6-out=influxdb=http://user:passworf@your-host:8086/k6
+$ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200 --k6-out=influxdb=http://user:passworf@your-host:8086/k6
 ```
