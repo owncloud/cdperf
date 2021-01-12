@@ -41,7 +41,7 @@ usage(){
   echo "                                --cloud-vendor=ocis | owncloud/ocis"
   echo "                                --cloud-vendor=oc10 | owncloud/server"
   echo "                                --cloud-vendor=nextcloud | nextcloud"
-  echo "                                ENV: CDPERF_CLOUD_IMAGE"
+  echo "                                ENV: CDPERF_CLOUD_DOCKER_IMAGE"
   echo "                                --"
   echo " --cloud-docker-publish         Docker published port if --cloud-docker is set to true"
   echo "                                Default:"
