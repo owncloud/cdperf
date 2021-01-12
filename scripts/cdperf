@@ -6,7 +6,7 @@ host_docker_host=${DOCKER_HOST:-}
 
 cloud_docker=${CDPERF_CLOUD_DOCKER:-"true"}
 cloud_docker_host=${CDPERF_CLOUD_DOCKER_HOST:-}
-cloud_docker_image=${CDPERF_CLOUD_IMAGE:-}
+cloud_docker_image=${CDPERF_CLOUD_DOCKER_IMAGE:-}
 cloud_docker_publish=${CDPERF_CLOUD_DOCKER_PUBLISH:-}
 cloud_oidc=${CDPERF_CLOUD_OIDC:-"false"}
 cloud_oidc_issuer=${CDPERF_CLOUD_OIDC_ISSUER:-}
