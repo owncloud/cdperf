@@ -8,11 +8,11 @@ with_host_docker_host=${DOCKER_HOST:-}
 cloud_vendor=${CDPERF_CLOUD_VENDOR:-"ocis"}
 cloud_oidc_issuer=${CDPERF_CLOUD_OIDC_ISSUER:-}
 cloud_id=${CDPERF_CLOUD_ID:-}
-cloud_login="admin"
-cloud_password="admin"
-cloud_image=""
-cloud_host=""
-cloud_docker_publish=""
+cloud_login=${CDPERF_CLOUD_LOGIN:-"admin"}
+cloud_password=${CDPERF_CLOUD_PASSWORD:-"admin"}
+cloud_image=${CDPERF_CLOUD_IMAGE:-}
+cloud_host=${CDPERF_CLOUD_HOST:-}
+cloud_docker_publish=${CDPERF_CLOUD_DOCKER_PUBLISH:-}
 k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../dist/k6/test\-*.js")}
 k6_duration=${CDPERF_K6_DURATION:-"1h0m0s"}
 k6_iterations=${CDPERF_K6_ITERATIONS:-"3"}
@@ -45,6 +45,7 @@ usage(){
   echo " --cloud-vendor                 Key of the cloud to use"
   echo "                                Supported values: ( ocis | oc10 | nextcloud )"
   echo "                                Default: ocis"
+  echo "                                ENV: CDPERF_CLOUD_VENDOR"
   echo "                                --"
   echo " --cloud-oidc-issuer            OIDC issuer url"
   echo "                                ENV: CDPERF_CLOUD_OIDC_ISSUER"
@@ -54,27 +55,32 @@ usage(){
   echo "                                --"
   echo " --cloud-login                  Login-Name of the cloud user"
   echo "                                Default: admin"
+  echo "                                ENV: CDPERF_CLOUD_LOGIN"
   echo "                                --"
   echo " --cloud-password               Login-Password of the cloud user"
   echo "                                Default: admin"
+  echo "                                ENV: CDPERF_CLOUD_PASSWORD"
   echo "                                --"
   echo " --cloud-image                  Docker image to use if --with-cloud-docker is set to true"
   echo "                                Default:"
   echo "                                --cloud-vendor=ocis | owncloud/ocis"
   echo "                                --cloud-vendor=oc10 | owncloud/server"
   echo "                                --cloud-vendor=nextcloud | nextcloud"
+  echo "                                ENV: CDPERF_CLOUD_IMAGE"
   echo "                                --"
   echo " --cloud-host                   Host of the cloud"
   echo "                                Default:"
   echo "                                --cloud-vendor=ocis | https://host.docker.internal:9200"
   echo "                                --cloud-vendor=oc10 | http://host.docker.internal:9200"
   echo "                                --cloud-vendor=nextcloud | http://host.docker.internal:9200"
+  echo "                                ENV: CDPERF_CLOUD_HOST"
   echo "                                --"
   echo " --cloud-docker-publish         Docker published port if --with-cloud-docker is set to true"
   echo "                                Default:"
   echo "                                --cloud-vendor=ocis | 9200:9200"
   echo "                                --cloud-vendor=oc10 | 9200:8080"
   echo "                                --cloud-vendor=nextcloud | 9200:80"
+  echo "                                ENV: CDPERF_CLOUD_DOCKER_PUBLISH"
   echo "                                --"
   echo " --k6-scripts                   K6 scripts to run"
   echo "                                Default: ./dist/k6/test\-*.js"
