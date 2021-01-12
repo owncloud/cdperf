@@ -22,16 +22,16 @@ $ # test with docker ocis and k6
 $ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
 $
 $ # test with local ocis and docker k6
-$ ./scripts/cdperf --with-cloud-docker=false --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
+$ ./scripts/cdperf --cloud-docker=false --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
 $
 $ # test with docker ocis and local k6
-$ ./scripts/cdperf --with-k6-docker=false --cloud-vendor=ocis --k6-test-host=https://localhost:9200
+$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://localhost:9200 --k6-docker=false
 $
 $ # export test results to influxdb
 $ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=influxdb=http://admin:admin@host.docker.internal:8086/k6
 $
 $ # with cloud on remote docker host
-$ ./scripts/cdperf --with-cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200
+$ ./scripts/cdperf --cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200
 ```
 
 ## Dashboard
