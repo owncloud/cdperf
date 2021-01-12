@@ -6,40 +6,35 @@ Supported clouds are:
 * [nextCloud](https://github.com/nextcloud/server/)
 
 ## Requirements
-*  [K6](https://k6.io/)
+*  [K6](https://k6.io/) (if k6 should run on the host machine)
 *  [Docker](https://docs.docker.com/)
 
 ## Usage
 To see available options run ./scripts/cdperf --help
 
-### With cloud in docker
-```
+```shell
 $ make clean build
-$ ./scripts/cdperf --cloud-vendor=ocis
+$
+$ # all available options
+$ ./scripts/cdperf --help
+$
+$ # test with docker ocis and k6
+$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
+$
+$ # test with local ocis and docker k6
+$ ./scripts/cdperf --with-cloud-docker=false --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
+$
+$ # test with docker ocis and local k6
+$ ./scripts/cdperf --with-k6-docker=false --cloud-vendor=ocis --k6-test-host=https://localhost:9200
+$
+$ # export test results to influxdb
+$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=influxdb=http://admin:admin@host.docker.internal:8086/k6
+$
+$ # with cloud on remote docker host
+$ ./scripts/cdperf --with-cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200 
+$  
 ```
 
-### With local k6
-```
-$ make clean build
-$ ./scripts/cdperf --with-k6-docker=false --cloud-vendor=ocis
-```
-
-### With existing cloud installation
-```
-$ make clean build
-$ ./scripts/cdperf --with-cloud-docker=false --cloud-vendor=ocis --cloud-host=https://your-host:9200
-```
-
-### With cloud in remote docker
-```
-$ make clean build
-$ ./scripts/cdperf --with-cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --cloud-host=https://your-host:9200
-```
-
-### With dashboard
-You can get a prepared grafana and influxdb installation [here](https://github.com/owncloud-devops/k6-benchmark-visualization)
-
-```
-$ make clean build
-$ ./scripts/cdperf --cloud-vendor=ocis --cloud-host=https://your-host:9200 --k6-out=influxdb=http://user:passworf@your-host:8086/k6
-```
+## Dashboard
+To visualize the test results you need an influxdb and grafana instance running.
+At ownCloud we are using [https://github.com/owncloud-devops/k6-benchmark-visualization](https://github.com/owncloud-devops/k6-benchmark-visualization)
