@@ -1,7 +1,7 @@
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-import { auth, defaults, playbook, types, utils, k6 } from '../../../../../../lib';
+import { auth, defaults, k6, playbook, types, utils } from '../../../../../../lib';
 import { default as upDownDelete, options as upDownDeleteOptions } from './shared.lib';
 
 // create 10 users. Do the Simple Uploads & downloads with each user in parallel.
@@ -22,7 +22,7 @@ const plays = {
 export const options: Options = k6.options({
     tags: {
         test_id: 'upload-download-delete-with-new-user',
-        issue_url: 'github.com/owncloud/ocis/issues/1018'
+        issue_url: 'github.com/owncloud/ocis/issues/1018',
     },
     ...upDownDeleteOptions({ plays, files }),
 });

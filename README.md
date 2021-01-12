@@ -31,8 +31,7 @@ $ # export test results to influxdb
 $ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=influxdb=http://admin:admin@host.docker.internal:8086/k6
 $
 $ # with cloud on remote docker host
-$ ./scripts/cdperf --with-cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200 
-$  
+$ ./scripts/cdperf --with-cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200
 ```
 
 ## Dashboard
