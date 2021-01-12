@@ -1,7 +1,7 @@
-import {Options} from 'k6/options';
-import {times} from 'lodash';
+import { Options } from 'k6/options';
+import { times } from 'lodash';
 
-import {auth, defaults, playbook, utils, k6} from '../../../../../lib';
+import { auth, defaults, k6, playbook, utils } from '../../../../../lib';
 import {
     default as upDownDelete,
     options as upDownDeleteOptions,
@@ -106,7 +106,7 @@ const files: {
     { size: 300, unit: 'MB' },
 ];
 
-const authFactory = new auth(utils.buildAccount({login: defaults.ACCOUNTS.EINSTEIN}));
+const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
     davUpload: new playbook.dav.Upload(),
     davDownload: new playbook.dav.Download(),
@@ -118,8 +118,13 @@ export const options: Options = k6.options({
         test_id: 'most-used-sizes-upload',
         issue_url: 'github.com/owncloud/enterprise/issues/4115',
     },
-    ...upDownDeleteOptions({plays, files}),
+    ...upDownDeleteOptions({ plays, files }),
 });
 
 export default (): void =>
-    upDownDelete({files, plays, credential: authFactory.credential, account: authFactory.account});
+    upDownDelete({
+        files,
+        plays,
+        credential: authFactory.credential,
+        account: authFactory.account,
+    });

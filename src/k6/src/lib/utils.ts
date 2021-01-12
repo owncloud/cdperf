@@ -1,14 +1,14 @@
-import {bytes} from 'k6';
-import {randomBytes as k6_randomBytes} from 'k6/crypto';
+import { bytes } from 'k6';
+import { randomBytes as k6_randomBytes } from 'k6/crypto';
+
 import * as defaults from './defaults';
 import * as types from './types';
 
-
-export const randomNumber = ({min, max}: { min: number; max: number }): number => {
+export const randomNumber = ({ min, max }: { min: number; max: number }): number => {
     return Math.random() * (max - min) + min;
 };
 
-export const randomString = ({length = 10}: { length?: number } = {}): string => {
+export const randomString = ({ length = 10 }: { length?: number } = {}): string => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
     let str = '';
@@ -20,9 +20,12 @@ export const randomString = ({length = 10}: { length?: number } = {}): string =>
 };
 
 export const buildAccount = ({
-                                 login = defaults.ACCOUNTS.EINSTEIN,
-                                 ignore_defaults = false
-                             }: { login: string, ignore_defaults?: boolean }): types.Account => {
+    login = defaults.ACCOUNTS.EINSTEIN,
+    ignore_defaults = false,
+}: {
+    login: string;
+    ignore_defaults?: boolean;
+}): types.Account => {
     if (!ignore_defaults && defaults.ENV.CLOUD_LOGIN && defaults.ENV.CLOUD_PASSWORD) {
         return {
             login: defaults.ENV.CLOUD_LOGIN,
@@ -33,10 +36,10 @@ export const buildAccount = ({
     return defaults.ACCOUNTS.ALL[login];
 };
 export const buildAsset = ({
-                               name = 'dummy.zip',
-                               size = 50,
-                               unit = 'KB',
-                           }: {
+    name = 'dummy.zip',
+    size = 50,
+    unit = 'KB',
+}: {
     name?: string;
     size?: number;
     unit?: types.AssetUnit;

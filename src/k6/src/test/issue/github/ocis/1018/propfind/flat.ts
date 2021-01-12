@@ -1,7 +1,7 @@
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-import { auth, defaults, playbook, types, utils, k6 } from '../../../../../../lib';
+import { auth, defaults, k6, playbook, types, utils } from '../../../../../../lib';
 import { default as propfind, options as propfindOptions } from './flat.lib';
 
 // put 1000 files into one dir and run a 'PROPFIND' through API
@@ -19,9 +19,9 @@ const plays = {
 export const options: Options = k6.options({
     tags: {
         test_id: 'propfind-flat',
-        issue_url: 'github.com/owncloud/ocis/issues/1018'
+        issue_url: 'github.com/owncloud/ocis/issues/1018',
     },
     ...propfindOptions({ plays, files }),
-})
+});
 
 export default (): void => propfind({ files, plays, credential: authFactory.credential, account: authFactory.account });

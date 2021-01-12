@@ -9,9 +9,6 @@ with_k6_docker=${CDPERF_WITH_K6_DOCKER:-"true"}
 with_host_docker_host=${DOCKER_HOST:-}
 cloud_vendor=${CDPERF_CLOUD_VENDOR:-"ocis"}
 cloud_oidc_issuer=${CDPERF_CLOUD_OIDC_ISSUER:-}
-cloud_id=${CDPERF_CLOUD_ID:-}
-cloud_login=${CDPERF_CLOUD_LOGIN:-"admin"}
-cloud_password=${CDPERF_CLOUD_PASSWORD:-"admin"}
 cloud_image=${CDPERF_CLOUD_IMAGE:-}
 cloud_docker_publish=${CDPERF_CLOUD_DOCKER_PUBLISH:-}
 k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../tests/k6/test\-*.js")}
@@ -21,6 +18,9 @@ k6_iterations=${CDPERF_K6_ITERATIONS:-"3"}
 k6_vus=${CDPERF_K6_VUS:-"3"}
 k6_quiet=${CDPERF_K6_QUIET:-}
 k6_out=${CDPERF_K6_OUT:-}
+k6_cloud_id=${CDPERF_K6_CLOUD_ID:-}
+k6_cloud_login=${CDPERF_K6_CLOUD_LOGIN:-"admin"}
+k6_cloud_password=${CDPERF_K6_CLOUD_PASSWORD:-"admin"}
 
 usage(){
   echo "cdPerf: ownCloud cloud performance test"
@@ -51,17 +51,6 @@ usage(){
   echo "                                --"
   echo " --cloud-oidc-issuer            OIDC issuer url"
   echo "                                ENV: CDPERF_CLOUD_OIDC_ISSUER"
-  echo "                                --"
-  echo " --cloud-id                     Id of the cloud"
-  echo "                                ENV: CDPERF_CLOUD_ID"
-  echo "                                --"
-  echo " --cloud-login                  Login-Name of the cloud user"
-  echo "                                Default: admin"
-  echo "                                ENV: CDPERF_CLOUD_LOGIN"
-  echo "                                --"
-  echo " --cloud-password               Login-Password of the cloud user"
-  echo "                                Default: admin"
-  echo "                                ENV: CDPERF_CLOUD_PASSWORD"
   echo "                                --"
   echo " --cloud-image                  Docker image to use if --with-cloud-docker is set to true"
   echo "                                Default:"
@@ -104,6 +93,17 @@ usage(){
   echo "                                See https://k6.io/docs/getting-started/results-output"
   echo "                                ENV: CDPERF_K6_OUT"
   echo "                                --"
+  echo " --k6-cloud-id                  Id of the cloud"
+  echo "                                ENV: CDPERF_K6_CLOUD_ID"
+  echo "                                --"
+  echo " --k6-cloud-login               Login-Name of the cloud user"
+  echo "                                Default: admin"
+  echo "                                ENV: CDPERF_K6_CLOUD_LOGIN"
+  echo "                                --"
+  echo " --k6-cloud-password            Login-Password of the cloud user"
+  echo "                                Default: admin"
+  echo "                                ENV: CDPERF_K6_CLOUD_PASSWORD"
+  echo "                                --"
   echo " --help                         Show help"
 }
 
@@ -131,18 +131,6 @@ while test $# -gt 0; do
             ;;
         --cloud-oidc-issuer=*)
             cloud_oidc_issuer="${1#*=}"
-            shift
-            ;;
-        --cloud-id=*)
-            cloud_id="${1#*=}"
-            shift
-            ;;
-        --cloud-login=*)
-            cloud_login="${1#*=}"
-            shift
-            ;;
-        --cloud-password=*)
-            cloud_password="${1#*=}"
             shift
             ;;
         --cloud-image=*)
@@ -181,6 +169,18 @@ while test $# -gt 0; do
             k6_out="${1#*=}"
             shift
             ;;
+        --k6-cloud-id=*)
+            k6_cloud_id="${1#*=}"
+            shift
+            ;;
+        --k6-cloud-login=*)
+            k6_cloud_login="${1#*=}"
+            shift
+            ;;
+        --k6-cloud-password=*)
+            k6_cloud_password="${1#*=}"
+            shift
+            ;;
         --help)
             usage
             exit 0
@@ -193,24 +193,30 @@ while test $# -gt 0; do
     esac
 done
 
-[[ $cloud_vendor !=  "ocis" && $cloud_vendor !=  "oc10" && $cloud_vendor != "nextcloud" ]] && echo 'Error: cloud_vendor not set. --cloud-vendor=( ocis | oc10 | nextcloud )' && exit 1
-[[ ! $k6_test_host ]] && echo 'Error: k6_test_host not set. --cloud-host=https://host.docker.internal:8086' && exit 1
+[[ $cloud_vendor !=  "ocis" && $cloud_vendor !=  "oc10" && $cloud_vendor != "nextcloud" ]] && echo "Error: cloud_vendor not set. --cloud-vendor=( ocis | oc10 | nextcloud )" && exit 1
+[[ ! $k6_test_host ]] && echo "Error: k6_test_host not set. --cloud-host=https://host.docker.internal:9200" && exit 1
 
-if [[ $cloud_vendor == 'ocis' ]]
+cloud_docker_env=()
+
+if [[ $cloud_vendor == "ocis" ]]
 then
-  [[ ! $cloud_image ]] && cloud_image='owncloud/ocis'
-  [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:9200'
-elif [[ $cloud_vendor == 'oc10' ]]
+  [[ ! $cloud_image ]] && cloud_image="owncloud/ocis"
+  [[ ! $cloud_docker_publish ]] && cloud_docker_publish="9200:9200"
+elif [[ $cloud_vendor == "oc10" ]]
 then
-  [[ ! $cloud_image ]] && cloud_image='owncloud/server'
-  [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:8080'
-elif [[ $cloud_vendor == 'nextcloud' ]]
+  [[ ! $cloud_image ]] && cloud_image="owncloud/server"
+  [[ ! $cloud_docker_publish ]] && cloud_docker_publish="9200:8080"
+elif [[ $cloud_vendor == "nextcloud" ]]
 then
-  [[ ! $cloud_image ]] && cloud_image='nextcloud'
-  [[ ! $cloud_docker_publish ]] && cloud_docker_publish='9200:80'
+  [[ ! $cloud_image ]] && cloud_image="nextcloud"
+  [[ ! $cloud_docker_publish ]] && cloud_docker_publish="9200:80"
+  cloud_docker_env+=("NEXTCLOUD_ADMIN_USER=admin")
+  cloud_docker_env+=("NEXTCLOUD_ADMIN_PASSWORD=admin")
+  cloud_docker_env+=("SQLITE_DATABASE=cdperf")
+  cloud_docker_env+=("OVERWRITEHOST=host.docker.internal")
 fi
 
-function prepare_docker_host() {
+function set_docker_host() {
   if [[ $1 ]]
   then
     export DOCKER_HOST=$1
@@ -223,7 +229,7 @@ function prepare_docker_host() {
 }
 
 function cloud_stop() {
-  prepare_docker_host "$with_cloud_docker_host"
+  set_docker_host "$with_cloud_docker_host"
 
   # stop old container
   cloud_container=$(docker ps -q --filter ancestor=$cloud_image)
@@ -231,15 +237,20 @@ function cloud_stop() {
 }
 
 function cloud_start() {
-  prepare_docker_host "$with_cloud_docker_host"
+  set_docker_host "$with_cloud_docker_host"
   cloud_stop
 
+  for i in "${!cloud_docker_env[@]}"
+  do
+    cloud_docker_env[$i]="--env ${cloud_docker_env[$i]}"
+  done
   # start new container
-  docker run --rm --detach --pull always --publish $cloud_docker_publish $cloud_image
+  # shellcheck disable=SC2068
+  docker run ${cloud_docker_env[@]} --rm --detach --pull always --publish $cloud_docker_publish $cloud_image
 }
 
 function k6_run(){
-  prepare_docker_host
+  set_docker_host
 
   k6_params=()
   [[ $k6_duration ]] && k6_params+=("--duration=$k6_duration")
@@ -249,20 +260,18 @@ function k6_run(){
   [[ $k6_quiet == true ]] && k6_params+=("--quiet")
 
   k6_env=()
+  [[ $k6_test_host ]] && k6_env+=("CLOUD_HOST=$k6_test_host")
+  [[ $k6_cloud_id ]] && k6_env+=("CLOUD_ID=$k6_cloud_id")
+  [[ $k6_cloud_login ]] && k6_env+=("CLOUD_LOGIN=$k6_cloud_login")
+  [[ $k6_cloud_password ]] && k6_env+=("CLOUD_PASSWORD=$k6_cloud_password")
   [[ $with_cloud_oidc == true ]] && k6_env+=("CLOUD_OIDC_ENABLED=$with_cloud_oidc")
   [[ $cloud_vendor ]] && k6_env+=("CLOUD_VENDOR=$cloud_vendor")
-  [[ $cloud_id ]] && k6_env+=("CLOUD_ID=$cloud_id")
-  [[ $k6_test_host ]] && k6_env+=("CLOUD_HOST=$k6_test_host")
-  [[ $cloud_login ]] && k6_env+=("CLOUD_LOGIN=$cloud_login")
-  [[ $cloud_password ]] && k6_env+=("CLOUD_PASSWORD=$cloud_password")
   [[ $cloud_oidc_issuer ]] && k6_env+=("CLOUD_OIDC_ISSUER=$cloud_oidc_issuer")
-
-  k6_docker_env=()
 
   for i in "${!k6_env[@]}"
   do
     export "${k6_env[$i]}"
-    k6_docker_env+=(--env "${k6_env[$i]}")
+    k6_env[$i]="--env ${k6_env[$i]}"
   done
 
   # run k6
@@ -272,9 +281,11 @@ function k6_run(){
     then
       if [[ $with_k6_docker == true ]]
       then
-        docker run "${k6_docker_env[@]}" --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        # shellcheck disable=SC2068
+        docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
       else
-        k6 run "${k6_params[@]}" "$t"
+        # shellcheck disable=SC2068
+        k6 run ${k6_params[@]} "$t"
       fi
     else
        echo "Error: k6 test file '$t' does not exist"
@@ -282,25 +293,15 @@ function k6_run(){
   done
 }
 
-function prepare() {
-  [[ $with_cloud_docker != false ]] && cloud_start
-}
+[[ $with_cloud_docker != false ]] && cloud_start
 
-function run() {
-  # wait for cloud container to be ready
-  wait_host=${k6_test_host/host.docker.internal/localhost}
-  until curl --output /dev/null --head --fail --silent --insecure "$wait_host"; do
-    echo "waiting for '$cloud_vendor' on '$wait_host'"
-    sleep 1
-  done
+# wait for cloud container to be ready
+wait_host="${k6_test_host/host.docker.internal/localhost}"
+until curl --output /dev/null --head --fail --silent --insecure "$wait_host"; do
+  echo "waiting for '$cloud_vendor' on '$wait_host'"
+  sleep 1
+done
 
-  k6_run
-}
+k6_run
 
-function clean() {
-  [[ $with_cloud_docker != false ]] && cloud_stop
-}
-
-prepare
-run
-clean
+[[ $with_cloud_docker != false ]] && cloud_stop
