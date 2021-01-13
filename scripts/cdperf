@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap "clean; exit;" SIGINT SIGTERM
+trap "stop; exit;" SIGINT SIGTERM
 
 host_docker_host=${DOCKER_HOST:-}
 
@@ -295,6 +295,7 @@ function k6_run(){
   done
 }
 
+function start(){
 [[ $cloud_docker != false ]] && cloud_start
 
 # wait for cloud container to be ready
@@ -303,7 +304,16 @@ until curl --output /dev/null --head --fail --silent --insecure "$wait_host"; do
   echo "waiting for '$cloud_vendor' on '$wait_host'"
   sleep 1
 done
+}
 
-k6_run
+function run(){
+  k6_run
+}
 
-[[ $cloud_docker != false ]] && cloud_stop
+function stop(){
+  [[ $cloud_docker != false ]] && cloud_stop
+}
+
+start
+run
+stop
