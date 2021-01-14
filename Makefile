@@ -9,3 +9,7 @@ build:
 .PHONY: clean
 clean:
 	rm -rf ./tests
+
+.PHONY: changelog
+changelog:
+	go run github.com/restic/calens -i ./changelog -t ./changelog/CHANGELOG.tmpl >| ./CHANGELOG.md
