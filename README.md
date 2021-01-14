@@ -36,4 +36,4 @@ $ ./scripts/cdperf --cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis 
 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
-At ownCloud we are using [https://github.com/owncloud-devops/k6-benchmark-visualization](https://github.com/owncloud-devops/k6-benchmark-visualization)
+At ownCloud, we are using [https://github.com/owncloud-devops/k6-benchmark-visualization](https://github.com/owncloud-devops/k6-benchmark-visualization)

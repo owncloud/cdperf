@@ -1,9 +1,9 @@
 {{ $allVersions := . }}
 {{- range $index, $changes := . }}{{ with $changes -}}
-Changelog for ownCloud cdPerf [{{ .Version }}] ({{ .Date }})
-=======================================
-The following sections list the changes in ownCloud cdPerf {{ .Version }} relevant to
-ownCloud admins and users.
+{{ if gt (len $allVersions) 1 -}}
+# Changelog for [{{ .Version }}] ({{ .Date }})
+
+The following sections list the changes for {{ .Version }}.
 
 {{/* creating version compare links */ -}}
 {{ $next := add1 $index -}}
@@ -11,23 +11,34 @@ ownCloud admins and users.
 {{ $previousVersion := (index $allVersions $next).Version -}}
 {{ if eq .Version "unreleased" -}}
 [{{ .Version }}]: https://github.com/owncloud/cdperf/compare/v{{ $previousVersion }}...master
-{{- else -}}
+
+{{ else -}}
 [{{ .Version }}]: https://github.com/owncloud/cdperf/compare/v{{ $previousVersion }}...v{{ .Version }}
-{{- end -}}
+
+{{ end -}}
 {{ end -}}
 
-Summary
--------
+{{- /* last version managed by calens, end of the loop */ -}}
+{{ else -}}
+# Changes in {{ .Version }}
+
+{{ end -}}
+
+## Summary
 {{ range $entry := .Entries }}{{ with $entry }}
 * {{ .Type }} - {{ .Title }}: [#{{ .PrimaryID }}]({{ .PrimaryURL }})
 {{- end }}{{ end }}
 
-Details
--------
+## Details
 {{ range $entry := .Entries }}{{ with $entry }}
 * {{ .Type }} - {{ .Title }}: [#{{ .PrimaryID }}]({{ .PrimaryURL }})
-{{ range $par := .Paragraphs }}
-   {{ wrapIndent $par 80 3 }}
+{{ range $par := .Paragraphs -}}
+{{/* Workaround for keeping lists inside of changelog items well formatted */ -}}
+{{ if hasPrefix "*" $par }}
+  {{ $par | replace " *" "\n  *" }}
+{{- else }}
+   {{ wrapIndent $par 80 3 -}}
+{{ end }}
 {{ end -}}
 {{ range $url := .IssueURLs }}
    {{ $url -}}
@@ -38,5 +49,5 @@ Details
 {{ range $url := .OtherURLs }}
    {{ $url -}}
 {{ end }}
-{{ end }}{{ end }}
+{{ end }}{{ end -}}
 {{ end }}{{ end -}}
