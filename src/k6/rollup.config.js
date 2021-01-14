@@ -8,18 +8,23 @@ import { terser } from 'rollup-plugin-terser';
 
 import pkg from './package.json';
 
-const extensions = ['.js', '.ts'];
+const env = {
+    production: !process.env.ROLLUP_WATCH,
+}
+const conf = {
+    extensions: ['.js', '.ts']
+};
 
 export default [
     {
         input: ['src/test/**/*.ts', '!src/test/**/*.lib.ts', '!src/test/**/index.ts', '!src/test/**/_*.ts'],
-        external: utils.createFilter(['k6/**', ...Object.keys(pkg.devDependencies)], null, { resolve: false }),
+        external: utils.createFilter(['k6/**', ...Object.keys(pkg.devDependencies)], null, {resolve: false}),
         output: [
             {
                 dir: 'dist',
                 format: 'cjs',
                 exports: 'named',
-                chunkFileNames: '_chunks/[name]-[hash].js',
+                chunkFileNames: env.production ? '_chunks/[name]-[hash].js' : '_chunks/[name].js',
             },
         ],
         plugins: [
@@ -28,14 +33,14 @@ export default [
             }),
             json(),
             resolve({
-                extensions,
+                extensions: conf.extensions,
             }),
             commonjs(),
             babel({
-                extensions,
+                extensions: conf.extensions,
                 include: ['src/**/*'],
             }),
-            terser(),
+            env.production && terser(),
         ],
     },
 ];

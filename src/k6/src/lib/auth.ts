@@ -97,7 +97,7 @@ class OIDCProvider implements types.AuthProvider {
         );
         const continueURI = get(logonResponse.json(), 'hello.continue_uri');
 
-        if (logonResponse.status != 200 || !continueURI) {
+        if (logonResponse.status !== 200 || !continueURI) {
             fail(this.logonUri);
         }
 
@@ -119,7 +119,7 @@ class OIDCProvider implements types.AuthProvider {
 
         const code = get(queryString.parseUrl(authorizeResponse.headers.Location), 'query.code');
 
-        if (authorizeResponse.status != 302 || !code) {
+        if (authorizeResponse.status !== 302 || !code) {
             fail(continueURI);
         }
 
@@ -142,7 +142,7 @@ class OIDCProvider implements types.AuthProvider {
         };
 
         if (
-            tokenResponse.status != 200 ||
+            tokenResponse.status !== 200 ||
             !token.accessToken ||
             !token.tokenType ||
             !token.idToken ||
