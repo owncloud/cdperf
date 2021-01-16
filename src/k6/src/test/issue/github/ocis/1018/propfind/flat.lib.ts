@@ -11,6 +11,7 @@ interface Plays {
     davUpload: playbook.dav.Upload;
     davPropfind: playbook.dav.Propfind;
     davDelete: playbook.dav.Delete;
+    davCreate: playbook.dav.Create;
 }
 
 export const options = ({ files, plays }: { files: File[]; plays: Plays }): Options => {
@@ -34,7 +35,14 @@ export default ({
     account: types.Account;
     credential: types.Credential;
 }): void => {
-    const filesUploaded: { id: string; name: string }[] = [];
+    const filesUploaded: { id: string; name: string}[] = [];
+    const root = `${__VU}-${__ITER}`
+
+    plays.davCreate.exec({
+        credential,
+        path: root,
+        userName: account.login,
+    });
 
     files.forEach((f) => {
         const id = f.unit + f.size.toString();
@@ -47,6 +55,7 @@ export default ({
 
         plays.davUpload.exec({
             credential,
+            path: root,
             asset,
             userName: account.login,
             tags: { asset: id },
@@ -57,6 +66,7 @@ export default ({
 
     plays.davPropfind.exec({
         credential,
+        path: root,
         userName: account.login,
     });
 
@@ -64,8 +74,14 @@ export default ({
         plays.davDelete.exec({
             credential,
             userName: account.login,
-            path: f.name,
+            path: [root, f.name].join('/'),
             tags: { asset: f.id },
         });
+    });
+
+    plays.davDelete.exec({
+        credential,
+        userName: account.login,
+        path: root,
     });
 };

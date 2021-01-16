@@ -12,6 +12,7 @@ const files: {
 }[] = times(1000, () => ({ size: 1, unit: 'KB' }));
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
+    davCreate: new playbook.dav.Create(),
     davUpload: new playbook.dav.Upload(),
     davPropfind: new playbook.dav.Propfind(),
     davDelete: new playbook.dav.Delete(),
