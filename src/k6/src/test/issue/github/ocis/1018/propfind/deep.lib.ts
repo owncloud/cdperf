@@ -38,6 +38,13 @@ export default ({
     credential: types.Credential;
 }): void => {
     const filesUploaded: { id: string; name: string; folder: string }[] = [];
+    const root = `${__VU}-${__ITER}`
+
+    plays.davCreate.exec({
+        credential,
+        path: root,
+        userName: account.login,
+    });
 
     files.forEach((f) => {
         const id = f.unit + f.size.toString();
@@ -60,7 +67,7 @@ export default ({
                 });
 
                 return acc;
-            }, [])
+            }, [root])
             .join('/');
 
         plays.davUpload.exec({
@@ -76,6 +83,7 @@ export default ({
 
     plays.davPropfind.exec({
         credential,
+        path: root,
         userName: account.login,
     });
 
@@ -83,8 +91,14 @@ export default ({
         plays.davDelete.exec({
             credential,
             userName: account.login,
-            path: f.folder.split('/')[0],
+            path: [...f.folder.split('/'), f.name].join('/'),
             tags: { asset: f.id },
         });
+    });
+
+    plays.davDelete.exec({
+        credential,
+        userName: account.login,
+        path: root,
     });
 };
