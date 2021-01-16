@@ -55,7 +55,7 @@ export default ({
             size: f.size,
         });
 
-        const folder = times(utils.randomNumber({ min: 1, max: 10 }), () => utils.randomString())
+        const folder = times(5, () => utils.randomString())
             .reduce((acc: string[], c) => {
                 acc.push(c);
 
