@@ -15,7 +15,7 @@ k6 run ./dist/NAME_OF_TEST.js
 ```
 
 ## How add new tests
-The best point to start is to have a look at the existing tests which can be found [src/test](here).
+The best point to start is to have a look at the existing tests which can be found [here](src/test).
 
 The tests ares structured by platform -> repo -> issue id -> name. For example /src/test/issue/github/ocis/42/test-name.ts gets test-issue-github-ocis-51-test-name.js
 
