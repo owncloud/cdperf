@@ -37,3 +37,17 @@ $ ./scripts/cdperf --cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
 At ownCloud, we are using [https://github.com/owncloud-devops/k6-benchmark-visualization](https://github.com/owncloud-devops/k6-benchmark-visualization)
+
+## Security
+If you find a security issue please contact [security@owncloud.com](mailto:security@owncloud.com) first
+
+## Contributing
+Fork -> Patch -> Push -> Pull Request
+
+## License
+Apache-2.0
+
+## Copyright
+```console
+Copyright (c) 2020 ownCloud GmbH <https://owncloud.com>
+```
