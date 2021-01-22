@@ -4,7 +4,7 @@ _extends: gh-labels
 repository:
   name: cdperf
   description: ':atom_symbol: ownCloud cloud performance test'
-  homepage: https://owncloud.github.io/cdperf/
+  homepage: https://owncloud.github.io/
 
   private: true
   has_issues: true
