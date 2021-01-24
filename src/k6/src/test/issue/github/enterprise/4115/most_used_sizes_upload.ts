@@ -1,15 +1,14 @@
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-import { auth, defaults, k6, playbook, utils } from '../../../../../lib';
+import { auth, defaults, k6, playbook, types, utils } from '../../../../../lib';
 import {
     default as upDownDelete,
     options as upDownDeleteOptions,
 } from '../../ocis/1018/upload_download_delete/shared.lib';
 
-// upload, download and delete of 1000 files with following distribution:
+// upload, download and delete files with following distribution:
 // 83,68% under 1mb
-// - 828 files total
 // -- 92 100kb
 // -- 92 200kb
 // -- 92 300kb
@@ -20,7 +19,6 @@ import {
 // -- 92 800kb
 // -- 92 900kb
 // 12,57% between 1mb and 10mb
-// - 130 files total
 // -- 13 1mb
 // -- 13 2mb
 // -- 13 3mb
@@ -30,9 +28,7 @@ import {
 // -- 13 7mb
 // -- 13 8mb
 // -- 13 9mb
-// -- 13 10mb
 // 2,96% between 1mb and 100mb
-// - 30 files total
 // -- 3 10mb
 // -- 3 20mb
 // -- 3 30mb
@@ -44,7 +40,6 @@ import {
 // -- 3 90mb
 // -- 3 100mb
 // 0,78% larger then 100mb
-// - 10 files total
 // -- 1 120mb
 // -- 1 140mb
 // -- 1 160mb
@@ -56,43 +51,45 @@ import {
 // -- 1 280mb
 // -- 1 300mb
 
+const createFiles = (count: number, size: number, unit: types.AssetUnit): { size: number; unit: types.AssetUnit }[] => {
+    return times(count, () => ({ size, unit }));
+};
+
 const files: {
     size: number;
-    unit: any;
+    unit: types.AssetUnit;
 }[] = [
     // 83,68% under 1mb
-    ...times(92, () => ({ size: 100, unit: 'KB' })),
-    ...times(92, () => ({ size: 200, unit: 'KB' })),
-    ...times(92, () => ({ size: 300, unit: 'KB' })),
-    ...times(92, () => ({ size: 400, unit: 'KB' })),
-    ...times(92, () => ({ size: 500, unit: 'KB' })),
-    ...times(92, () => ({ size: 600, unit: 'KB' })),
-    ...times(92, () => ({ size: 700, unit: 'KB' })),
-    ...times(92, () => ({ size: 800, unit: 'KB' })),
-    ...times(92, () => ({ size: 900, unit: 'KB' })),
-    ...times(92, () => ({ size: 1, unit: 'MB' })),
+    ...createFiles(92, 100, 'KB'),
+    ...createFiles(92, 200, 'KB'),
+    ...createFiles(92, 300, 'KB'),
+    ...createFiles(92, 400, 'KB'),
+    ...createFiles(92, 500, 'KB'),
+    ...createFiles(92, 600, 'KB'),
+    ...createFiles(92, 700, 'KB'),
+    ...createFiles(92, 800, 'KB'),
+    ...createFiles(92, 900, 'KB'),
     // 12,57% between 1mb and 10mb
-    ...times(13, () => ({ size: 1, unit: 'MB' })),
-    ...times(13, () => ({ size: 2, unit: 'MB' })),
-    ...times(13, () => ({ size: 3, unit: 'MB' })),
-    ...times(13, () => ({ size: 4, unit: 'MB' })),
-    ...times(13, () => ({ size: 5, unit: 'MB' })),
-    ...times(13, () => ({ size: 6, unit: 'MB' })),
-    ...times(13, () => ({ size: 7, unit: 'MB' })),
-    ...times(13, () => ({ size: 8, unit: 'MB' })),
-    ...times(13, () => ({ size: 9, unit: 'MB' })),
-    ...times(13, () => ({ size: 10, unit: 'MB' })),
+    ...createFiles(13, 1, 'MB'),
+    ...createFiles(13, 2, 'MB'),
+    ...createFiles(13, 3, 'MB'),
+    ...createFiles(13, 4, 'MB'),
+    ...createFiles(13, 5, 'MB'),
+    ...createFiles(13, 6, 'MB'),
+    ...createFiles(13, 7, 'MB'),
+    ...createFiles(13, 8, 'MB'),
+    ...createFiles(13, 9, 'MB'),
     // 2,96% between 1mb and 100mb
-    ...times(3, () => ({ size: 10, unit: 'MB' })),
-    ...times(3, () => ({ size: 20, unit: 'MB' })),
-    ...times(3, () => ({ size: 30, unit: 'MB' })),
-    ...times(3, () => ({ size: 40, unit: 'MB' })),
-    ...times(3, () => ({ size: 50, unit: 'MB' })),
-    ...times(3, () => ({ size: 60, unit: 'MB' })),
-    ...times(3, () => ({ size: 70, unit: 'MB' })),
-    ...times(3, () => ({ size: 80, unit: 'MB' })),
-    ...times(3, () => ({ size: 90, unit: 'MB' })),
-    ...times(3, () => ({ size: 100, unit: 'MB' })),
+    ...createFiles(3, 10, 'MB'),
+    ...createFiles(3, 20, 'MB'),
+    ...createFiles(3, 30, 'MB'),
+    ...createFiles(3, 40, 'MB'),
+    ...createFiles(3, 50, 'MB'),
+    ...createFiles(3, 60, 'MB'),
+    ...createFiles(3, 70, 'MB'),
+    ...createFiles(3, 80, 'MB'),
+    ...createFiles(3, 90, 'MB'),
+    ...createFiles(3, 100, 'MB'),
     // 0,78% larger then 100mb
     { size: 120, unit: 'MB' },
     { size: 140, unit: 'MB' },

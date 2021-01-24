@@ -1,3 +1,5 @@
+import 'core-js';
+
 export * as api from './api';
 export { default as auth } from './auth';
 export * as defaults from './defaults';

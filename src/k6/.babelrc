@@ -1,5 +1,14 @@
 {
-  "presets": ["@babel/env", "@babel/typescript"],
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "useBuiltIns": "entry",
+        "corejs": "3"
+      }
+    ],
+    "@babel/typescript"
+  ],
   "plugins": [
     "lodash",
     "@babel/proposal-class-properties",
