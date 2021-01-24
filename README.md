@@ -39,7 +39,7 @@ It's important to know how to compare the tests against each other and what thos
 
 **Please note the following points:**
 * Only compare clouds if they run on the same host
-* Try to run the cloud on a different host then k6
+* Try to run the cloud on a different host than the k6 test-runner
 * Try to keep traffic on the hosts as low as possible while testing
 * Don't compare clouds that run in docker against non dockerized clouds
 * Docker for macs is slow on file operations compared to linux
@@ -48,16 +48,16 @@ It's important to know how to compare the tests against each other and what thos
 **Test setup at ownCloud:**
 
 At ownCloud we currently test two times a day on different servers. Server (A) is intel based and server (B) amd based.
-The first test run, runs the tests on A which is testing on B and then B which is testing on A.
-We collect those metrics over time to get indicators how the performance changes over time (version to version) and how the clouds perform in comparison to each other.
+The first test run, runs the tests on A which is testing a server on B and then B which is testing on A.
+We collect those metrics over time to get indicators of how the performance changes over time (version to version) and how the clouds perform in comparison to each other.
 
 **How to read the test results**
 
-Let's use 'test-issue-github-ocis-1018-propfind-flat.js' as example.
+Let's use 'test-issue-github-ocis-1018-propfind-flat.js' as an example.
 * Total time of execution
-    * This is the time how long the test took for all users and iterations
+    * This is the total elapsed time of the test for all users and iterations
 * status
-    * Red || Green is a quick overview how many requests are failed or not
+    * Red || Green is a quick overview of how many requests failed or not
 * cloud_default_play_$PLAYNAME$_$OPERATION$_$TYPE$
     * PLAYNAME: name of the play, for example dav, users, ...
     * OPERATION: type of operation, for example create, delete, update, ...
