@@ -43,7 +43,7 @@ It's important to know how to compare the tests against each other and what thos
 * Try to keep traffic on the hosts as low as possible while testing
 * Don't compare clouds that run in docker against non dockerized clouds
 * Docker for macs is slow on file operations compared to linux
-* Sometimes it's possible that one of the clouds will fail on some operations. Keep in mind that it's not possible to compared a test with failures against a test where all checks are green
+* Sometimes it's possible that one of the clouds will fail on some operations. Keep in mind that it's not valid to compare a test with failures against a test where all checks are green
 
 **Test setup at ownCloud:**
 
