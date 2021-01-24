@@ -30,12 +30,14 @@ export const request = ({
     body = {},
     params = {},
     credential,
+    headers,
 }: {
-    method: 'PROPFIND' | 'PUT' | 'GET' | 'POST' | 'DELETE' | 'MKCOL';
+    method: 'PROPFIND' | 'PUT' | 'GET' | 'POST' | 'DELETE' | 'MKCOL' | 'MOVE';
     path: string;
     credential: types.Credential;
     body?: RequestBody | bytes | null;
     params?: RefinedParams<ResponseType> | null;
+    headers?: {[name: string]: string};
 }): RefinedResponse<ResponseType> => {
     return http.request(
         method,
@@ -45,6 +47,7 @@ export const request = ({
             {
                 headers: {
                     ...buildHeaders({ credential }),
+                    ...headers,
                 },
             },
             params,
