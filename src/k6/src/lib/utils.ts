@@ -35,6 +35,7 @@ export const buildAccount = ({
 
     return defaults.ACCOUNTS.ALL[login];
 };
+
 export const buildAsset = ({
     name = 'dummy.zip',
     size = 50,
@@ -64,4 +65,19 @@ export const buildAsset = ({
         name: `${fileName}-vu-${__VU}-iter-${__ITER}-${unit}-${size}-${randomString()}.${fileExtension}`,
         bytes: gen[unit](size),
     };
+};
+
+export const objectToQueryString = (o: { [key: string]: string | number }): string => {
+    return Object.keys(o)
+        .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(o[key]))
+        .join('&');
+};
+
+export const queryStringToObject = (qs: string): { [key: string]: string } => {
+    try {
+        const url = new URL(qs);
+        qs = url.search;
+    } catch (e) {}
+
+    return Object.fromEntries(new URLSearchParams(qs));
 };

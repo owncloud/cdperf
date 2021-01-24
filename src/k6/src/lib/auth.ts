@@ -1,10 +1,10 @@
 import { fail } from 'k6';
 import http from 'k6/http';
 import { get } from 'lodash';
-import queryString from 'query-string';
 
 import * as defaults from './defaults';
 import * as types from './types';
+import * as utils from './utils';
 
 export default class Factory {
     private provider!: types.AuthProvider;
@@ -27,7 +27,7 @@ export default class Factory {
 }
 
 class AccountProvider implements types.AuthProvider {
-    private account: types.Account;
+    private readonly account: types.Account;
 
     constructor(account: types.Account) {
         this.account = account;
@@ -105,7 +105,7 @@ class OIDCProvider implements types.AuthProvider {
     }
 
     private getCode(continueURI: string): string {
-        const authorizeUri = `${continueURI}?${queryString.stringify({
+        const authorizeUri = `${continueURI}?${utils.objectToQueryString({
             client_id: 'web',
             prompt: 'none',
             redirect_uri: this.redirectUri,
@@ -117,8 +117,7 @@ class OIDCProvider implements types.AuthProvider {
             redirects: 0,
         });
 
-        const code = get(queryString.parseUrl(authorizeResponse.headers.Location), 'query.code');
-
+        const code = get(utils.queryStringToObject(authorizeResponse.headers.Location), 'code');
         if (authorizeResponse.status !== 302 || !code) {
             fail(continueURI);
         }

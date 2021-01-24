@@ -38,7 +38,7 @@ export default ({
     credential: types.Credential;
 }): void => {
     const filesUploaded: { id: string; name: string; folder: string }[] = [];
-    const root = `${__VU}-${__ITER}`
+    const root = `${__VU}-${__ITER}`;
 
     plays.davCreate.exec({
         credential,
@@ -56,18 +56,21 @@ export default ({
         });
 
         const folder = times(5, () => utils.randomString())
-            .reduce((acc: string[], c) => {
-                acc.push(c);
+            .reduce(
+                (acc: string[], c) => {
+                    acc.push(c);
 
-                plays.davCreate.exec({
-                    credential,
-                    path: acc.join('/'),
-                    userName: account.login,
-                    tags: { asset: id },
-                });
+                    plays.davCreate.exec({
+                        credential,
+                        path: acc.join('/'),
+                        userName: account.login,
+                        tags: { asset: id },
+                    });
 
-                return acc;
-            }, [root])
+                    return acc;
+                },
+                [root],
+            )
             .join('/');
 
         plays.davUpload.exec({

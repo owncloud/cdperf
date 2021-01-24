@@ -35,8 +35,8 @@ export default ({
     account: types.Account;
     credential: types.Credential;
 }): void => {
-    const filesUploaded: { id: string; name: string}[] = [];
-    const root = `${__VU}-${__ITER}`
+    const filesUploaded: { id: string; name: string }[] = [];
+    const root = `${__VU}-${__ITER}`;
 
     plays.davCreate.exec({
         credential,
