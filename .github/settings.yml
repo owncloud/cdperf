@@ -6,7 +6,7 @@ repository:
   description: ':atom_symbol: ownCloud cloud performance test'
   homepage: https://owncloud.github.io/
 
-  private: true
+  private: false
   has_issues: true
   has_projects: false
   has_wiki: true
