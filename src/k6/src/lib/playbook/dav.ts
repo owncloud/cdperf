@@ -149,11 +149,11 @@ export class Propfind extends Play {
     }
 
     public exec({
-        credential,
-        userName,
-        path,
-        tags,
-    }: {
+                    credential,
+                    userName,
+                    path,
+                    tags,
+                }: {
         credential: types.Credential;
         path?: string;
         userName: string;
@@ -167,6 +167,43 @@ export class Propfind extends Play {
             response,
             {
                 'dav propfind status is 207': () => response.status === 207,
+            },
+            tags,
+        ) || this.metricErrorRate.add(1, tags);
+
+        this.metricTrend.add(response.timings.duration, tags);
+
+        return { response, tags };
+    }
+}
+
+
+export class Move extends Play {
+    constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
+        super({ name: name || `cloud_${metricID}_play_dav_move` });
+    }
+
+    public exec({
+                    credential,
+                    userName,
+                    path,
+                    destination,
+                    tags,
+                }: {
+        credential: types.Credential;
+        path: string;
+        destination: string;
+        userName: string;
+        tags?: types.Tags;
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+        tags = { ...this.tags, ...tags };
+
+        const response = api.dav.Move.exec({ credential, userName, tags, path, destination });
+
+        check(
+            response,
+            {
+                'dav move status is 201': () => response.status === 201,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);

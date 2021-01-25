@@ -92,11 +92,11 @@ export class Create {
 
 export class Propfind {
     public static exec({
-        credential,
-        userName,
-        path = '',
-        tags,
-    }: {
+                           credential,
+                           userName,
+                           path = '',
+                           tags,
+                       }: {
         credential: types.Credential;
         userName: string;
         path?: string;
@@ -107,6 +107,32 @@ export class Propfind {
             credential,
             path: `/remote.php/dav/files/${userName}/${path}`,
             params: { tags },
+        });
+    }
+}
+
+export class Move {
+    public static exec({
+                           credential,
+                           userName,
+                           path,
+                           destination,
+                           tags,
+                       }: {
+        credential: types.Credential;
+        userName: string;
+        path: string;
+        destination: string;
+        tags?: types.Tags;
+    }): RefinedResponse<ResponseType> {
+        return api.request({
+            method: 'MOVE',
+            credential,
+            path: `/remote.php/dav/files/${userName}/${path}`,
+            params: { tags },
+            headers: {
+                destination: `/remote.php/dav/files/${userName}/${destination}`,
+            }
         });
     }
 }

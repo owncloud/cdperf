@@ -18,6 +18,7 @@ export const options = ({ files, plays }: { files: File[]; plays: Plays }): Opti
     return {
         thresholds: files.reduce((acc: { [name: string]: Threshold[] }, c) => {
             acc[`${plays.davUpload.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
+            acc[`${plays.davCreate.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
             acc[`${plays.davDelete.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
             return acc;
         }, {}),
