@@ -1,5 +1,6 @@
 # ownCloud cloud testing toolbox
 This repository contains the tools we use to test the performance of different cloud systems.
+
 Supported clouds are:
 * [ownCloud](https://github.com/owncloud/core)
 * [ocis](https://github.com/owncloud/core)
@@ -65,6 +66,10 @@ Let's use 'test-issue-github-ocis-1018-propfind-flat.js' as an example.
 
 Only those numbers should be considered for comparison.
 Don't forget to only compare same tests with same requirements.
+
+## Details
+
+Read more about [docs/considerations.md](considerations) of performance measurement.
 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
