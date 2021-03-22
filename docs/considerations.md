@@ -12,7 +12,7 @@ To solve that, the idea is to model typical scenarios for EFSS cloud installatio
 
 There needs to be a standardized process to collect data that allow a statement. It needs to be repeatable and clearly specified.
 
-For that, ownCloud developed a tool called cdperf. It automates to run certain test setups for currently three different test candidates: ownCloud 10, oCIS and NextCloud.
+For that, ownCloud developed a tool called cdperf. cdperf is based on [k6](https://k6.io). It automates to run certain test setups for currently three different test candidates: ownCloud 10, oCIS and NextCloud.
 
 ## Influencual Parameters
 
@@ -36,7 +36,7 @@ Especially for a distributed system like oCIS it is important how the runtime ma
 
 ### Concurrent Access
 
-To model a real life scenario of EFSS it is important to mimic parallel access to the system. That means that different users access the cloud independently at the same time.
+To model a real life scenario of EFSS it is important to mimic parallel access to the system. That means that many virtual users access the cloud independently at the same time.
 
 In addition to that it happens that for example the desktop client runs parallel requests to the server to achieve one job, ie. a file upload. That triggers PUT requests that run in parallel.
 
