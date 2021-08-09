@@ -86,6 +86,7 @@ export class Create {
             credential,
             path: `/remote.php/dav/files/${userName}/${path}`,
             params: { tags },
+            body: null,
         });
     }
 }
