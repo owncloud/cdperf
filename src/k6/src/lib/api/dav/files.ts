@@ -1,7 +1,7 @@
 import { RefinedResponse, ResponseType } from 'k6/http';
 
-import * as types from '../types';
-import * as api from './api';
+import * as types from '../../types';
+import * as api from '../api';
 
 export class Upload {
     public static exec({
@@ -93,11 +93,11 @@ export class Create {
 
 export class Propfind {
     public static exec({
-                           credential,
-                           userName,
-                           path = '',
-                           tags,
-                       }: {
+        credential,
+        userName,
+        path = '',
+        tags,
+    }: {
         credential: types.Credential;
         userName: string;
         path?: string;
@@ -114,12 +114,12 @@ export class Propfind {
 
 export class Move {
     public static exec({
-                           credential,
-                           userName,
-                           path,
-                           destination,
-                           tags,
-                       }: {
+        credential,
+        userName,
+        path,
+        destination,
+        tags,
+    }: {
         credential: types.Credential;
         userName: string;
         path: string;
@@ -133,7 +133,7 @@ export class Move {
             params: { tags },
             headers: {
                 destination: `/remote.php/dav/files/${userName}/${destination}`,
-            }
+            },
         });
     }
 }

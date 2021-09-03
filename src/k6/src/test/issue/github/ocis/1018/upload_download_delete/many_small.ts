@@ -15,9 +15,9 @@ const files: {
 ];
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
-    davUpload: new playbook.dav.Upload(),
-    davDownload: new playbook.dav.Download(),
-    davDelete: new playbook.dav.Delete(),
+    davUpload: new playbook.dav.files.Upload(),
+    davDownload: new playbook.dav.files.Download(),
+    davDelete: new playbook.dav.files.Delete(),
 };
 
 export const options: Options = k6.options({

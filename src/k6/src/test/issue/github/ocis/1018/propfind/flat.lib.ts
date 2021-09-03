@@ -8,10 +8,10 @@ interface File {
 }
 
 interface Plays {
-    davUpload: playbook.dav.Upload;
-    davPropfind: playbook.dav.Propfind;
-    davDelete: playbook.dav.Delete;
-    davCreate: playbook.dav.Create;
+    davUpload: playbook.dav.files.Upload;
+    davPropfind: playbook.dav.files.Propfind;
+    davDelete: playbook.dav.files.Delete;
+    davCreate: playbook.dav.files.Create;
 }
 
 export const options = ({ files, plays }: { files: File[]; plays: Plays }): Options => {

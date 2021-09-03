@@ -12,10 +12,10 @@ const files: {
 }[] = times(1000, () => ({ size: 1, unit: 'KB' }));
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
-    davCreate: new playbook.dav.Create(),
-    davUpload: new playbook.dav.Upload(),
-    davPropfind: new playbook.dav.Propfind(),
-    davDelete: new playbook.dav.Delete(),
+    davCreate: new playbook.dav.files.Create(),
+    davUpload: new playbook.dav.files.Upload(),
+    davPropfind: new playbook.dav.files.Propfind(),
+    davDelete: new playbook.dav.files.Delete(),
 };
 export const options: Options = k6.options({
     tags: {

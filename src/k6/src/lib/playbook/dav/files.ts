@@ -1,13 +1,13 @@
 import { check } from 'k6';
 import { RefinedResponse, ResponseType } from 'k6/http';
 
-import * as api from '../api';
-import * as types from '../types';
-import { Play } from './playbook';
+import * as api from '../../api';
+import * as types from '../../types';
+import { Play } from '../playbook';
 
 export class Upload extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
-        super({ name: name || `cloud_${metricID}_play_dav_upload` });
+        super({ name: name || `cloud_${metricID}_play_dav_files_upload` });
     }
 
     public exec({
@@ -25,12 +25,12 @@ export class Upload extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Upload.exec({ credential: credential, asset, userName, tags, path });
+        const response = api.dav.files.Upload.exec({ credential: credential, asset, userName, tags, path });
 
         check(
             response,
             {
-                'dav upload status is 201': () => response.status === 201,
+                'dav files upload status is 201': () => response.status === 201,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);
@@ -43,7 +43,7 @@ export class Upload extends Play {
 
 export class Delete extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
-        super({ name: name || `cloud_${metricID}_play_dav_delete` });
+        super({ name: name || `cloud_${metricID}_play_dav_files_delete` });
     }
 
     public exec({
@@ -59,12 +59,12 @@ export class Delete extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Delete.exec({ credential: credential, userName, tags, path });
+        const response = api.dav.files.Delete.exec({ credential: credential, userName, tags, path });
 
         check(
             response,
             {
-                'dav delete status is 204': () => response.status === 204,
+                'dav files delete status is 204': () => response.status === 204,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);
@@ -77,7 +77,7 @@ export class Delete extends Play {
 
 export class Download extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
-        super({ name: name || `cloud_${metricID}_play_dav_download` });
+        super({ name: name || `cloud_${metricID}_play_dav_files_download` });
     }
 
     public exec({
@@ -93,12 +93,12 @@ export class Download extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Download.exec({ credential: credential, userName, tags, path });
+        const response = api.dav.files.Download.exec({ credential: credential, userName, tags, path });
 
         check(
             response,
             {
-                'dav download status is 200': () => response.status === 200,
+                'dav files download status is 200': () => response.status === 200,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);
@@ -111,7 +111,7 @@ export class Download extends Play {
 
 export class Create extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
-        super({ name: name || `cloud_${metricID}_play_dav_create` });
+        super({ name: name || `cloud_${metricID}_play_dav_files_create` });
     }
 
     public exec({
@@ -127,12 +127,12 @@ export class Create extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Create.exec({ credential: credential, userName, tags, path });
+        const response = api.dav.files.Create.exec({ credential: credential, userName, tags, path });
 
         check(
             response,
             {
-                'dav create status is 201': () => response.status === 201,
+                'dav files create status is 201': () => response.status === 201,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);
@@ -145,15 +145,15 @@ export class Create extends Play {
 
 export class Propfind extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
-        super({ name: name || `cloud_${metricID}_play_dav_propfind` });
+        super({ name: name || `cloud_${metricID}_play_dav_files_propfind` });
     }
 
     public exec({
-                    credential,
-                    userName,
-                    path,
-                    tags,
-                }: {
+        credential,
+        userName,
+        path,
+        tags,
+    }: {
         credential: types.Credential;
         path?: string;
         userName: string;
@@ -161,12 +161,12 @@ export class Propfind extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Propfind.exec({ credential: credential, userName, tags, path });
+        const response = api.dav.files.Propfind.exec({ credential: credential, userName, tags, path });
 
         check(
             response,
             {
-                'dav propfind status is 207': () => response.status === 207,
+                'dav files propfind status is 207': () => response.status === 207,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);
@@ -177,19 +177,18 @@ export class Propfind extends Play {
     }
 }
 
-
 export class Move extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
-        super({ name: name || `cloud_${metricID}_play_dav_move` });
+        super({ name: name || `cloud_${metricID}_play_dav_files_move` });
     }
 
     public exec({
-                    credential,
-                    userName,
-                    path,
-                    destination,
-                    tags,
-                }: {
+        credential,
+        userName,
+        path,
+        destination,
+        tags,
+    }: {
         credential: types.Credential;
         path: string;
         destination: string;
@@ -198,12 +197,12 @@ export class Move extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Move.exec({ credential, userName, tags, path, destination });
+        const response = api.dav.files.Move.exec({ credential, userName, tags, path, destination });
 
         check(
             response,
             {
-                'dav move status is 201': () => response.status === 201,
+                'dav files move status is 201': () => response.status === 201,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);

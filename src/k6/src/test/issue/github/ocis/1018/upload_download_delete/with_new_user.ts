@@ -12,9 +12,9 @@ const files: {
 }[] = times(10, () => ({ size: 1, unit: 'KB' as types.AssetUnit }));
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.ADMIN }));
 const plays = {
-    davUpload: new playbook.dav.Upload(),
-    davDownload: new playbook.dav.Download(),
-    davDelete: new playbook.dav.Delete(),
+    davUpload: new playbook.dav.files.Upload(),
+    davDownload: new playbook.dav.files.Download(),
+    davDelete: new playbook.dav.files.Delete(),
     usersCreate: new playbook.users.Create(),
     usersDelete: new playbook.users.Delete(),
 };
