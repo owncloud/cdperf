@@ -69,7 +69,7 @@ Don't forget to only compare same tests with same requirements.
 
 ## Details
 
-Read more about [docs/considerations.md](considerations) of performance measurement.
+Read more about [considerations](docs/considerations.md) of performance measurement.
 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
