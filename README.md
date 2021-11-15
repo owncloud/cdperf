@@ -3,7 +3,7 @@ This repository contains the tools we use to test the performance of different c
 
 Supported clouds are:
 * [ownCloud](https://github.com/owncloud/core)
-* [ocis](https://github.com/owncloud/core)
+* [ocis](https://github.com/owncloud/ocis)
 * [nextCloud](https://github.com/nextcloud/server/)
 
 ## Requirements
