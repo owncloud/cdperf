@@ -90,7 +90,7 @@ usage(){
   echo "                                ENV: CDPERF_K6_OUT"
   echo "                                --"
   echo " --k6-scripts                   K6 scripts to run"
-  echo "                                Default: ./dist/k6/test\-*.js"
+  echo "                                Default: ./tests/k6/test\-*.js"
   echo "                                ENV: CDPERF_K6_SCRIPTS"
   echo "                                --"
   echo " --k6-test-host                 Host of the cloud"
