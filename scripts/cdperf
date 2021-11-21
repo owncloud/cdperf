@@ -22,6 +22,7 @@ k6_vus=${CDPERF_K6_VUS:-"3"}
 k6_iterations=${CDPERF_K6_ITERATIONS:-"3"}
 k6_duration=${CDPERF_K6_DURATION:-"1h0m0s"}
 k6_debug=${CDPERF_K6_DEBUG:-}
+k6_insecure=${CDPERF_K6_INSECURE:-"false"}
 k6_csv=${CDPERF_K6_CSV:-}
 k6_json=${CDPERF_K6_JSON:-}
 k6_out=${CDPERF_K6_OUT:-}
@@ -91,6 +92,9 @@ usage(){
   echo " --k6-debug                     K6 debug enabled for http requests"
   echo "                                ENV: CDPERF_K6_DEBUG"
   echo "                                --"
+  echo " --k6-insecure                  K6 allow requests using insecure SSL certificates"
+  echo "                                ENV: CDPERF_K6_INSECURE"
+  echo "                                --"
   echo " --k6-out                       K6 uri for an external metrics database"
   echo "                                See https://k6.io/docs/getting-started/results-output"
   echo "                                ENV: CDPERF_K6_OUT"
@@ -158,6 +162,10 @@ while test $# -gt 0; do
             ;;
         --k6-debug=*)
             k6_debug="${1#*=}"
+            shift
+            ;;
+        --k6-insecure=*)
+            k6_insecure="${1#*=}"
             shift
             ;;
         --k6-docker=*)
@@ -290,6 +298,7 @@ function k6_run(){
   [[ $k6_vus ]] && k6_params+=("--vus=$k6_vus")
   [[ $k6_out ]] && k6_params+=("--out=$k6_out")
   [[ $k6_debug ]] && k6_params+=("--http-debug")
+  [[ $k6_insecure == true ]] && k6_params+=("--insecure-skip-tls-verify")
   [[ $k6_csv ]] && k6_params+=("--out csv=$k6_csv")
   [[ $k6_json ]] && k6_params+=("--out json=$k6_json")
   [[ $k6_quiet == true ]] && k6_params+=("--quiet")
