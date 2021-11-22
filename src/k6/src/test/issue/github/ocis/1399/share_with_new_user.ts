@@ -1,12 +1,13 @@
-import {Options, Threshold} from 'k6/options';
-import {times} from 'lodash';
-import {auth, defaults, k6, playbook, types, utils} from '../../../../../lib';
+import { Options, Threshold } from 'k6/options';
+import { times } from 'lodash';
+
+import { auth, defaults, k6, playbook, types, utils } from '../../../../../lib';
 
 const files: {
     size: number;
     unit: types.AssetUnit;
-}[] = times(500, () => ({size: 10, unit: 'KB'}));
-const adminAuthFactory = new auth(utils.buildAccount({login: defaults.ACCOUNTS.ADMIN}));
+}[] = times(500, () => ({ size: 10, unit: 'KB' }));
+const adminAuthFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.ADMIN }));
 const plays = {
     davCreate: new playbook.dav.Create(),
     davUpload: new playbook.dav.Upload(),
@@ -32,19 +33,19 @@ export const options: Options = k6.options({
 });
 
 export default (): void => {
-    const userAuthFactory = new auth({login: utils.randomString(), password: utils.randomString()});
+    const userAuthFactory = new auth({ login: utils.randomString(), password: utils.randomString() });
     const user = {
         name: userAuthFactory.account.login,
         password: userAuthFactory.account.password,
         get credential() {
-            return userAuthFactory.credential
+            return userAuthFactory.credential;
         },
-    }
+    };
     const admin = {
         name: adminAuthFactory.account.login,
         password: adminAuthFactory.account.password,
-        credential: adminAuthFactory.credential
-    }
+        credential: adminAuthFactory.credential,
+    };
 
     plays.usersCreate.exec({
         credential: admin.credential,
@@ -74,26 +75,24 @@ export default (): void => {
             credential: admin.credential,
             userName: admin.name,
             path: user.name,
-            tags: {asset: id},
+            tags: { asset: id },
         });
 
-        filesUploaded.push({id, name: asset.name});
+        filesUploaded.push({ id, name: asset.name });
     });
 
-    const share = plays.shareCreate.exec(
-        {
-            credential: adminAuthFactory.credential,
-            shareType: '0',
-            shareWith: user.name,
-            path: user.name,
-            permissions: '1',
-        }
-    )
+    const share = plays.shareCreate.exec({
+        credential: adminAuthFactory.credential,
+        shareType: '0',
+        shareWith: user.name,
+        path: user.name,
+        permissions: '1',
+    });
 
     plays.shareAccept.exec({
         credential: userAuthFactory.credential,
-        id: utils.parseXML(share.response.body).getElementsByTagName("id")[0].childNodes[0].textContent as string,
-    })
+        id: utils.parseXML(share.response.body).getElementsByTagName('id')[0].childNodes[0].textContent as string,
+    });
 
     plays.davPropfind.exec({
         credential: user.credential,
@@ -106,15 +105,15 @@ export default (): void => {
             credential: user.credential,
             userName: user.name,
             path: ['Shares', user.name, f.name].join('/'),
-            tags: {asset: f.id},
+            tags: { asset: f.id },
         });
     });
 
-    plays.usersDelete.exec({credential: admin.credential, userName: user.name});
+    plays.usersDelete.exec({ credential: admin.credential, userName: user.name });
 
     plays.davDelete.exec({
         credential: admin.credential,
         path: user.name,
         userName: admin.name,
     });
-}
+};
