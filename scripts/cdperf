@@ -234,6 +234,7 @@ then
   [[ ! $cloud_docker_image ]] && cloud_docker_image="owncloud/ocis"
   [[ ! $cloud_docker_publish ]] && cloud_docker_publish="9200:9200"
   [[ $cloud_oidc != true ]] && cloud_docker_env+=("PROXY_ENABLE_BASIC_AUTH=true")
+  cloud_docker_env+=("OCIS_INSECURE=true")
 elif [[ $cloud_vendor == "oc10" ]]
 then
   [[ ! $cloud_docker_image ]] && cloud_docker_image="owncloud/server"
