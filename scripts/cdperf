@@ -31,6 +31,9 @@ k6_quiet=${CDPERF_K6_QUIET:-}
 k6_cloud_id=${CDPERF_K6_CLOUD_ID:-}
 k6_cloud_login=${CDPERF_K6_CLOUD_LOGIN:-"admin"}
 k6_cloud_password=${CDPERF_K6_CLOUD_PASSWORD:-"admin"}
+k6_influxdb_organization=${CDPERF_K6_INFLUXDB_ORGANIZATION:-"k6-benchmark"}
+k6_influxdb_bucket=${CDPERF_K6_INFLUXDB_BUCKET:-"k6-benchmark"}
+k6_influxdb_token=${CDPERF_K6_INFLUXDB_TOKEN:-""}
 
 usage(){
   echo "cdPerf: ownCloud cloud performance test"
@@ -117,6 +120,18 @@ usage(){
   echo "                                Default: admin"
   echo "                                ENV: CDPERF_K6_CLOUD_PASSWORD"
   echo "                                --"
+  echo " --k6-influxdb-organization     Name of organization when using with InfluxDB v2"
+  echo "                                Default: k6-benchmark"
+  echo "                                ENV: CDPERF_K6_INFLUXDB_ORGANIZATION"
+  echo "                                --"
+  echo " --k6-influxdb-bucket           Name of bucket when using with InfluxDB v2"
+  echo "                                Default: k6-benchmark"
+  echo "                                ENV: CDPERF_K6_INFLUXDB_BUCKET"
+  echo "                                --"
+  echo " --k6-influxdb-token            Token when using with InfluxDB v2"
+  echo "                                Default: "
+  echo "                                ENV: CDPERF_K6_INFLUXDB_TOKEN"
+  echo "                                --"
   echo " --k6-csv                       Output results file to CSV"
   echo "                                ENV: CDPERF_K6_CSV"
   echo "                                --"
@@ -202,6 +217,18 @@ while test $# -gt 0; do
             ;;
         --k6-cloud-password=*)
             k6_cloud_password="${1#*=}"
+            shift
+            ;;
+        --k6-influxdb-organization=*)
+            k6_influxdb_organization="${1#*=}"
+            shift
+            ;;
+        --k6-influxdb-bucket=*)
+            k6_influxdb_bucket="${1#*=}"
+            shift
+            ;;
+        --k6-influxdb-token=*)
+            k6_influxdb_token="${1#*=}"
             shift
             ;;
         --k6-csv=*)
@@ -303,6 +330,9 @@ function k6_run(){
   [[ $cloud_oidc == true ]] && k6_env+=("CLOUD_OIDC_ENABLED=$cloud_oidc")
   [[ $cloud_vendor ]] && k6_env+=("CLOUD_VENDOR=$cloud_vendor")
   [[ $cloud_oidc_issuer ]] && k6_env+=("CLOUD_OIDC_ISSUER=$cloud_oidc_issuer")
+  [[ $k6_influxdb_organization ]] && k6_env+=("K6_INFLUXDB_ORGANIZATION=$k6_influxdb_organization")
+  [[ $k6_influxdb_bucket ]] && k6_env+=("K6_INFLUXDB_BUCKET=$k6_influxdb_bucket")
+  [[ $k6_influxdb_token ]] && k6_env+=("K6_INFLUXDB_TOKEN=$k6_influxdb_token")
 
   for i in "${!k6_env[@]}"
   do
