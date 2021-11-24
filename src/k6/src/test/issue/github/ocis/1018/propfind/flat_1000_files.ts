@@ -2,7 +2,7 @@ import { Options } from 'k6/options';
 import { times } from 'lodash';
 
 import { auth, defaults, k6, types, utils } from '../../../../../../lib';
-import { default as propfind, options as propfindOptions } from './lib';
+import { default as propfind, options as propfindOptions } from './shared.lib';
 
 // put 1000 files into one dir and run a 'PROPFIND' through API
 
