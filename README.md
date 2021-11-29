@@ -14,7 +14,11 @@ Supported clouds are:
 To see available options run ./scripts/cdperf --help
 
 ```shell
+$ # build via docker
 $ make clean build
+$
+$ # alternatively, build locally (requires node + yarn installed)
+$ make local
 $
 $ # all available options
 $ ./scripts/cdperf --help
