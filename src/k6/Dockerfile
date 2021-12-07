@@ -1,4 +1,9 @@
-FROM loadimpact/k6 as k6
+FROM golang as k6
+
+RUN go install go.k6.io/xk6/cmd/xk6@latest && \
+    xk6 build --with github.com/grafana/xk6-output-influxdb
+
+
 FROM node:15-alpine as node
 
 WORKDIR /k6
@@ -12,7 +17,7 @@ RUN yarn build
 FROM alpine:3
 
 COPY --from=node /k6/dist /scripts
-COPY --from=k6 /usr/bin/k6 /usr/bin/k6
+COPY --from=k6 /go/k6 /usr/bin/k6
 
 LABEL maintainer="ownCloud GmbH <devops@owncloud.com>" \
   org.label-schema.name="ownCloud measure" \

@@ -28,8 +28,11 @@ $
 $ # test with docker ocis and local k6
 $ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://localhost:9200 --k6-docker=false
 $
-$ # export test results to influxdb
+$ # export test results to influxdb v1
 $ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=influxdb=http://admin:admin@host.docker.internal:8086/k6
+$
+$ # export test results to influxdb v2
+$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=xk6-influxdb=http://host.docker.internal:8086 --k6-influxdb-token="superlongadmintoken"
 $
 $ # with cloud on remote docker host
 $ ./scripts/cdperf --cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200
