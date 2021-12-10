@@ -93,11 +93,11 @@ export class Create {
 
 export class Propfind {
     public static exec({
-                           credential,
-                           userName,
-                           path = '',
-                           tags,
-                       }: {
+        credential,
+        userName,
+        path = '',
+        tags,
+    }: {
         credential: types.Credential;
         userName: string;
         path?: string;
@@ -114,12 +114,12 @@ export class Propfind {
 
 export class Move {
     public static exec({
-                           credential,
-                           userName,
-                           path,
-                           destination,
-                           tags,
-                       }: {
+        credential,
+        userName,
+        path,
+        destination,
+        tags,
+    }: {
         credential: types.Credential;
         userName: string;
         path: string;
@@ -133,7 +133,54 @@ export class Move {
             params: { tags },
             headers: {
                 destination: `/remote.php/dav/files/${userName}/${destination}`,
-            }
+            },
+        });
+    }
+}
+export class Trash {
+    public static exec({
+        credential,
+        userName,
+        fileid = '',
+        tags,
+    }: {
+        credential: types.Credential;
+        userName: string;
+        fileid?: string;
+        tags?: types.Tags;
+    }): RefinedResponse<ResponseType> {
+        return api.request({
+            method: 'DELETE',
+            credential,
+            path: `/remote.php/dav/trash-bin/${userName}/${fileid}`,
+            params: { tags },
+        });
+    }
+}
+
+export class Restore {
+    public static exec({
+        credential,
+        userName,
+        fileid = '',
+        path = '',
+        tags,
+    }: {
+        credential: types.Credential;
+        userName: string;
+        fileid?: string;
+        path?: string;
+        tags?: types.Tags;
+    }): RefinedResponse<ResponseType> {
+        return api.request({
+            method: 'MOVE',
+            credential,
+            path: `/remote.php/dav/trash-bin/${userName}/${fileid}`,
+            params: { tags },
+            headers: {
+                destination: `/remote.php/dav/files/${userName}/${path}`,
+                overwrite: 'F',
+            },
         });
     }
 }

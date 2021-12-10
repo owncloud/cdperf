@@ -149,11 +149,11 @@ export class Propfind extends Play {
     }
 
     public exec({
-                    credential,
-                    userName,
-                    path,
-                    tags,
-                }: {
+        credential,
+        userName,
+        path,
+        tags,
+    }: {
         credential: types.Credential;
         path?: string;
         userName: string;
@@ -177,19 +177,18 @@ export class Propfind extends Play {
     }
 }
 
-
 export class Move extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
         super({ name: name || `cloud_${metricID}_play_dav_move` });
     }
 
     public exec({
-                    credential,
-                    userName,
-                    path,
-                    destination,
-                    tags,
-                }: {
+        credential,
+        userName,
+        path,
+        destination,
+        tags,
+    }: {
         credential: types.Credential;
         path: string;
         destination: string;
@@ -204,6 +203,75 @@ export class Move extends Play {
             response,
             {
                 'dav move status is 201': () => response.status === 201,
+            },
+            tags,
+        ) || this.metricErrorRate.add(1, tags);
+
+        this.metricTrend.add(response.timings.duration, tags);
+
+        return { response, tags };
+    }
+}
+
+export class Trash extends Play {
+    constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
+        super({ name: name || `cloud_${metricID}_play_dav_trash_delete` });
+    }
+
+    public exec({
+        credential,
+        userName,
+        fileid,
+        tags,
+    }: {
+        credential: types.Credential;
+        fileid?: string;
+        userName: string;
+        tags?: types.Tags;
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+        tags = { ...this.tags, ...tags };
+
+        const response = api.dav.Trash.exec({ credential: credential, userName, tags, fileid });
+
+        check(
+            response,
+            {
+                'dav trash delete status is 204': () => response.status === 204,
+            },
+            tags,
+        ) || this.metricErrorRate.add(1, tags);
+
+        this.metricTrend.add(response.timings.duration, tags);
+
+        return { response, tags };
+    }
+}
+
+export class Restore extends Play {
+    constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
+        super({ name: name || `cloud_${metricID}_play_dav_trash_restore` });
+    }
+
+    public exec({
+        credential,
+        userName,
+        fileid,
+        path,
+        tags,
+    }: {
+        credential: types.Credential;
+        fileid?: string;
+        path?: string;
+        userName: string;
+        tags?: types.Tags;
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+        tags = { ...this.tags, ...tags };
+
+        const response = api.dav.Restore.exec({ credential: credential, userName, tags, fileid, path });
+        check(
+            response,
+            {
+                'dav trash restore status is 201': () => response.status === 201,
             },
             tags,
         ) || this.metricErrorRate.add(1, tags);
