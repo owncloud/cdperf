@@ -24,7 +24,7 @@ const plays = {
 
 export const options: Options = k6.options({
     tags: {
-        test_id: 'upload-download-restore-many-large',
+        test_id: 'upload-delete-restore-many-large',
         issue_url: 'github.com/owncloud/ocis/issues/1018',
     },
     ...uploadDeleteTrashRestoreOptions({ plays, files }),
