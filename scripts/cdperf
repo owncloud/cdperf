@@ -384,7 +384,7 @@ function start(){
 
 # wait for cloud container to be ready
 wait_host="${k6_test_host/host.docker.internal/localhost}"
-until curl --output /dev/null --head --fail --silent --insecure "$wait_host"; do
+until curl --output /dev/null --head --fail --silent --insecure "$wait_host" -uadmin:admin; do
   echo "waiting for '$cloud_vendor' on '$wait_host'"
   sleep 1
 done
