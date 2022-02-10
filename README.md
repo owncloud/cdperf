@@ -74,6 +74,8 @@ Don't forget to only compare same tests with same requirements.
 
 Read more about [considerations](docs/considerations.md) of performance measurement.
 
+Detailed descriptions about all tests are [available here](docs/tests.md).
+
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
 At ownCloud, we are using [https://github.com/owncloud-devops/k6-benchmark-visualization](https://github.com/owncloud-devops/k6-benchmark-visualization)
