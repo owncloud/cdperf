@@ -8,7 +8,7 @@ import { default as propfind, options as propfindOptions } from './shared.lib';
 const files: {
     size: number;
     unit: types.AssetUnit;
-}[] = times(1000, () => ({ size: 1, unit: 'KB' }));
+}[] = times(100, () => ({ size: 1, unit: 'KB' }));
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 export const options: Options = k6.options({
     tags: {

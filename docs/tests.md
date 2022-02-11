@@ -15,17 +15,21 @@ This simulates a "normal" upload/download scenario with a common file set.
 
 ### Deep Propfind
 
-Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-propfind-deep.js`
+Scripts:
+* `/root/cdperf/tests/k6/test-issue-github-ocis-1018-propfind-deep-100-files-45-nested-folders.js`
+* `/root/cdperf/tests/k6/test-issue-github-ocis-1018-propfind-deep-1000-files-5-nested-folders.js`
 
-This test creates a nested directory structure that is five levels deep and distributes 1000 files within that tree.
+This test creates a nested directory structure and puts some files into the folder.
 
-The files are created and uploaded. After that, one PROPFIND on the top directory is done.
+The depth and file count depends on the test that is running.
+
+After provisioning is complete, the test does one propfind per folder
 
 This simulates the ETag check of a large nested directory.
 
 ### Flat Propfind
 
-Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-propfind-flat.js`
+Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-propfind-flat-1000-files.js`
 
 This test crates many (1000 a 1kB) files in the root of the cloud.
 
@@ -72,6 +76,8 @@ The folders and files are uploaded, renamed and after the rename, a PROPFIND is 
 This reflects the behaviour of renames of folders.
 
 ### Share with User
+
+Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1399-share-with-new-user.js`
 
 This script creates a folder and provisions the folder with some files right after.
 
