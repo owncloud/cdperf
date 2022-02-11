@@ -8,14 +8,14 @@ interface File {
     unit: types.AssetUnit;
 }
 
-interface Plays {
-    davUpload: playbook.dav.Upload;
-    davPropfind: playbook.dav.Propfind;
-    davCreate: playbook.dav.Create;
-    davDelete: playbook.dav.Delete;
-}
+const plays = {
+    davUpload: new playbook.dav.Upload(),
+    davCreate: new playbook.dav.Create(),
+    davPropfind: new playbook.dav.Propfind(),
+    davDelete: new playbook.dav.Delete(),
+};
 
-export const options = ({ files, plays }: { files: File[]; plays: Plays }): Options => {
+export const options = ({ files }: { files: File[] }): Options => {
     return {
         thresholds: files.reduce((acc: { [name: string]: Threshold[] }, c) => {
             acc[`${plays.davUpload.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
@@ -30,15 +30,17 @@ export default ({
     files,
     account,
     credential,
-    plays,
+    depth = 5,
 }: {
-    plays: Plays;
     files: File[];
     account: types.Account;
     credential: types.Credential;
+    depth?: number;
 }): void => {
     const filesUploaded: { id: string; name: string; folder: string }[] = [];
     const root = `${__VU}-${__ITER}`;
+
+    depth -= 1;
 
     plays.davCreate.exec({
         credential,
@@ -55,7 +57,7 @@ export default ({
             size: f.size,
         });
 
-        const folder = times(5, () => utils.randomString())
+        const folder = times(depth, () => utils.randomString())
             .reduce(
                 (acc: string[], c) => {
                     acc.push(c);

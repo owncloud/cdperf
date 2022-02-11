@@ -37,7 +37,7 @@ export const request = ({
     credential: types.Credential;
     body?: RequestBody | bytes | null;
     params?: RefinedParams<ResponseType> | null;
-    headers?: {[name: string]: string};
+    headers?: { [name: string]: string };
 }): RefinedResponse<ResponseType> => {
     return http.request(
         method,

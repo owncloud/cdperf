@@ -1,9 +1,10 @@
 import { bytes } from 'k6';
 import { randomBytes as k6_randomBytes } from 'k6/crypto';
-import { DOMParser } from 'xmldom'
+import { RefinedResponseBody, ResponseType } from 'k6/http';
+import { DOMParser } from 'xmldom';
+
 import * as defaults from './defaults';
 import * as types from './types';
-import {RefinedResponseBody, ResponseType} from "k6/http";
 
 export const randomNumber = ({ min, max }: { min: number; max: number }): number => {
     return Math.random() * (max - min) + min;
@@ -84,5 +85,5 @@ export const queryStringToObject = (qs: string): { [key: string]: string } => {
 };
 
 export const parseXML = (body: RefinedResponseBody<ResponseType>): Document => {
-    return new DOMParser().parseFromString(body as string, 'text/xml')
+    return new DOMParser().parseFromString(body as string, 'text/xml');
 };
