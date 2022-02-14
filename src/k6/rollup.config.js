@@ -10,7 +10,7 @@ import pkg from './package.json';
 
 const env = {
     production: !process.env.ROLLUP_WATCH,
-}
+};
 const conf = {
     extensions: ['.js', '.ts']
 };
