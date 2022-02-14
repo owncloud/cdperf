@@ -6,15 +6,15 @@ https://jira.owncloud.com/browse/OCIS-1705
 
 ## How can we model typical scenarios?
 
-Getting comparable statement about performance of EFSS cloud installations is a non trivial task.
+Getting comparable statement about performance of EFSS cloud installations is a non-trivial task.
 
 To solve that, the idea is to model typical scenarios for EFSS cloud installations. That will make it possible to compare clouds objectively in terms of performance and stability.
 
-There needs to be a standardized process to collect data that allow a statement. It needs to be repeatable and clearly specified.
+There needs to be a standardized process to collect data that allows a valid comparison. It needs to be repeatable and clearly specified.
 
-For that, ownCloud developed a tool called cdperf. cdperf is based on [k6](https://k6.io). It automates to run certain test setups for currently three different test candidates: ownCloud 10, oCIS and NextCloud.
+For that, ownCloud developed a tool called cdperf. cdperf is based on [k6](https://k6.io). It automates running certain test setups for currently three different test candidates: ownCloud 10, oCIS and NextCloud.
 
-## Influencual Parameters
+## Influential Parameters
 
 First, it makes sense to think about all parameters that influence the performance of an EFSS system.
 
@@ -28,17 +28,17 @@ Tests that should be compared need to be run on the same hardware in the same en
 
 Leaving things like hardware and operating system aside, the setup, ie. a virtualization- or bare metal setup, is important. To make it easy to repeat tests with different clouds on the same system, cdperf is using docker to run the cloud installations and the test tool.
 
-By default, it uses the officially provided docker containers of the cloud flavours. The installations within might be an more or less optimal setup.
+By default, it uses the officially provided docker containers of the cloud flavours. The installations within might be a more or less optimal setup.
 
 ### Runtime Configuration
 
-Especially for a distributed system like oCIS it is important how the runtime manages the services. Are they run as separate processes, system threads or go co-routines? That influences how many operations can be parallized and how many processor cores can be used at the same time.
+Especially for a distributed system like oCIS it is important how the runtime manages the services. Are they run as separate processes, system threads or go co-routines? That influences how many operations can be parallelized and how many processor cores can be used at the same time.
 
 ### Concurrent Access
 
 To model a real life scenario of EFSS it is important to mimic parallel access to the system. That means that many virtual users access the cloud independently at the same time.
 
-In addition to that it happens that for example the desktop client runs parallel requests to the server to achieve one job, ie. a file upload. That triggers PUT requests that run in parallel.
+In addition to that it happens that for example the desktop client runs parallel requests to the server to achieve one job, i.e. a file upload. That triggers PUT requests that run in parallel.
 
 ### File Structure
 
@@ -63,6 +63,6 @@ Examples:
 
 ### Request Baseline
 
-Depending on the setup of the whole EFSS system with clients there is a ground noise of requests that happen without any user interaction, mainly through clients that check for availablility of the cloud and sync states. This must be considered in performance checks.
+Depending on the setup of the whole EFSS system with clients there is a ground noise of requests that happen without any user interaction, mainly through clients that check for availability of the cloud and sync states. This must be considered in performance checks.
 
 

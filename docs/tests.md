@@ -9,7 +9,7 @@ Script: `/root/cdperf/tests/k6/test-issue-github-enterprise-4115-most-used-sizes
 
 This test creates a pattern of the so called *most used file sizes*. It contains a collection of test files in sizes how we find them in typical larger ownCloud installations. Specifically, that contains 84% files with a size smaller than 1MB, 12.5% files between 1MB and 10MB, 3% files between 1MB and 100MB and 0.8% files larger than 100MB.
 
-The files are created, uploaded, downloaded and afterwards deleted in this test. The current implementation tests with in total 15GB data per User.
+The files are created, uploaded, downloaded and afterwards deleted in this test. The current implementation tests within a total of 15GB data per User.
 
 This simulates a "normal" upload/download scenario with a common file set.
 
@@ -31,7 +31,7 @@ This simulates the ETag check of a large nested directory.
 
 Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-propfind-flat-1000-files.js`
 
-This test crates many (1000 a 1kB) files in the root of the cloud.
+This test creates many (1000 a 1kB) files in the root of the cloud.
 
 The files are uploaded and afterwards, a PROPFIND to the root directory is done.
 
@@ -41,11 +41,11 @@ This test gives an indication on the PROPFIND speed for a larger structure of ne
 
 Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-download-delete-many-large.js`
 
-In total this test creates 5 GB of files which distributes from 5 MB up to 1 GB per file.
+In total this test creates 5 GB of files which are distributed from 5 MB up to 1 GB per file.
 
 The files are uploaded, downloaded and deleted afterwards.
 
-This gives indication about the transmission speed of big files.
+This gives an indication about the transmission speed of big files.
 
 ### Upload Small Files
 
@@ -81,7 +81,7 @@ Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1399-share-with-new-user.j
 
 This script creates a folder and provisions the folder with some files right after.
 
-Right after the the test folder is uploaded, it will be shared with a different user. With the share receiver, the files are downloaded. Finally the share is removed and the user and files are deleted.
+Right after the test folder is uploaded, it will be shared with a different user. With the share receiver, the files are downloaded. Finally, the share is removed and the user and files are deleted.
 
 This reflects the transmission performance of shared folders.
 
