@@ -57,6 +57,46 @@ The files are uploaded, downloaded and deleted.
 
 This measures the up- and download speed of smaller files.
 
+### Upload, Delete and Trash Big Files
+
+Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-delete-trash-many-large.js`
+
+In total this test creates 5 GB of files which are distributed from 5 MB up to 1 GB per file.
+
+The files are uploaded, deleted and removed from trash afterwards.
+
+This gives an indication about the transmission speed of big files and tests the performance of trashing those files.
+
+### Upload, Delete and Trash Small Files
+
+Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-delete-trash-many-small.js`
+
+This test creates files between 500 kB and 25 MB, with a total size of 1.7 GB.
+
+The files are uploaded, deleted and removed from trash afterwards.
+
+This gives an indication about the transmission speed of smaller files and tests the performance of trashing those files.
+
+### Upload, Delete and Restore Big Files
+
+Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-delete-restore-many-large.js`
+
+In total this test creates 5 GB of files which are distributed from 5 MB up to 1 GB per file.
+
+The files are uploaded, deleted and restored from trash afterwards.
+
+This gives an indication about the transmission speed of big files and tests the performance of restoring those files from trash.
+
+### Upload, Delete and Restore Small Files
+
+Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-delete-restore-many-small.js`
+
+This test creates files between 500 kB and 25 MB, with a total size of 1.7 GB.
+
+The files are uploaded, deleted and restored from trash afterwards.
+
+This gives an indication about the transmission speed of smaller files and tests the performance of restoring those files from trash.
+
 ### Up- and Download with New User
 
 Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-download-delete-with-new-user.js`
