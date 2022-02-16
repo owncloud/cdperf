@@ -95,9 +95,9 @@ This test creates files between 500 kB and 25 MB, with a total size of 1.7 GB.
 
 The files are uploaded, deleted and restored from trash afterwards.
 
-This gives an indication about the transmission speed of smaller files and tests the performance of restoring those files from trash.
+This gives an indication about the transmission speed of smallert files and tests the performance of restoring those files from trash.
 
-### Up- and Download with New User
+### Upload and Download with New User
 
 Script: `/root/cdperf/tests/k6/test-issue-github-ocis-1018-upload-download-delete-with-new-user.js`
 
