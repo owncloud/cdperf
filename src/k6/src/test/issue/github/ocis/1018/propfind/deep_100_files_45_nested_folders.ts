@@ -12,7 +12,7 @@ const files: {
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 export const options: Options = k6.options({
     tags: {
-        test_id: 'propfind-deep',
+        test_id: 'propfind-deep-45',
         issue_url: 'github.com/owncloud/ocis/issues/1018',
     },
     ...propfindOptions({ files }),
