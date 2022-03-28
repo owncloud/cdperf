@@ -29,10 +29,18 @@ const plays = {
 };
 
 const DefaultPassword = "foobar";
-const TargetBaseVUS = 10
-const TargetMaxVUS = 100  // NOTE: this also defines the number of user accounts created
-const AccountPrefix = "user"
-const TearDownCoolDownTime = 60
+const TargetBaseVUS = 10;
+const TargetMaxVUS = 100;  // NOTE: this also defines the number of user accounts created
+const AccountPrefix = "user";
+const TearDownCoolDownTime = 60;
+const MinIterationDurationMillies = 1000;
+
+const WarmupDuration = 60; // seconds
+const RunDuration = 60; // seconds
+const RampupDuration = 120; // seconds
+const StressDuration = 120; // seconds
+const RecoverDuration = 60; // seconds
+const NormalizeDuration = 60; // seconds
 
 export function setup (): void {
   console.log("Generating ".concat(TargetMaxVUS.toString()).concat(" users"))
@@ -70,7 +78,7 @@ export function teardown (): void {
     }
   }
   console.log("done")
-} 
+}
 
 export const options = {
     setupTimeout: (TargetMaxVUS*2).toString().concat('s'),
@@ -78,17 +86,17 @@ export const options = {
     tags: {
       test_id: 'kube-cluster-loadtesting',
     },
-    discardResponseBodies: true,
-    thresholds: {
-      http_req_failed: ['rate<0.01'], // http errors should be less than 1%
-      http_req_duration: ['p(95)<200'], // 95% of requests should be below 200ms
-    },
+    //discardResponseBodies: true,
+    //thresholds: {
+    //  http_req_failed: ['rate<0.01'], // http errors should be less than 1%
+    //  http_req_duration: ['p(95)<200'], // 95% of requests should be below 200ms
+    //},
     scenarios: {
         warmup: {
           executor: 'ramping-vus',
           startVUs: 0,
           stages: [
-            { duration: '60s', target: TargetBaseVUS },
+            { duration: WarmupDuration.toString().concat("s"), target: TargetBaseVUS },
           ],
           gracefulRampDown: '0s',
           tags: { metric_tag: 'warmup'},
@@ -96,16 +104,16 @@ export const options = {
         run: {
           executor: 'constant-vus',
           vus: TargetBaseVUS,
-          startTime: '60s',
-          duration: '60s',
+          startTime: WarmupDuration.toString().concat("s"),
+          duration: RunDuration.toString().concat("s"),
           tags: { metric_tag: 'run'},
         },
         rampup: {
           executor: 'ramping-vus',
           startVUs: 0,
-          startTime: '120s',
+          startTime: (WarmupDuration + RunDuration).toString().concat("s"),
           stages: [
-            { duration: '60s', target: TargetMaxVUS },
+            { duration: RampupDuration.toString().concat("s"), target: TargetMaxVUS },
           ],
           gracefulRampDown: '0s',
           tags: { metric_tag: 'rampup'},
@@ -113,16 +121,16 @@ export const options = {
         stress: {
           executor: 'constant-vus',
           vus: TargetMaxVUS,
-          startTime: '180s',
-          duration: '60s',
+          startTime: (WarmupDuration + RunDuration + RampupDuration).toString().concat("s"),
+          duration: StressDuration.toString().concat("s"),
           tags: { metric_tag: 'stress'},
         },
         recover: {
           executor: 'ramping-vus',
-          startTime: '240s',
+          startTime: (WarmupDuration + RunDuration + RampupDuration +  StressDuration).toString().concat("s"),
           startVUs: TargetMaxVUS,
           stages: [
-            { duration: '60s', target: TargetBaseVUS },
+            { duration: RecoverDuration.toString().concat("s"), target: TargetBaseVUS },
           ],
           gracefulRampDown: '30s',
           tags: { metric_tag: 'recover'},
@@ -130,19 +138,14 @@ export const options = {
         normalize: {
           executor: 'constant-vus',
           vus: TargetBaseVUS,
-          startTime: '300s',
-          duration: '60s',
+          startTime: (WarmupDuration + RunDuration + RampupDuration +  StressDuration + RecoverDuration).toString().concat("s"),
+          duration: NormalizeDuration.toString().concat("s"),
           tags: { metric_tag: 'normalize'},
         },
       },
 };
 
 export default (): void => {
-    //const loggedInUser = {
-    //    name: adminAuthFactory.account.login,
-    //    password: adminAuthFactory.account.password,
-    //    credential: adminAuthFactory.credential,
-    //};
 
     // using modulo here, k6 counts up the VU numbers for each process run in each scenario,
     // resulting in ids > TargetMaxVUS
@@ -155,63 +158,77 @@ export default (): void => {
                     password: DefaultPassword
                   }).credential
     };
-    
-    const folders = times(50, (i) => `VU-${__VU}-ITER-${__ITER}-I-${i}`).reduce((acc: string[][], tlf, i) => {
-      acc.push([tlf, ...times(5, (i) => `D-${i + 1}`)]);
-      acc[i].forEach((_, ci) => {
-          plays.davCreate.exec({
-              credential: loggedInUser.credential,
-              path: acc[i].slice(0, ci + 1).join('/'),
-              userName: loggedInUser.name,
-          });
-      });
-      return acc;
-    }, []);
 
-    const asset = utils.buildAsset({
-        ...file,
-        name: 'dummy.zip',
+    const date = Date.now();
+
+    plays.davPropfind.exec({
+      credential: loggedInUser.credential,
+      userName: loggedInUser.name,
+      path: "", // home folder
     });
 
-    folders.forEach((g) => {
-        g.forEach((_, i) => {
-            plays.davUpload.exec({
-                asset: asset,
-                credential: loggedInUser.credential,
-                userName: loggedInUser.name,
-                path: g.slice(0, i + 1).join('/'),
-            });
-        });
-    });
 
-    folders.forEach((g) => {
-        g.forEach((_, i) => {
-            const newName = `renamed-${g.slice(g.length - i - 1, g.length - i)}`;
-            const path = g.slice(0, g.length - i).join('/');
-            const destination = [...g.slice(0, g.length - i - 1), newName].join('/');
+    let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < MinIterationDurationMillies);
 
-            plays.davMove.exec({
-                credential: loggedInUser.credential,
-                userName: loggedInUser.name,
-                path,
-                destination,
-            });
+    // const folders = times(50, (i) => `VU-${__VU}-ITER-${__ITER}-I-${i}`).reduce((acc: string[][], tlf, i) => {
+    //   acc.push([tlf, ...times(5, (i) => `D-${i + 1}`)]);
+    //   acc[i].forEach((_, ci) => {
+    //       plays.davCreate.exec({
+    //           credential: loggedInUser.credential,
+    //           path: acc[i].slice(0, ci + 1).join('/'),
+    //           userName: loggedInUser.name,
+    //       });
+    //   });
+    //   return acc;
+    // }, []);
 
-            plays.davPropfind.exec({
-                credential: loggedInUser.credential,
-                userName: loggedInUser.name,
-                path: destination,
-            });
+    // const asset = utils.buildAsset({
+    //     ...file,
+    //     name: 'dummy.zip',
+    // });
 
-            g[g.length - 1 - i] = newName;
-        });
-    });
+    // folders.forEach((g) => {
+    //     g.forEach((_, i) => {
+    //         plays.davUpload.exec({
+    //             asset: asset,
+    //             credential: loggedInUser.credential,
+    //             userName: loggedInUser.name,
+    //             path: g.slice(0, i + 1).join('/'),
+    //         });
+    //     });
+    // });
 
-    folders.forEach((g) => {
-        plays.davDelete.exec({
-            credential: loggedInUser.credential,
-            userName: loggedInUser.name,
-            path: g[0],
-        });
-    });
+    // folders.forEach((g) => {
+    //     g.forEach((_, i) => {
+    //         const newName = `renamed-${g.slice(g.length - i - 1, g.length - i)}`;
+    //         const path = g.slice(0, g.length - i).join('/');
+    //         const destination = [...g.slice(0, g.length - i - 1), newName].join('/');
+
+    //         plays.davMove.exec({
+    //             credential: loggedInUser.credential,
+    //             userName: loggedInUser.name,
+    //             path,
+    //             destination,
+    //         });
+
+    //         plays.davPropfind.exec({
+    //             credential: loggedInUser.credential,
+    //             userName: loggedInUser.name,
+    //             path: destination,
+    //         });
+
+    //         g[g.length - 1 - i] = newName;
+    //     });
+    // });
+
+    // folders.forEach((g) => {
+    //     plays.davDelete.exec({
+    //         credential: loggedInUser.credential,
+    //         userName: loggedInUser.name,
+    //         path: g[0],
+    //     });
+    // });
 }
