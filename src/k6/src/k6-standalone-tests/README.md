@@ -31,5 +31,5 @@ export CLOUD_OIDC_ENABLED=true
 export TARGET_BASE_VUS=10
 export TARGET_MAX_VUS=100
 
-k6 run test-ocis-scaling.js
+k6 run k6-standalone-tests/model-user-ramping-up-stress-test.js
 ```
