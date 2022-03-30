@@ -1,5 +1,5 @@
 .ONESHELL:
-ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+ROOT_DIR:=$(shell dirname $(readlink -f $(firstword $(MAKEFILE_LIST))))
 
 .PHONY: build
 build:
