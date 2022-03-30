@@ -20,10 +20,13 @@ const plays = {
   davPropfind: new playbook.dav.Propfind(),
 };
 
-const DefaultPassword = "foobar";
-const TargetBaseVUS = 100;
-const TargetMaxVUS = 1000;  // NOTE: this also defines the number of user accounts created
-const AccountPrefix = "user";
+
+const TargetBaseVUS = parseInt(__ENV.TARGET_BASE_VUS) || 100;
+// NOTE: this also defines the number of user accounts created
+const TargetMaxVUS = parseInt(__ENV.TARGET_MAX_VUS) || 1000;
+
+const DefaultPassword = __ENV.DEFAULT_K6_USER_PASSWORD || Math.random().toString(16).substring(2, 8);
+const AccountPrefix = "k6-user";
 const TearDownCoolDownTime = 60;
 const MinIterationDurationMillies = 5000;
 
@@ -73,11 +76,11 @@ export function teardown(): void {
 }
 
 export const options = {
+  tags: {
+    test_id: 'model-user-ramping-up-stress-test',
+  },
   setupTimeout: (TargetMaxVUS * 2).toString().concat('s'),
   teardownTimeout: (TargetMaxVUS * 2 + TearDownCoolDownTime).toString().concat('s'),
-  tags: {
-    test_id: 'kube-cluster-loadtesting', // TODO: delete me?
-  },
   scenarios: {
     warmup: {
       executor: 'ramping-vus',

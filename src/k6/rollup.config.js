@@ -17,8 +17,8 @@ const conf = {
 
 export default [
     {
-        input: ['src/test/**/*.ts', '!src/test/**/*.lib.ts', '!src/test/**/index.ts', '!src/test/**/_*.ts'],
-        external: utils.createFilter(['k6/**', ...Object.keys(pkg.devDependencies)], null, {resolve: false}),
+        input: ['src/*tests/**/*.ts', '!src/*tests/**/*.lib.ts', '!src/*tests/**/index.ts', '!src/*tests/**/_*.ts'],
+        external: utils.createFilter(['k6/**', ...Object.keys(pkg.devDependencies)], null, { resolve: false }),
         output: [
             {
                 dir: 'dist',
@@ -29,7 +29,13 @@ export default [
         ],
         plugins: [
             multiInput({
-                transformOutputPath: (output, input) => `${output.split('/').join('-').replace(/_/g, '-')}`,
+                transformOutputPath: (output, input) => {
+                let segments = input.split('/');
+                segments.shift(); // remove src
+                let testFolder = segments.shift();
+                let fileName = segments.join('-').replace(/_/g, '-');
+                return `${testFolder}/${fileName}`;
+                },
             }),
             json(),
             resolve({
