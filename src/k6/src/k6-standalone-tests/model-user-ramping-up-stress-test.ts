@@ -25,7 +25,7 @@ const TargetBaseVUS = parseInt(__ENV.TARGET_BASE_VUS) || 100;
 // NOTE: this also defines the number of user accounts created
 const TargetMaxVUS = parseInt(__ENV.TARGET_MAX_VUS) || 1000;
 
-const DefaultPassword = __ENV.DEFAULT_K6_USER_PASSWORD || Math.random().toString(16).substring(2, 8);
+const DefaultPassword = 'change-me-please';
 const AccountPrefix = "k6-user";
 const TearDownCoolDownTime = 60;
 const MinIterationDurationMillies = 5000;
