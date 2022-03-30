@@ -25,7 +25,7 @@ k6_debug=${CDPERF_K6_DEBUG:-}
 k6_csv=${CDPERF_K6_CSV:-}
 k6_json=${CDPERF_K6_JSON:-}
 k6_out=${CDPERF_K6_OUT:-}
-k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../tests/k6/test\-*.js")}
+k6_scripts=${CDPERF_K6_SCRIPTS:-$(readlink -f "$(dirname "$0")/../tests/k6/test\-*.js")}
 k6_test_host=${CDPERF_K6_TEST_HOST:-}
 k6_quiet=${CDPERF_K6_QUIET:-}
 k6_cloud_id=${CDPERF_K6_CLOUD_ID:-}
@@ -361,7 +361,7 @@ function k6_run(){
   done
 
   # run k6
-  for t in $(realpath "$k6_scripts");
+  for t in $(readlink -f "$k6_scripts");
   do
     if [[ -f $t ]]
     then
