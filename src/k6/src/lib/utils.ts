@@ -42,10 +42,12 @@ export const buildAsset = ({
     name = 'dummy.zip',
     size = 50,
     unit = 'KB',
+    generatedName = true,
 }: {
     name?: string;
     size?: number;
     unit?: types.AssetUnit;
+    generatedName?: boolean;
 }): types.Asset => {
     const gen = {
         KB: (s: number): bytes => {
@@ -62,6 +64,13 @@ export const buildAsset = ({
     const fileBaseName = name.split('/').reverse()[0];
     const fileName = fileBaseName.split('.')[0];
     const fileExtension = fileBaseName.split('.').reverse()[0] || 'zip';
+
+    if (!generatedName) {
+        return {
+            name: `${fileName}.${fileExtension}`,
+            bytes: gen[unit](size),
+        };
+    }
 
     return {
         name: `${fileName}-vu-${__VU}-iter-${__ITER}-${unit}-${size}-${randomString()}.${fileExtension}`,

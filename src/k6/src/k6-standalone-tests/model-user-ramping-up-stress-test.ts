@@ -150,41 +150,58 @@ export default (): void => {
 
   const startTime = Date.now();
 
-  plays.davCreate.exec({
+  let createResult = plays.davCreate.exec({
     credential: loggedInUser.credential,
     path: "foobar",
-    userName: loggedInUser.name
+    userName: loggedInUser.name,
+    tags: {
+      "precondition_failed": false.toString(),
+    },
   });
 
   const asset = utils.buildAsset({
     ...file,
     name: 'dummy.zip',
+    generatedName: false,
   });
 
-  plays.davUpload.exec({
+  let upResult = plays.davUpload.exec({
     asset: asset,
     credential: loggedInUser.credential,
     userName: loggedInUser.name,
-    path: "foobar/dummy.zip",
+    path: "",
+    tags: {
+      "precondition_failed": false.toString(),
+    },
   });
 
   plays.davMove.exec({
     credential: loggedInUser.credential,
     userName: loggedInUser.name,
-    path: "foobar/dummy.zip",
+    path: "dummy.zip",
     destination: "foobar/dummy-new.zip",
+    tags: {
+      "precondition_failed": (!createResult.ok || !upResult.ok).toString(),
+    },
   });
+
 
   plays.davDelete.exec({
     credential: loggedInUser.credential,
     userName: loggedInUser.name,
     path: "foobar",
+    tags: {
+      "precondition_failed": (!createResult.ok).toString(),
+    },
   });
 
   plays.davPropfind.exec({
     credential: loggedInUser.credential,
     userName: loggedInUser.name,
     path: "", // home folder
+    tags: {
+      "precondition_failed": false.toString(),
+    },
   });
 
   let currentDate = null;
