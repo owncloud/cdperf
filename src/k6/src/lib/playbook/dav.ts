@@ -153,15 +153,17 @@ export class Propfind extends Play {
         userName,
         path,
         tags,
+        body,
     }: {
         credential: types.Credential;
         path?: string;
         userName: string;
         tags?: types.Tags;
+        body?: string;
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.dav.Propfind.exec({ credential: credential, userName, tags, path });
+        const response = api.dav.Propfind.exec({ credential: credential, userName, tags, path, body });
 
         check(
             response,

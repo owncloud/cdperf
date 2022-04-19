@@ -97,17 +97,20 @@ export class Propfind {
         userName,
         path = '',
         tags,
+        body = '',
     }: {
         credential: types.Credential;
         userName: string;
         path?: string;
         tags?: types.Tags;
+        body?: string;
     }): RefinedResponse<ResponseType> {
         return api.request({
             method: 'PROPFIND',
             credential,
             path: `/remote.php/dav/files/${userName}/${path}`,
             params: { tags },
+            body,
         });
     }
 }

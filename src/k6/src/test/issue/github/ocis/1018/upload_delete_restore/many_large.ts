@@ -18,6 +18,7 @@ const files: {
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
     davUpload: new playbook.dav.Upload(),
+    davPropfind: new playbook.dav.Propfind(),
     davDelete: new playbook.dav.Delete(),
     davRestore: new playbook.dav.Restore(),
 };

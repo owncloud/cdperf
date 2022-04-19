@@ -1,4 +1,3 @@
-import { b64decode } from 'k6/encoding';
 import { Options, Threshold } from 'k6/options';
 
 import { playbook, types, utils } from '../../../../../../lib';
@@ -10,6 +9,7 @@ interface File {
 
 interface Plays {
     davUpload: playbook.dav.Upload;
+    davPropfind: playbook.dav.Propfind;
     davDelete: playbook.dav.Delete;
     davRestore: playbook.dav.Restore;
 }
@@ -18,6 +18,7 @@ export const options = ({ files, plays }: { files: File[]; plays: Plays }): Opti
     return {
         thresholds: files.reduce((acc: { [name: string]: Threshold[] }, c) => {
             acc[`${plays.davUpload.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
+            acc[`${plays.davPropfind.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
             acc[`${plays.davDelete.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
             acc[`${plays.davRestore.metricTrendName}{asset:${c.unit + c.size.toString()}}`] = [];
             return acc;
@@ -47,16 +48,24 @@ export default ({
             size: f.size,
         });
 
-        const output = plays.davUpload.exec({
+        plays.davUpload.exec({
             credential,
             asset,
             userName: account.login,
             tags: { asset: id },
         });
 
-        const base64Fileid = output.response.headers['Oc-Fileid'];
-        const fileid = b64decode(base64Fileid, 'std', 's').split(':')[1];
+        const propfindOutput = plays.davPropfind.exec({
+            credential,
+            userName: account.login,
+            tags: { asset: id },
+            path: asset.name,
+            body:
+                '<?xml version="1.0"?><d:propfind  xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:prop><oc:fileid /></d:prop></d:propfind>',
+        });
 
+        const fileid = utils.parseXML(propfindOutput.response.body).getElementsByTagName('oc:fileid')[0].childNodes[0]
+            .textContent as string;
         filesUploaded.push({ id, name: asset.name, fileid: fileid });
     });
 
