@@ -368,7 +368,7 @@ function k6_run(){
       if [[ $k6_docker == true ]]
       then
         # shellcheck disable=SC2068
-        docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        docker run -it ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
       else
         # shellcheck disable=SC2068
         k6 run ${k6_params[@]} "$t"
