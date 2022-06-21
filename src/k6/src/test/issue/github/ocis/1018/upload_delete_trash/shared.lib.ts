@@ -64,8 +64,12 @@ export default ({
                 '<?xml version="1.0"?><d:propfind  xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns"><d:prop><oc:fileid /></d:prop></d:propfind>',
         });
 
-        const fileid = utils.parseXML(propfindOutput.response.body).getElementsByTagName('oc:fileid')[0].childNodes[0]
-            .textContent as string;
+        const fileid = utils
+            .parseXML(propfindOutput.response.body)
+            .getElementsByTagName('oc:fileid')[0]
+            .childNodes[0].textContent!.split('!')
+            .pop()!;
+
         filesUploaded.push({ id, name: asset.name, fileid: fileid });
     });
 
