@@ -18,6 +18,7 @@ cloud_oidc_issuer=${CDPERF_CLOUD_OIDC_ISSUER:-}
 cloud_vendor=${CDPERF_CLOUD_VENDOR:-"ocis"}
 
 k6_docker=${CDPERF_K6_DOCKER:-"true"}
+k6_docker_interactive=${CDPERF_K6_DOCKER_INTERACTIVE:-"false"}
 k6_vus=${CDPERF_K6_VUS:-"3"}
 k6_iterations=${CDPERF_K6_ITERATIONS:-"3"}
 k6_duration=${CDPERF_K6_DURATION:-"1h0m0s"}
@@ -80,6 +81,11 @@ usage(){
   echo "                                  Supported values: ( true | false )"
   echo "                                  Default: true"
   echo "                                  ENV: CDPERF_K6_DOCKER"
+  echo "                                  --"
+  echo " --k6-docker-interactive          Use docker interactive mode to run k6"
+  echo "                                  Supported values: ( true | false )"
+  echo "                                  Default: false"
+  echo "                                  ENV: CDPERF_K6_DOCKER_INTERACTIVE"
   echo "                                  --"
   echo " --k6-vus                         K6 number of virtual users"
   echo "                                  Default: 3"
@@ -189,6 +195,10 @@ while test $# -gt 0; do
             k6_docker="${1#*=}"
             shift
             ;;
+        --k6-docker-interactive=*)
+            k6_docker_interactive="${1#*=}"
+            shift
+            ;;
         --k6-vus=*)
             k6_vus="${1#*=}"
             shift
@@ -273,13 +283,20 @@ done
 [[ ! $k6_test_host ]] && echo "Error: k6_test_host not set. --cloud-host=https://host.docker.internal:9200" && exit 1
 
 cloud_docker_env=()
+cloud_docker_volumes=()
+cloud_docker_setup_script=""
+cloud_docker_teardown_script=""
 
 if [[ $cloud_vendor == "ocis" ]]
 then
   [[ ! $cloud_docker_image ]] && cloud_docker_image="owncloud/ocis"
   [[ ! $cloud_docker_publish ]] && cloud_docker_publish="9200:9200"
   [[ $cloud_oidc != true ]] && cloud_docker_env+=("PROXY_ENABLE_BASIC_AUTH=true")
+  config_volume_name="ocis-config-k6"
   cloud_docker_env+=("OCIS_INSECURE=true")
+  cloud_docker_volumes+=("$config_volume_name:/etc/ocis")
+  cloud_docker_setup_script="docker run -e IDM_ADMIN_PASSWORD=admin --rm -it -v $config_volume_name:/etc/ocis owncloud/ocis init --insecure true"
+  cloud_docker_teardown_script="docker volume rm $config_volume_name"
 elif [[ $cloud_vendor == "oc10" ]]
 then
   [[ ! $cloud_docker_image ]] && cloud_docker_image="owncloud/server"
@@ -312,6 +329,10 @@ function cloud_stop() {
   # stop old container
   cloud_container=$(docker ps -q --filter ancestor=$cloud_docker_image)
   [[ $cloud_container ]] && docker stop "$cloud_container"
+  if [ -n "$cloud_docker_teardown_script" ]
+  then
+    $cloud_docker_teardown_script
+  fi
 }
 
 function cloud_start() {
@@ -322,9 +343,18 @@ function cloud_start() {
   do
     cloud_docker_env[$i]="--env ${cloud_docker_env[$i]}"
   done
+
+    for i in "${!cloud_docker_volumes[@]}"
+    do
+      cloud_docker_volumes[$i]="-v ${cloud_docker_volumes[$i]}"
+    done
   # start new container
   # shellcheck disable=SC2068
-  docker run ${cloud_docker_env[@]} --rm --detach --pull always --publish $cloud_docker_publish $cloud_docker_image
+  if [ -n "$cloud_docker_setup_script" ]
+  then
+    $cloud_docker_setup_script
+  fi
+  docker run ${cloud_docker_env[@]} --rm --detach --pull always ${cloud_docker_volumes[@]} --publish $cloud_docker_publish $cloud_docker_image
 }
 
 function k6_run(){
@@ -368,7 +398,12 @@ function k6_run(){
       if [[ $k6_docker == true ]]
       then
         # shellcheck disable=SC2068
-        docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        if [[ $k6_docker_interactive == false ]]
+        then
+          docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        else
+          docker run -it ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        fi
       else
         # shellcheck disable=SC2068
         k6 run ${k6_params[@]} "$t"
