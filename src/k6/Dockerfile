@@ -16,9 +16,6 @@ RUN yarn build
 
 FROM alpine:3
 
-COPY --from=node /k6/dist /scripts
-COPY --from=k6 /go/k6 /usr/bin/k6
-
 LABEL maintainer="ownCloud GmbH <devops@owncloud.com>" \
   org.label-schema.name="ownCloud measure" \
   org.label-schema.vendor="ownCloud GmbH" \
@@ -36,3 +33,7 @@ RUN chmod +x /usr/bin/entrypoint
 WORKDIR /scripts
 
 ENTRYPOINT ["entrypoint"]
+
+COPY --from=k6 /go/k6 /usr/bin/k6
+
+COPY --from=node /k6/dist /scripts

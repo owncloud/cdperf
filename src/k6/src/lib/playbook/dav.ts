@@ -22,22 +22,23 @@ export class Upload extends Play {
         userName: string;
         asset: types.Asset;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Upload.exec({ credential: credential, asset, userName, tags, path });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav upload status is 201': () => response.status === 201,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -56,22 +57,23 @@ export class Delete extends Play {
         path: string;
         userName: string;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Delete.exec({ credential: credential, userName, tags, path });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav delete status is 204': () => response.status === 204,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -90,22 +92,23 @@ export class Download extends Play {
         path: string;
         userName: string;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Download.exec({ credential: credential, userName, tags, path });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav download status is 200': () => response.status === 200,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -124,22 +127,24 @@ export class Create extends Play {
         path: string;
         userName: string;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Create.exec({ credential: credential, userName, tags, path });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav create status is 201': () => response.status === 201,
+                'dav create status is 204': () => response.status === 204,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -160,22 +165,23 @@ export class Propfind extends Play {
         userName: string;
         tags?: types.Tags;
         body?: string;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Propfind.exec({ credential: credential, userName, tags, path, body });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav propfind status is 207': () => response.status === 207,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -196,22 +202,23 @@ export class Move extends Play {
         destination: string;
         userName: string;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Move.exec({ credential, userName, tags, path, destination });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav move status is 201': () => response.status === 201,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -230,22 +237,23 @@ export class Trash extends Play {
         fileid?: string;
         userName: string;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Trash.exec({ credential: credential, userName, tags, fileid });
 
-        check(
+        let ok = check(
             response,
             {
                 'dav trash delete status is 204': () => response.status === 204,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
 
@@ -266,20 +274,22 @@ export class Restore extends Play {
         path?: string;
         userName: string;
         tags?: types.Tags;
-    }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
+    }): { response: RefinedResponse<ResponseType>; tags: types.Tags; ok: boolean } {
         tags = { ...this.tags, ...tags };
 
         const response = api.dav.Restore.exec({ credential: credential, userName, tags, fileid, path });
-        check(
+
+        let ok = check(
             response,
             {
                 'dav trash restore status is 201': () => response.status === 201,
             },
             tags,
-        ) || this.metricErrorRate.add(1, tags);
+        );
+        ok || this.metricErrorRate.add(1, tags);
 
         this.metricTrend.add(response.timings.duration, tags);
 
-        return { response, tags };
+        return { response, tags, ok };
     }
 }
