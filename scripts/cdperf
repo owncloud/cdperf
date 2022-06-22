@@ -26,7 +26,7 @@ k6_debug=${CDPERF_K6_DEBUG:-}
 k6_csv=${CDPERF_K6_CSV:-}
 k6_json=${CDPERF_K6_JSON:-}
 k6_out=${CDPERF_K6_OUT:-}
-k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../tests/k6/tests/test\-*.js")}
+k6_scripts=${CDPERF_K6_SCRIPTS:-$(realpath "$(dirname "$0")/../tests/cdperf/*.js")}
 k6_test_host=${CDPERF_K6_TEST_HOST:-}
 k6_quiet=${CDPERF_K6_QUIET:-}
 k6_cloud_id=${CDPERF_K6_CLOUD_ID:-}
@@ -107,7 +107,7 @@ usage(){
   echo "                                  ENV: CDPERF_K6_OUT"
   echo "                                  --"
   echo " --k6-scripts                     K6 scripts to run"
-  echo "                                  Default: ./tests/k6/test\-*.js"
+  echo "                                  Default: ./tests/cdperf/*.js"
   echo "                                  ENV: CDPERF_K6_SCRIPTS"
   echo "                                  --"
   echo " --k6-test-host                   Host of the cloud"
@@ -400,9 +400,9 @@ function k6_run(){
         # shellcheck disable=SC2068
         if [[ $k6_docker_interactive == false ]]
         then
-          docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+          docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "cdperf/$(basename "$t")"
         else
-          docker run -it ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+          docker run -it ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "cdperf/$(basename "$t")"
         fi
       else
         # shellcheck disable=SC2068
