@@ -295,7 +295,7 @@ then
   config_volume_name="ocis-config-k6"
   cloud_docker_env+=("OCIS_INSECURE=true")
   cloud_docker_volumes+=("$config_volume_name:/etc/ocis")
-  cloud_docker_setup_script="docker run -e IDM_ADMIN_PASSWORD=admin --rm -it -v $config_volume_name:/etc/ocis owncloud/ocis init --insecure true"
+  cloud_docker_setup_script="docker run -e IDM_ADMIN_PASSWORD=admin --rm -v $config_volume_name:/etc/ocis owncloud/ocis init --insecure true"
   cloud_docker_teardown_script="docker volume rm $config_volume_name"
 elif [[ $cloud_vendor == "oc10" ]]
 then
