@@ -15,7 +15,7 @@ export class MeLegacyAPI implements MeAPI {
     this.baseURL = baseURL;
   }
 
-  driveInfo(fallback: JSONValue, _: Credential): JSONValue {
+  driveInfo(fallback: JSONValue, _credential: Credential): JSONValue {
     return fallback;
   }
 }

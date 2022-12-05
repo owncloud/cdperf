@@ -12,6 +12,7 @@ export interface User {
 
 export interface UserAPI {
   get(account: Account, adapter: Adapter): User;
+  enable(account: Account, credential: Credential): void;
   create(account: Account, credential: Credential, adapter: Adapter): User;
   delete(id: string, credential: Credential): void;
 }
@@ -33,6 +34,26 @@ export class UserLegacyAPI implements UserAPI {
     };
   }
 
+  enable(account: Account, credential: Credential): void {
+    const enableResponse = http.request(
+      'PUT',
+      `${this.baseURL}/ocs/v1.php/cloud/users/${account.login}/enable`,
+      undefined,
+      buildParams(
+        {
+          headers: {
+            'OCS-APIRequest': 'true',
+          },
+        },
+        { credential },
+      ),
+    );
+
+    check(enableResponse, {
+      'user enable': (r) => r.status === 200,
+    });
+  }
+
   create(account: Account, credential: Credential, adapter: Adapter) {
     const createResponse = http.request(
       'POST',
@@ -51,6 +72,8 @@ export class UserLegacyAPI implements UserAPI {
     check(createResponse, {
       'user create': (r) => r.status === 200,
     });
+
+    this.enable(account, credential);
 
     return this.get(account, adapter);
   }
@@ -108,5 +131,9 @@ export class UserLatestAPI extends UserLegacyAPI implements UserAPI {
     check(deleteResponse, {
       'user delete': ({ status }) => status === 204,
     });
+  }
+
+  enable(_account: Account, _credential: Credential): void {
+    /* not needed in current ocis */
   }
 }
