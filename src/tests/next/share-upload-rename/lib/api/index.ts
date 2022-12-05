@@ -3,7 +3,7 @@ import { MeAPI, MeLatestAPI, MeLegacyAPI } from './me';
 import { ShareAPI } from './share';
 import { UserAPI, UserLatestAPI, UserLegacyAPI } from './user';
 
-export { User } from './User';
+export { User } from './user';
 
 export const Version = {
   latest: 'latest',
