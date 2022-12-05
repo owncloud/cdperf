@@ -37,8 +37,8 @@ const settings: Settings = {
   apiVersion: __ENV.API_VERSION == Version.legacy ? Version.legacy : Version.latest,
   testFolder: 'test-folder',
   adminUser: {
-    login: 'admin',
-    password: 'admin',
+    login: __ENV.ADMIN_LOGIN || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
     size: 1,
