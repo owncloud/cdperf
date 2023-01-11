@@ -1,11 +1,10 @@
 ## Description
 The `share upload rename default` test mimics a typical end user resource sharing scenario.
 
-the admin user shares a parent folder with each of his colleagues, who in turn create a folder
+The admin user shares a parent folder with each of his colleagues, who in turn create a folder
 in the received share per iteration and upload a fixed number of files.
 To finish, the folder in which the files are located is renamed by each user.
 
-### In detail the steps are
 * `admin` creates `N` users.
   * `N` can be set by using the k6 `--vus` option.
   * by default, it set to 5.
