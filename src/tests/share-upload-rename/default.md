@@ -15,7 +15,7 @@ To finish, the folder in which the files are located is renamed by each user.
 * each `user` uploads `10` files with a size of `1mb` each into this folder.
 * each `user` renames the folder `$ITERATION-initial-$USERNAME` to `$ITERATION-final-$USERNAME`.
 * `admin` deletes the `share-upload-rename-default` folder.
-* `admin` deletes every user.
+* `admin` deletes the created users.
 
 the test runs `N` times for each user, for example if you define `--vus 2` and `--iterations 5`
 the testing steps as a whole will run 10 times (5 times per user).
