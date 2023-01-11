@@ -65,9 +65,6 @@ export class OpenIDConnect {
         },
       },
     );
-    console.log('###');
-    console.log(logonResponse);
-    console.log('###');
     const continueURI = get(logonResponse.json(), 'hello.continue_uri');
     if (logonResponse.status !== 200 || !continueURI) {
       fail(this.#logonURL);

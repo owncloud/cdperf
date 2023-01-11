@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { URLSearchParams } from 'https://jslib.k6.io/url/1.0.0/index.js';
 import { RefinedResponseBody, ResponseType } from 'k6/http';
 import { DOMParser } from 'xmldom';
 
