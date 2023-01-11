@@ -54,11 +54,7 @@ const settings: Settings = {
 const api = new API(settings.baseURL, settings.apiVersion);
 /**/
 
-export const options: Options = {
-  vus: 5,
-  iterations: 50,
-  insecureSkipTLSVerify: true,
-};
+export const options: Options = settings.k6;
 
 export function setup(): Data {
   const { user: admin } = api.user.get(
