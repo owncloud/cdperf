@@ -2,6 +2,7 @@ import { check } from 'k6';
 import http from 'k6/http';
 
 import { Account, Adapter, Auth, Credential } from '../auth';
+import { Result } from './api';
 import { buildParams } from './utils';
 
 export interface User {
@@ -10,11 +11,16 @@ export interface User {
   credential: Credential;
 }
 
+interface CreateResult {
+  user: User;
+  createResponse: Result['response'];
+  enableResponse?: Result['response'];
+}
+
 export interface UserAPI {
-  get(account: Account, adapter: Adapter): User;
-  enable(account: Account, credential: Credential): void;
-  create(account: Account, credential: Credential, adapter: Adapter): User;
-  delete(id: string, credential: Credential): void;
+  get(account: Account, adapter: Adapter): { user: User };
+  create(account: Account, credential: Credential, adapter: Adapter): CreateResult;
+  delete(id: string, credential: Credential): Result;
 }
 
 export class UserLegacyAPI implements UserAPI {
@@ -24,17 +30,19 @@ export class UserLegacyAPI implements UserAPI {
     this.baseURL = baseURL;
   }
 
-  get(account: Account, adapter: Adapter): User {
+  get(account: Account, adapter: Adapter): { user: User } {
     const { credential } = new Auth({ login: account.login, password: account.password }, adapter, this.baseURL);
 
     return {
-      login: account.login,
-      password: account.password,
-      credential,
+      user: {
+        login: account.login,
+        password: account.password,
+        credential,
+      },
     };
   }
 
-  enable(account: Account, credential: Credential): void {
+  enable(account: Account, credential: Credential): Result {
     const enableResponse = http.request(
       'PUT',
       `${this.baseURL}/ocs/v1.php/cloud/users/${account.login}/enable`,
@@ -52,9 +60,13 @@ export class UserLegacyAPI implements UserAPI {
     check(enableResponse, {
       'user enable': (r) => r.status === 200,
     });
+
+    return {
+      response: enableResponse,
+    };
   }
 
-  create(account: Account, credential: Credential, adapter: Adapter) {
+  create(account: Account, credential: Credential, adapter: Adapter): CreateResult {
     const createResponse = http.request(
       'POST',
       `${this.baseURL}/ocs/v1.php/cloud/users`,
@@ -73,12 +85,17 @@ export class UserLegacyAPI implements UserAPI {
       'user create': (r) => r.status === 200,
     });
 
-    this.enable(account, credential);
+    const { response: enableResponse } = this.enable(account, credential);
+    const { user } = this.get(account, adapter);
 
-    return this.get(account, adapter);
+    return {
+      enableResponse,
+      user,
+      createResponse,
+    };
   }
 
-  delete(id: string, credential: Credential): void {
+  delete(id: string, credential: Credential): Result {
     const deleteResponse = http.request(
       'DELETE',
       `${this.baseURL}/ocs/v1.php/cloud/users/${id}`,
@@ -96,11 +113,15 @@ export class UserLegacyAPI implements UserAPI {
     check(deleteResponse, {
       'user delete': ({ status }) => status === 200,
     });
+
+    return {
+      response: deleteResponse,
+    };
   }
 }
 
 export class UserLatestAPI extends UserLegacyAPI implements UserAPI {
-  create(account: Account, credential: Credential, adapter: Adapter) {
+  create(account: Account, credential: Credential, adapter: Adapter): CreateResult {
     const createResponse = http.request(
       'POST',
       `${this.baseURL}/graph/v1.0/users`,
@@ -117,10 +138,15 @@ export class UserLatestAPI extends UserLegacyAPI implements UserAPI {
       'user create': (r) => r.status === 200,
     });
 
-    return this.get(account, adapter);
+    const { user } = this.get(account, adapter);
+
+    return {
+      user,
+      createResponse,
+    };
   }
 
-  delete(id: string, credential: Credential): void {
+  delete(id: string, credential: Credential): Result {
     const deleteResponse = http.request(
       'DELETE',
       `${this.baseURL}/graph/v1.0/users/${id}`,
@@ -131,9 +157,9 @@ export class UserLatestAPI extends UserLegacyAPI implements UserAPI {
     check(deleteResponse, {
       'user delete': ({ status }) => status === 204,
     });
-  }
 
-  enable(_account: Account, _credential: Credential): void {
-    /* not needed in current ocis */
+    return {
+      response: deleteResponse,
+    };
   }
 }

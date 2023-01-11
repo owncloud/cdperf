@@ -11,36 +11,8 @@ Supported clouds are:
 *  [Docker](https://docs.docker.com/)
 
 ## Usage
-To see available options run ./scripts/cdperf --help
-
-```shell
-$ # build via docker
-$ make clean build
-$
-$ # alternatively, build locally (requires node + yarn installed)
-$ make local
-$
-$ # all available options
-$ ./scripts/cdperf --help
-$
-$ # test with docker ocis and k6
-$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
-$
-$ # test with local ocis and docker k6
-$ ./scripts/cdperf --cloud-docker=false --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200
-$
-$ # test with docker ocis and local k6
-$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://localhost:9200 --k6-docker=false
-$
-$ # export test results to influxdb v1
-$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=influxdb=http://admin:admin@host.docker.internal:8086/k6
-$
-$ # export test results to influxdb v2
-$ ./scripts/cdperf --cloud-vendor=ocis --k6-test-host=https://host.docker.internal:9200 --k6-out=xk6-influxdb=http://host.docker.internal:8086 --k6-influxdb-token="superlongadmintoken"
-$
-$ # with cloud on remote docker host
-$ ./scripts/cdperf --cloud-docker-host=ssh://user@your-host --cloud-vendor=ocis --k6-test-host=https://your-host:9200
-```
+cdPerf is just a collection of prepared scripts which can used with k6 as described
+[here](https://k6.io/docs/get-started/running-k6/).
 
 ## How to test
 It's important to know how to compare the tests against each other and what those numbers mean.
@@ -61,24 +33,20 @@ We collect those metrics over time to get indicators of how the performance chan
 
 **How to read the test results**
 
-Let's use 'test-issue-github-ocis-1018-propfind-flat.js' as an example.
 * Total time of execution
     * This is the total elapsed time of the test for all users and iterations
 * status
     * Red || Green is a quick overview of how many requests failed or not
-* cloud_default_play_$PLAYNAME$_$OPERATION$_$TYPE$
-    * PLAYNAME: name of the play, for example dav, users, ...
-    * OPERATION: type of operation, for example create, delete, update, ...
-    * TYPE: type of operation, for example trend (min, max, avg, ...) or error (count)
 
-Only those numbers should be considered for comparison.
-Don't forget to only compare same tests with same requirements.
+for a more detailed instruction how to read the results you should consider reading the k6 manual,
+specially the [end of test](https://k6.io/docs/results-output/end-of-test/) section.
 
 ## Details
-
 Read more about [considerations](docs/considerations.md) of performance measurement.
+A precise description of what a test does and what the requirements are can be found in the respective test folder.
 
-Detailed descriptions about all tests are [available here](docs/tests.md).
+## Available tests
+* [share-upload-rename](src/tests/share-upload-rename/default.md)
 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
@@ -95,5 +63,5 @@ Apache-2.0
 
 ## Copyright
 ```console
-Copyright (c) 2022 ownCloud GmbH <https://owncloud.com>
+Copyright (c) 2023 ownCloud GmbH <https://owncloud.com>
 ```

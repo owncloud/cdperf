@@ -3,9 +3,9 @@ import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-import { randomString } from '../../../lib/utils';
-import { API, Version } from './lib/api';
-import { Account, Adapter } from './lib/auth';
+import { API, Version } from '../../lib/api';
+import { Account, Adapter } from '../../lib/auth';
+import { randomString } from '../../lib/utils';
 
 interface UserInfo {
   home: string;
@@ -35,13 +35,13 @@ const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
   authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
   apiVersion: __ENV.API_VERSION == Version.legacy ? Version.legacy : Version.latest,
-  testFolder: 'test-folder',
+  testFolder: 'share-upload-rename-default',
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
     password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
-    size: 1,
+    size: 1024,
     quantity: 10,
   },
   k6: {
@@ -61,7 +61,7 @@ export const options: Options = {
 };
 
 export function setup(): Data {
-  const admin = api.user.get(
+  const { user: admin } = api.user.get(
     { login: settings.adminUser.login, password: settings.adminUser.password },
     settings.authAdapter,
   );
@@ -76,7 +76,7 @@ export function setup(): Data {
   api.dav.create(adminInfo.home, settings.testFolder, admin.credential);
 
   const userInfos = times(options.vus || 1, () => {
-    const user = api.user.create(
+    const { user } = api.user.create(
       { login: randomString(), password: randomString() },
       admin.credential,
       settings.authAdapter,
@@ -102,7 +102,7 @@ export function setup(): Data {
 
 export default function ({ userInfos }: Data): void {
   const userInfo = userInfos[exec.vu.idInTest - 1];
-  const user = api.user.get(userInfo, settings.authAdapter);
+  const { user } = api.user.get(userInfo, settings.authAdapter);
   const folderNameInitial = [exec.scenario.iterationInTest, 'initial', user.login].join('-');
   api.dav.create(userInfo.home, folderNameInitial, user.credential);
 
@@ -116,7 +116,7 @@ export default function ({ userInfos }: Data): void {
 }
 
 export function teardown({ adminInfo, userInfos }: Data): void {
-  const admin = api.user.get(adminInfo, settings.authAdapter);
+  const { user: admin } = api.user.get(adminInfo, settings.authAdapter);
   api.dav.delete(adminInfo.home, settings.testFolder, admin.credential);
   userInfos.forEach((info) => api.user.delete(info.login, admin.credential));
 }

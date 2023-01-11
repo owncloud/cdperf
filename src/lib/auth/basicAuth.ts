@@ -1,4 +1,4 @@
-import { Account } from './adapter';
+import { Account } from './auth';
 
 export class BasicAuthAdapter {
   readonly #account: Account;

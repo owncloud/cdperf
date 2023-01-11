@@ -17,17 +17,11 @@ const conf = {
 
 export default [
   {
-    input: [
-      'src/tests/**/*.ts',
-      '!src/tests/**/*.lib.ts',
-      '!src/tests/**/index.ts',
-      '!src/tests/**/_*.ts',
-      '!src/tests/**/lib/*.ts',
-    ],
+    input: ['src/tests/*/*.ts'],
     external: utils.createFilter(['k6/**', ...Object.keys(pkg.devDependencies)], null, { resolve: false }),
     output: [
       {
-        dir: 'tests',
+        dir: 'run',
         format: 'cjs',
         exports: 'named',
         chunkFileNames: env.production ? '_chunks/[name]-[hash].js' : '_chunks/[name].js',
@@ -37,7 +31,7 @@ export default [
       multiInput({
         transformOutputPath: (output, input) => {
           const [, , target, ...script] = input.split('/');
-          return `${target}/${script.join('-').replace(/_/g, '-')}`;
+          return `${target}-${script.join('-').replace(/_/g, '-')}`;
         },
       }),
       json(),

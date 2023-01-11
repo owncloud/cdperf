@@ -1,8 +1,8 @@
-import { Account, Adapter, Credential } from './adapter';
+import { Account, Adapter, Credential } from './auth';
 import { BasicAuthAdapter } from './basicAuth';
 import { OpenIDConnect } from './openIDConnect';
 
-export { Account, Adapter, Credential, Token } from './adapter';
+export { Account, Adapter, Credential, Token } from './auth';
 
 export class Auth {
   #adapter: { credential: Credential };

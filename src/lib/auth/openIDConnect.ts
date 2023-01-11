@@ -2,8 +2,8 @@ import { fail } from 'k6';
 import http from 'k6/http';
 import { get } from 'lodash';
 
-import * as utils from '../../../../../lib/utils';
-import { Account, Token } from './adapter';
+import { objectToQueryString, queryStringToObject } from '../utils';
+import { Account, Token } from './auth';
 
 export class OpenIDConnect {
   #account: Account;
@@ -55,7 +55,7 @@ export class OpenIDConnect {
           redirect_uri: this.#redirectURL,
           flow: 'oidc',
         },
-        state: 'vp42cf',
+        state: '22db4af49efce268',
       }),
       {
         headers: {
@@ -65,8 +65,10 @@ export class OpenIDConnect {
         },
       },
     );
+    console.log('###');
+    console.log(logonResponse);
+    console.log('###');
     const continueURI = get(logonResponse.json(), 'hello.continue_uri');
-
     if (logonResponse.status !== 200 || !continueURI) {
       fail(this.#logonURL);
     }
@@ -75,7 +77,7 @@ export class OpenIDConnect {
   }
 
   private getCode(continueURI: string): string {
-    const authorizeUri = `${continueURI}?${utils.objectToQueryString({
+    const authorizeUri = `${continueURI}?${objectToQueryString({
       client_id: 'web',
       prompt: 'none',
       redirect_uri: this.#redirectURL,
@@ -87,7 +89,7 @@ export class OpenIDConnect {
       redirects: 0,
     });
 
-    const code = get(utils.queryStringToObject(authorizeResponse.headers.Location), 'code');
+    const code = get(queryStringToObject(authorizeResponse.headers.Location), 'code');
     if (authorizeResponse.status !== 302 || !code) {
       fail(continueURI);
     }

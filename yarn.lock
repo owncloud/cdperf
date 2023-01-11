@@ -949,10 +949,10 @@
   resolved "https://registry.yarnpkg.com/@types/json5/-/json5-0.0.29.tgz#ee28707ae94e11d2b827bcbe5270bcea7f3e71ee"
   integrity sha1-7ihweulOEdK4J7y+UnC86n8+ce4=
 
-"@types/k6@^0.41.0":
-  version "0.41.0"
-  resolved "https://registry.yarnpkg.com/@types/k6/-/k6-0.41.0.tgz#de023a75eadf33b87f50a9261f40bd7eb5736e50"
-  integrity sha512-Zvu9Hhu2Q8CYHFQi3P0whFnK9UnO8apJxRimhAMxbEeAVjCgyWGWb0vgJqy0cxGmmy2yJ2Ee3JhfHZC645o7fA==
+"@types/k6@^0.42.0":
+  version "0.42.0"
+  resolved "https://registry.yarnpkg.com/@types/k6/-/k6-0.42.0.tgz#4e670579f8becd2032838d8760dd90914093d60f"
+  integrity sha512-btIVh1X3aC3iiYHL3J6vnWx65tFhTZyA6c3RjsizlVRAk80a83mL9ybwClUpxo/gl8C7nii1NGMGmmN7yH5doQ==
 
 "@types/lodash@^4.14.165":
   version "4.14.168"
