@@ -2,7 +2,7 @@
 The `share upload rename default` test mimics a typical end user resource sharing scenario.
 
 The admin user shares a parent folder with each of his colleagues, who in turn create a folder
-in the received share per iteration and upload a fixed number of files.
+in the received share per iteration and user then uploads a fixed number of files.
 To finish, the folder in which the files are located is renamed by each user.
 
 * `admin` creates `N` users.
