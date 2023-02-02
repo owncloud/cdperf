@@ -1,4 +1,4 @@
-import { check } from 'k6';
+import { check, fail } from 'k6';
 import http from 'k6/http';
 
 import { Credential } from '../auth';
@@ -34,9 +34,16 @@ export class ShareAPI {
     check(createResponse, {
       'share create': ({ status }) => status === 200,
     });
+    if (
+      check(createResponse, {
+        'share create': ({ status }) => status === 401,
+      })
+    ) {
+      fail('Authentication failed');
+    };
 
     return {
-      id: parseXML(createResponse.body).getElementsByTagName('id')[0].childNodes[0].textContent!,
+      id: parseXML(createResponse.body).getElementsByTagName('id')[0]?.childNodes[0].textContent!,
       response: createResponse,
     };
   }
