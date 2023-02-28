@@ -4,6 +4,7 @@ import { RefinedResponse, ResponseType } from 'k6/http';
 import * as api from '../api';
 import * as types from '../types';
 import { Play } from './playbook';
+import * as cdperfDefaults from '../defaults';
 
 export class Create extends Play {
     constructor({ name, metricID = 'default' }: { name?: string; metricID?: string } = {}) {
@@ -25,7 +26,7 @@ export class Create extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.users.Create.exec({ credential: credential, userName, password, tags, email });
+        const response = cdperfDefaults.ENV.CLOUD_VENDOR === 'ocis' ? api.usersGraph.Create.exec({ credential: credential, userName, password, tags, email }) : api.users.Create.exec({ credential: credential, userName, password, tags, email })
 
         check(
             response,
@@ -57,7 +58,7 @@ export class Delete extends Play {
     }): { response: RefinedResponse<ResponseType>; tags: types.Tags } {
         tags = { ...this.tags, ...tags };
 
-        const response = api.users.Delete.exec({ credential: credential, userName, tags });
+        const response = cdperfDefaults.ENV.CLOUD_VENDOR === 'ocis' ? api.usersGraph.Delete.exec({ credential: credential, userName, tags }) : api.users.Delete.exec({ credential: credential, userName, tags });
 
         check(
             response,
