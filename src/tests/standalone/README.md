@@ -13,6 +13,8 @@ The test lets you define two values: - `TARGET_BASE_VUS`: the number of regular 
 
 ### How to run
 
+#### using cdper-k6 in the container
+
 On your machine:
 
 ```shell
@@ -30,4 +32,26 @@ export TARGET_BASE_VUS=10
 export TARGET_MAX_VUS=100
 
 k6 run k6-standalone-tests/model-user-ramping-up-stress-test.js
+```
+
+#### using k6 localy
+
+install k6 on your machine: https://k6.io/docs/get-started/installation/
+
+start the command:
+
+```shell
+make local
+```
+
+run the stress test: 
+
+```shell
+export CLOUD_OIDC_ENABLED=true
+export CLOUD_HOST=https://localhost:9200
+export CLOUD_LOGIN=admin
+export CLOUD_PASSWORD=admin
+export CLOUD_VENDOR=ocis
+
+k6 run --insecure-skip-tls-verify tests/standalone/model-user-ramping-up-stress-test.js
 ```

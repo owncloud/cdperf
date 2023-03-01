@@ -2,6 +2,8 @@ import { sleep } from 'k6';
 
 import { auth, defaults, playbook, types, utils } from '../../lib';
 import { Create, Delete } from '../../lib/api/users';
+import { Create as CreateGraph, Delete as DeleteGraph } from '../../lib/api/usersGraph';
+import * as cdperfDefaults from '../../lib/defaults';
 
 const file: {
     size: number;
@@ -39,12 +41,20 @@ const NormalizeDuration = 60; // seconds
 export function setup(): void {
     console.log('Generating '.concat(TargetMaxVUS.toString()).concat(' users'));
     for (let i = 0; i < TargetMaxVUS; i++) {
-        const res = Create.exec({
-            userName: AccountPrefix.concat(i.toString()),
-            password: DefaultPassword,
-            email: AccountPrefix.concat(i.toString()).concat('@example.com'),
-            credential: adminAuthFactory.credential,
-        });
+        const res =
+            cdperfDefaults.ENV.CLOUD_VENDOR === 'ocis'
+                ? CreateGraph.exec({
+                      userName: AccountPrefix.concat(i.toString()),
+                      password: DefaultPassword,
+                      email: AccountPrefix.concat(i.toString()).concat('@example.com'),
+                      credential: adminAuthFactory.credential,
+                  })
+                : Create.exec({
+                      userName: AccountPrefix.concat(i.toString()),
+                      password: DefaultPassword,
+                      email: AccountPrefix.concat(i.toString()).concat('@example.com'),
+                      credential: adminAuthFactory.credential,
+                  });
         if (res.status != 200) {
             console.log(res.status.toString().concat(' ').concat(res.error));
         }
@@ -59,11 +69,17 @@ export function teardown(): void {
     sleep(TearDownCoolDownTime);
     console.log('Deleting '.concat(TargetMaxVUS.toString()).concat(' users'));
     for (let i = 0; i < TargetMaxVUS; i++) {
-        const res = Delete.exec({
-            userName: AccountPrefix.concat(i.toString()),
-            credential: adminAuthFactory.credential,
-        });
-        if (res.status != 200) {
+        const res =
+            cdperfDefaults.ENV.CLOUD_VENDOR === 'ocis'
+                ? DeleteGraph.exec({
+                      userName: AccountPrefix.concat(i.toString()),
+                      credential: adminAuthFactory.credential,
+                  })
+                : Delete.exec({
+                      userName: AccountPrefix.concat(i.toString()),
+                      credential: adminAuthFactory.credential,
+                  });
+        if (res.status != 204 || 200) {
             console.log(
                 res.status
                     .toString()
