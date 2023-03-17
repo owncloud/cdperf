@@ -29,7 +29,7 @@ the testing steps as a whole will run 10 times (5 times per user).
   * `export AUTH_ADAPTER=openIDConnect`
   * `export AUTH_ADAPTER=basicAuth`
 * `API_VERSION`: specifies which cloud api version should be used
-	* default value: `legacy`
+	* default value: `latest`
 	* `export API_VERSION=legacy`
 	* `export API_VERSION=latest`
 * `ADMIN_LOGIN`: the login name of an administrative user
@@ -47,19 +47,19 @@ the testing steps as a whole will run 10 times (5 times per user).
 
 ## Examples
 ```shell
-$ # run the test on a host with an ownCloud classic server
-$ BASE_URL=https://cloud-domain.org:80 \
-$ API_VERSION=legacy \
-$ AUTH_ADAPTER=basicAuth \
-$ ADMIN_LOGIN=main \
-$ ADMIN_PASSWORD=secret \
-$ k6 run run/share-upload-rename-default.js --vus 2 --iterations 5
-$
-$ # run the test on a host with an ocis server
-$ BASE_URL=https://cloud-domain.org:80 \
-$ ADMIN_LOGIN=main \
-$ ADMIN_PASSWORD=secret \
-$ k6 run run/share-upload-rename-default.js --vus 2 --iterations 5
+# run the test on a host with an ownCloud classic server
+BASE_URL=https://cloud-domain.org:80 \
+API_VERSION=legacy \
+AUTH_ADAPTER=basicAuth \
+ADMIN_LOGIN=main \
+ADMIN_PASSWORD=secret \
+k6 run run/share-upload-rename-default.js --vus 2 --iterations 5
+
+# run the test on a host with an ocis server
+BASE_URL=https://cloud-domain.org:80 \
+ADMIN_LOGIN=main \
+ADMIN_PASSWORD=secret \
+k6 run run/share-upload-rename-default.js --vus 2 --iterations 5
 ```
 
 The same can be archieved with docker:
