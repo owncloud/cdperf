@@ -1,189 +1,157 @@
-import { RefinedResponse, ResponseType } from 'k6/http';
+import { check } from 'k6';
+import http from 'k6/http';
 
-import * as types from '../types';
-import * as api from './api';
+import { Credential } from '../auth';
+import { Result } from './api';
+import { buildParams } from './utils';
 
-export class Upload {
-    public static exec({
-        credential,
-        userName,
-        path = '',
-        asset,
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        asset: types.Asset;
-        path?: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'PUT',
-            credential,
-            path: `/remote.php/dav/files/${userName}/${path}/${asset.name}`,
-            params: { tags },
-            body: asset.bytes,
-        });
-    }
+export interface DavAPI {
+  create(id: string, path: string, credential: Credential): Result;
+  delete(id: string, path: string, credential: Credential): Result;
+  move(id: string, source: string, target: string, credential: Credential): Result;
+  upload(id: string, destination: string, data: ArrayBuffer, credential: Credential): Result;
 }
 
-export class Download {
-    public static exec({
-        credential,
-        userName,
-        path,
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        path: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'GET',
-            credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
-            params: { tags },
-        });
-    }
+export class DavLegacyAPI implements DavAPI {
+  protected baseURL: string;
+  constructor(baseURL: string) {
+    this.baseURL = baseURL;
+  }
+
+  create(id: string, path: string, credential: Credential): Result {
+    const createResponse = http.request(
+      'MKCOL',
+      `${this.baseURL}/remote.php/dav/files/${id}/${path}`,
+      undefined,
+      buildParams({}, { credential }),
+    );
+
+    check(createResponse, {
+      'dav create': ({ status }) => status === 201,
+    });
+
+    return { response: createResponse };
+  }
+
+  delete(id: string, path: string, credential: Credential): Result {
+    const deleteResponse = http.request(
+      'DELETE',
+      `${this.baseURL}/remote.php/dav/files/${id}/${path}`,
+      undefined,
+      buildParams({}, { credential }),
+    );
+
+    check(deleteResponse, {
+      'dav delete': ({ status }) => status === 204,
+    });
+
+    return { response: deleteResponse };
+  }
+
+  move(id: string, source: string, target: string, credential: Credential): Result {
+    const moveResponse = http.request(
+      'MOVE',
+      `${this.baseURL}/remote.php/dav/files/${id}/${source}`,
+      undefined,
+      buildParams(
+        {
+          headers: {
+            destination: `/remote.php/dav/files/${id}/${target}`,
+          },
+        },
+        { credential },
+      ),
+    );
+
+    check(moveResponse, {
+      'dav move': ({ status }) => status === 201,
+    });
+
+    return { response: moveResponse };
+  }
+
+  upload(id: string, path: string, data: ArrayBuffer, credential: Credential): Result {
+    const uploadResponse = http.request(
+      'PUT',
+      `${this.baseURL}/remote.php/dav/files/${id}/${path}`,
+      data,
+      buildParams({}, { credential }),
+    );
+
+    check(uploadResponse, {
+      'dav upload': ({ status }) => status === 201,
+    });
+
+    return { response: uploadResponse };
+  }
 }
 
-export class Delete {
-    public static exec({
-        credential,
-        userName,
-        path,
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        path: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'DELETE',
-            credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
-            params: { tags },
-        });
-    }
-}
+export class DavLatestAPI extends DavLegacyAPI implements DavAPI {
+  create(id: string, path: string, credential: Credential): Result {
+    const createResponse = http.request(
+      'MKCOL',
+      `${this.baseURL}/remote.php/dav/spaces/${id}/${path}`,
+      undefined,
+      buildParams({}, { credential }),
+    );
 
-export class Create {
-    public static exec({
-        credential,
-        userName,
-        path,
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        path: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'MKCOL',
-            credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
-            params: { tags },
-            body: null,
-        });
-    }
-}
+    check(createResponse, {
+      'dav create': ({ status }) => status === 201,
+    });
 
-export class Propfind {
-    public static exec({
-        credential,
-        userName,
-        path = '',
-        tags,
-        body = '',
-    }: {
-        credential: types.Credential;
-        userName: string;
-        path?: string;
-        tags?: types.Tags;
-        body?: string;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'PROPFIND',
-            credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
-            params: { tags },
-            body,
-        });
-    }
-}
+    return { response: createResponse };
+  }
 
-export class Move {
-    public static exec({
-        credential,
-        userName,
-        path,
-        destination,
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        path: string;
-        destination: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'MOVE',
-            credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
-            params: { tags },
-            headers: {
-                destination: `/remote.php/dav/files/${userName}/${destination}`,
-            },
-        });
-    }
-}
-export class Trash {
-    public static exec({
-        credential,
-        userName,
-        fileid = '',
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        fileid?: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'DELETE',
-            credential,
-            path: `/remote.php/dav/trash-bin/${userName}/${fileid}`,
-            params: { tags },
-        });
-    }
-}
+  delete(id: string, path: string, credential: Credential): Result {
+    const deleteResponse = http.request(
+      'DELETE',
+      `${this.baseURL}/remote.php/dav/spaces/${id}/${path}`,
+      undefined,
+      buildParams({}, { credential }),
+    );
 
-export class Restore {
-    public static exec({
-        credential,
-        userName,
-        fileid = '',
-        path = '',
-        tags,
-    }: {
-        credential: types.Credential;
-        userName: string;
-        fileid?: string;
-        path?: string;
-        tags?: types.Tags;
-    }): RefinedResponse<ResponseType> {
-        return api.request({
-            method: 'MOVE',
-            credential,
-            path: `/remote.php/dav/trash-bin/${userName}/${fileid}`,
-            params: { tags },
-            headers: {
-                destination: `/remote.php/dav/files/${userName}/${path}`,
-                overwrite: 'F',
-            },
-        });
-    }
+    check(deleteResponse, {
+      'dav delete': ({ status }) => status === 204,
+    });
+
+    return { response: deleteResponse };
+  }
+
+  upload(id: string, path: string, data: ArrayBuffer, credential: Credential): Result {
+    const uploadResponse = http.request(
+      'PUT',
+      `${this.baseURL}/remote.php/dav/spaces/${id}/${path}`,
+      data,
+      buildParams({}, { credential }),
+    );
+
+    check(uploadResponse, {
+      'dav upload': ({ status }) => status === 201,
+    });
+
+    return { response: uploadResponse };
+  }
+
+  move(id: string, source: string, target: string, credential: Credential): Result {
+    const moveResponse = http.request(
+      'MOVE',
+      `${this.baseURL}/remote.php/dav/spaces/${id}/${source}`,
+      undefined,
+
+      buildParams(
+        {
+          headers: {
+            destination: `/remote.php/dav/spaces/${id}/${target}`,
+          },
+        },
+        { credential },
+      ),
+    );
+
+    check(moveResponse, {
+      'dav move': ({ status }) => status === 201,
+    });
+
+    return { response: moveResponse };
+  }
 }
