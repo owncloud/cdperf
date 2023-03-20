@@ -3,17 +3,15 @@ import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-import { API, Version } from '../../lib/api';
+import { API, User, Version } from '../../lib/api';
 import { Account, Adapter } from '../../lib/auth';
 import { randomString } from '../../lib/utils';
 
-interface UserInfo {
+interface UserInfo extends User {
   home: string;
-  login: string;
-  password: string;
 }
 interface Data {
-  adminInfo: UserInfo;
+  adminInfo: User;
   userInfos: UserInfo[];
 }
 
@@ -55,23 +53,15 @@ const api = new API(settings.baseURL, settings.apiVersion);
 
 export const options: Options = settings.k6;
 export function setup(): Data {
-  const { user: admin } = api.user.get(
+  const { user: adminInfo } = api.user.get(
     { login: settings.adminUser.login, password: settings.adminUser.password },
     settings.authAdapter,
   );
-  const adminInfo: UserInfo = {
-    ...admin,
-    home: String(
-      api.me.driveInfo(admin.login, admin.credential, {
-        selector: 'value.#(driveType=="personal").id',
-      }),
-    ),
-  };
 
   const userInfos = times(options.vus || 1, () => {
     const { user } = api.user.create(
       { login: randomString(), password: randomString() },
-      admin.credential,
+      adminInfo.credential,
       settings.authAdapter,
     );
 

@@ -47,6 +47,7 @@ A precise description of what a test does and what the requirements are can be f
 
 ## Available tests
 * [share-upload-rename](src/tests/share-upload-rename/default.md)
+* [surf-upload](src/tests/surf/upload.md)
 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.

@@ -3,14 +3,12 @@ import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-import { API, Version } from '../../lib/api';
+import { API, User, Version } from '../../lib/api';
 import { Account, Adapter } from '../../lib/auth';
 import { randomString } from '../../lib/utils';
 
-interface UserInfo {
+interface UserInfo extends User {
   home: string;
-  login: string;
-  password: string;
 }
 interface Data {
   adminInfo: UserInfo;
@@ -41,8 +39,8 @@ const settings: Settings = {
     password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
-    size: 1024,
-    quantity: 10,
+    size: parseInt(__ENV.ASSET_SIZE) || 1024,
+    quantity: parseInt(__ENV.ASSET_QUANTITY) || 10,
   },
   k6: {
     vus: 5,

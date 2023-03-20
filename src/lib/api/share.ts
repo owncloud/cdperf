@@ -31,19 +31,21 @@ export class ShareAPI {
       buildParams({ headers: { 'OCS-APIRequest': 'true' } }, { credential }),
     );
 
-    check(createResponse, {
-      'share create': ({ status }) => status === 200,
-    });
     if (
-      check(createResponse, {
-        'share create': ({ status }) => status === 401,
+      !check(createResponse, {
+        'share create': ({ status }) => status === 200,
       })
     ) {
-      fail('Authentication failed');
-    };
+      fail(`Share create failed wit status ${createResponse.status}`);
+    }
+
+    const id = parseXML(createResponse.body).getElementsByTagName('id')[0];
+    if (!id) {
+      fail('XML does not contain the id');
+    }
 
     return {
-      id: parseXML(createResponse.body).getElementsByTagName('id')[0]?.childNodes[0].textContent!,
+      id: id.childNodes[0].textContent!,
       response: createResponse,
     };
   }

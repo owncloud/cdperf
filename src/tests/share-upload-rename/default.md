@@ -38,6 +38,12 @@ the testing steps as a whole will run 10 times (5 times per user).
 * `ADMIN_PASSWORD`: the login password of that administrative user
 	* default value: `admin`
 	* `export ADMIN_PASSWORD=secret`
+* `ASSET_SIZE`: size of the individual asset in Kilobyte
+	* default value: `1024`
+	* `export ASSET_SIZE=2048`
+* `ASSET_QUANTITY`: number of assets to be uploaded
+	* default value: `10`
+	* `export ASSET_QUANTITY=20`
 * `--vus`: specifies how many virtual users are testing at the same time
 	* default value: `5`
 	* `k6 ... --vus 2`
