@@ -2,6 +2,7 @@ import { fail } from 'k6';
 import http from 'k6/http';
 import { get } from 'lodash';
 
+import { randomString } from '../k6/utils';
 import { objectToQueryString, queryStringToObject } from '../utils';
 import { Account, Token } from './auth';
 
@@ -55,7 +56,7 @@ export class OpenIDConnect {
           redirect_uri: this.#redirectURL,
           flow: 'oidc',
         },
-        state: '22db4af49efce268',
+        state: randomString(16),
       }),
       {
         headers: {

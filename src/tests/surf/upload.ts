@@ -5,7 +5,7 @@ import { times } from 'lodash';
 
 import { API, User, Version } from '../../lib/api';
 import { Account, Adapter } from '../../lib/auth';
-import { randomString } from '../../lib/utils';
+import { randomString } from '../../lib/k6/utils';
 
 interface UserInfo extends User {
   home: string;

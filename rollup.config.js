@@ -27,6 +27,14 @@ export default [
         chunkFileNames: env.production ? '_chunks/[name]-[hash].js' : '_chunks/[name].js',
       },
     ],
+    onwarn: (warning, warn) => {
+      // skip k6-jslib url import warnings
+      if (warning.code === 'UNRESOLVED_IMPORT' && warning.source.startsWith('https://jslib.k6.io')) {
+        return;
+      }
+
+      warn(warning);
+    },
     plugins: [
       multiInput({
         transformOutputPath: (output, input) => {

@@ -36,7 +36,7 @@ export class ShareAPI {
         'share create': ({ status }) => status === 200,
       })
     ) {
-      fail(`Share create failed wit status ${createResponse.status}`);
+      fail(`Share create failed with status ${createResponse.status}`);
     }
 
     const id = parseXML(createResponse.body).getElementsByTagName('id')[0];
@@ -45,7 +45,7 @@ export class ShareAPI {
     }
 
     return {
-      id: id.childNodes[0].textContent!,
+      id: id.childNodes[0].textContent || '',
       response: createResponse,
     };
   }
