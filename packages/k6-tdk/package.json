@@ -1,0 +1,48 @@
+{
+  "name": "@ownclouders/k6-tdk",
+  "version": "0.0.1",
+  "private": false,
+  "description": "ownCloud k6 test development kit",
+  "homepage": "https://github.com/owncloud/web/tree/master/packages/k6-tdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owncloud/cdperf",
+    "directory": "packages/k6-tdk"
+  },
+  "license": "AGPL-3.0",
+  "author": "ownCloud GmbH <devops@owncloud.com>",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm clean:artifacts && concurrently pnpm:build:*",
+    "build:esbuild": "node esbuild.mjs",
+    "build:types": "tsc --outDir dist",
+    "clean": "pnpm clean:artifacts && pnpm clean:vendor",
+    "clean:artifacts": "del-cli dist",
+    "clean:vendor": "del-cli .turbo node_modules",
+    "dev": "turbowatch",
+    "lint": "eslint package.json src/**/*.ts",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.1.3",
+    "jsonpath-plus": "^7.2.0",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@ownclouders/esbuild": "workspace:*",
+    "@ownclouders/eslint-config": "workspace:*",
+    "@ownclouders/tsconfig": "workspace:*",
+    "@ownclouders/turbowatch": "workspace:*",
+    "@types/jsonpath-plus": "^5.0.2",
+    "@types/k6": "^0.43.2",
+    "@types/lodash-es": "^4.17.7",
+    "@types/node": "^18.15.11",
+    "concurrently": "^8.0.1",
+    "del-cli": "^5.0.0",
+    "esbuild": "^0.17.14",
+    "eslint": "^8.37.0",
+    "turbowatch": "^2.20.0",
+    "typescript": "^5.0.2"
+  }
+}

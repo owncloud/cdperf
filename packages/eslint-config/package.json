@@ -1,0 +1,38 @@
+{
+  "name": "@ownclouders/eslint-config",
+  "version": "0.0.1",
+  "private": true,
+  "description": "common eslint config used withing @ownclouders namespace.",
+  "homepage": "https://github.com/owncloud/web/tree/master/packages/eslint-config",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owncloud/cdperf",
+    "directory": "packages/eslint-config"
+  },
+  "license": "AGPL-3.0",
+  "author": "ownCloud GmbH <devops@owncloud.com>",
+  "main": "index.js",
+  "scripts": {
+    "clean": "pnpm clean:vendor",
+    "clean:vendor": "del-cli node_modules",
+    "lint": "eslint package.json index.js",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-config-turbo": "^1.8.6",
+    "eslint-import-resolver-typescript": "^3.5.3",
+    "eslint-plugin-disable": "^2.0.3",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-json-files": "^2.1.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "eslint-plugin-unicorn": "^46.0.0"
+  },
+  "devDependencies": {
+    "del-cli": "^5.0.0",
+    "eslint": "^8.37.0",
+    "typescript": "^5.0.2"
+  }
+}

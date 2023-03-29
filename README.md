@@ -46,8 +46,10 @@ Read more about [considerations](docs/considerations.md) of performance measurem
 A precise description of what a test does and what the requirements are can be found in the respective test folder.
 
 ## Available tests
-* [share-upload-rename](src/tests/share-upload-rename/default.md)
-* [surf-upload](src/tests/surf/upload.md)
+* oc
+  * [share-upload-rename](packages/k6-tests/src/oc/share-upload-rename.md)
+* surf 
+  * [upload](packages/k6-tests/src/surf/upload.md)
 
 ## Dashboard
 To visualize the test results you need an influxdb and grafana instance running.
