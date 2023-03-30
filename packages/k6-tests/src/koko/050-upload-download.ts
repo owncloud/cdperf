@@ -62,7 +62,7 @@ const settings: Settings = {
       quantity: parseInt(__ENV.ASSET_MEDIUM_QUANTITY) || 1,
     },
     large: {
-      size: parseInt(__ENV.ASSET_SIZE) || 10 * 100,
+      size: parseInt(__ENV.ASSET_LARGE_SIZE) || 10 * 100,
       quantity: parseInt(__ENV.ASSET_LARGE_QUANTITY) || 1,
     },
   },

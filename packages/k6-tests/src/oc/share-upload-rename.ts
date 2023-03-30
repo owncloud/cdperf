@@ -40,11 +40,11 @@ const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
   authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
   apiVersion: __ENV.API_VERSION == Version.legacy ? Version.legacy : Version.latest,
-  testFolder: 'share-upload-rename-default',
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
     password: __ENV.ADMIN_PASSWORD || 'admin',
   },
+  testFolder: __ENV.TEST_FOLDER || 'oc-share-upload-rename',
   assets: {
     size: parseInt(__ENV.ASSET_SIZE) || 1000,
     quantity: parseInt(__ENV.ASSET_QUANTITY) || 10,

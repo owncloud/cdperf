@@ -6,8 +6,8 @@ The test idea originally came from [surf](https://www.surf.nl/), where the proce
 Each user loads an adjustable number of files with an adjustable file size into his home folder
 
 * `admin` creates `N` users.
-	* `N` can be set by using the k6 `--vus` option.
-	* by default, it set to 5.
+	* `N` can be set with the k6 `--vus` option.
+	* by default, it set to 1.
 * each `user` logs into the system individually.
 * each `user` uploads `10` files with a size of `1mb` each into their home folder.
 * `admin` deletes the created users.
@@ -33,7 +33,7 @@ the testing steps as a whole will run 10 times (5 times per user).
 * `ADMIN_PASSWORD`: the login password of that administrative user
 	* default value: `admin`
 	* `export ADMIN_PASSWORD=secret`
-* `ASSET_SIZE`: size of the individual asset in Kibibyte
+* `ASSET_SIZE`: size of the individual asset in kb
 	* default value: `1000`
 	* `export ASSET_SIZE=2000`
 * `ASSET_QUANTITY`: number of assets to be uploaded
@@ -55,16 +55,16 @@ API_VERSION=legacy \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run run/surf-upload.js --vus 2 --iterations 5
+k6 run artifacts/surf-upload.js --vus 2 --iterations 5
 
 # run the test on a host with an ocis server
 BASE_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run run/surf-upload.js --vus 2 --iterations 5
+k6 run artifacts/surf-upload.js --vus 2 --iterations 5
 ```
 
-The same can be archieved with docker:
+The same can be reached with docker:
 ```shell
-docker run -e BASE_URL=https://cloud-domain.org:80 -e API_VERSION=legacy -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < run/surf-upload.js
+docker run -e BASE_URL=https://cloud-domain.org:80 -e API_VERSION=legacy -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/surf-upload.js
 ```
