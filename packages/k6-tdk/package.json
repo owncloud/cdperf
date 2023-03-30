@@ -11,14 +11,63 @@
   },
   "license": "AGPL-3.0",
   "author": "ownCloud GmbH <devops@owncloud.com>",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/client/cjs/index.js"
+    },
+    "./lib/api": {
+      "types": "./dist/types/api/index.d.ts",
+      "import": "./dist/esm/api/index.js",
+      "require": "./dist/client/cjs/index.js"
+    },
+    "./lib/auth": {
+      "types": "./dist/types/auth/index.d.ts",
+      "import": "./dist/esm/auth/index.js",
+      "require": "./dist/client/cjs/index.js"
+    },
+    "./lib/client": {
+      "types": "./dist/types/client/index.d.ts",
+      "import": "./dist/esm/client/index.js",
+      "require": "./dist/cjs/client/index.js"
+    },
+    "./lib/utils": {
+      "types": "./dist/types/utils/index.d.ts",
+      "import": "./dist/esm/utils/index.js",
+      "require": "./dist/cjs/utils/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "index.d.ts",
+  "typesVersions": {
+    ">=4.2": {
+      "*": [
+        "dist/types/*"
+      ]
+    }
+  },
+  "files": [
+    "dist/cjs/**/!(*.tsbuildinfo)",
+    "dist/esm/**/!(*.tsbuildinfo)",
+    "dist/types/**/!(*.tsbuildinfo)",
+    "lib/api",
+    "lib/auth",
+    "lib/client",
+    "lib/utils",
+    "src",
+    "package.json",
+    "tsconfig.json"
+  ],
   "scripts": {
     "build": "pnpm clean:artifacts && concurrently pnpm:build:*",
-    "build:esbuild": "node esbuild.mjs",
-    "build:types": "tsc --outDir dist",
+    "build:artifacts": "node build.mjs",
+    "build:types": "tsc --outDir dist/types",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
-    "clean:artifacts": "del-cli dist",
+    "clean:artifacts": "del-cli dist lib",
     "clean:vendor": "del-cli .turbo node_modules",
     "dev": "turbowatch",
     "lint": "eslint package.json src/**/*.ts",

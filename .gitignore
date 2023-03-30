@@ -3,4 +3,5 @@
 .turbo
 .pnpm-store
 dist
+lib
 node_modules

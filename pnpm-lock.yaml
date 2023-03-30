@@ -117,25 +117,27 @@ importers:
       '@ownclouders/tsconfig': workspace:*
       '@ownclouders/turbowatch': workspace:*
       '@types/k6': ^0.43.2
-      '@types/lodash-es': ^4.17.7
+      '@types/lodash': ^4.14.192
       '@types/node': ^18.15.11
       concurrently: ^8.0.1
       del-cli: ^5.0.0
       esbuild: ^0.17.14
       fast-glob: ^3.2.12
-      lodash-es: ^4.17.21
+      lodash: ^4.17.21
+      rxjs: ^7.8.0
       turbowatch: ^2.20.0
       typescript: ^5.0.2
     dependencies:
       '@ownclouders/k6-tdk': link:../k6-tdk
-      lodash-es: 4.17.21
+      lodash: 4.17.21
+      rxjs: 7.8.0
     devDependencies:
       '@ownclouders/esbuild': link:../esbuild
       '@ownclouders/eslint-config': link:../eslint-config
       '@ownclouders/tsconfig': link:../tsconfig
       '@ownclouders/turbowatch': link:../turbowatch
       '@types/k6': 0.43.2
-      '@types/lodash-es': 4.17.7
+      '@types/lodash': 4.14.192
       '@types/node': 18.15.11
       concurrently: 8.0.1
       del-cli: 5.0.0
@@ -3262,7 +3264,6 @@ packages:
     resolution: {integrity: sha512-F2+gxDshqmIub1KdvZkaEfGDwLNpPvk9Fs6LD/MyQxNgMds/WH9OdDDXOmxUZpME+iSK3rQCctkL0DYyytUqMg==}
     dependencies:
       tslib: 2.5.0
-    dev: true
 
   /safe-regex-test/1.0.0:
     resolution: {integrity: sha512-JBUUzyOgEwXQY1NuPtvcj/qcBDbDmEvWufhlnXZIm75DEHp+afM1r1ujJpJsV/gSM4t59tpDyPi1sd6ZaPFfsA==}

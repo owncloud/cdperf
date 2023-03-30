@@ -13,7 +13,7 @@
   "author": "ownCloud GmbH <devops@owncloud.com>",
   "scripts": {
     "build": "pnpm clean:artifacts && concurrently pnpm:build:*",
-    "build:esbuild": "node esbuild.mjs",
+    "build:artifacts": "node build.mjs",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli artifacts",
     "clean:vendor": "del-cli .turbo node_modules",
@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "@ownclouders/k6-tdk": "workspace:*",
-    "lodash-es": "^4.17.21"
+    "lodash": "^4.17.21",
+    "rxjs": "^7.8.0"
   },
   "devDependencies": {
     "@ownclouders/esbuild": "workspace:*",
@@ -31,7 +32,7 @@
     "@ownclouders/tsconfig": "workspace:*",
     "@ownclouders/turbowatch": "workspace:*",
     "@types/k6": "^0.43.2",
-    "@types/lodash-es": "^4.17.7",
+    "@types/lodash": "^4.14.192",
     "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",

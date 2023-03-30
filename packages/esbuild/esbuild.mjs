@@ -9,4 +9,5 @@ await build({
 	sourcemap:   true,
 	outdir:      'dist',
 	packages:    'external',
+  minify: true,
 });

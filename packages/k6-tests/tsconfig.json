@@ -1,14 +1,14 @@
 {
   "extends": "@ownclouders/tsconfig/esbuild.json",
   "compilerOptions": {
-	"baseUrl": ".",
-	"paths": {
-	  "@/*": [
-		"src/*"
-	  ]
-	}
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
   "include": [
-	"src/**/*"
+    "src/**/*"
   ]
 }

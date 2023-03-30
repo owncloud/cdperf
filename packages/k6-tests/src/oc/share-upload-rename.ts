@@ -1,14 +1,11 @@
-import { api,auth, client, utils } from '@ownclouders/k6-tdk';
+import { Permission, ShareType } from  '@ownclouders/k6-tdk/lib/api';
+import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
+import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
+import { k6, queryJson, queryXml } from '@ownclouders/k6-tdk/lib/utils';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
-import { times } from 'lodash-es';
-
-
-const { Permission, ShareType } = api
-const { Adapter } = auth
-const { Client, Version } = client
-const { queryJson, queryXml, k6: { utils: { randomString } } } = utils
+import { times } from 'lodash';
 
 interface Credential {
 	login: string;
@@ -26,9 +23,9 @@ interface Data {
 }
 
 interface Settings {
-  authAdapter: auth.Adapter;
+  authAdapter: Adapter;
   baseURL: string;
-  apiVersion: client.Version;
+  apiVersion: Version;
   adminUser: Credential;
   testFolder: string;
   assets: {
@@ -72,7 +69,7 @@ export function setup(): Data {
   adminClient.resource.create(adminHome, settings.testFolder);
 
   const userInfos = times<Info>(options.vus || 1, () => {
-    const userCredential = { login: randomString(), password: randomString() };
+    const userCredential = { login: k6.utils.randomString(), password: k6.utils.randomString() };
     adminClient.user.create(userCredential);
     adminClient.user.enable(userCredential.login);
 

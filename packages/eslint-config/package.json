@@ -14,7 +14,7 @@
   "main": "index.js",
   "scripts": {
     "clean": "pnpm clean:vendor",
-    "clean:vendor": "del-cli node_modules",
+    "clean:vendor": "del-cli .turbo node_modules",
     "lint": "eslint package.json index.js",
     "lint:fix": "pnpm run lint --fix"
   },

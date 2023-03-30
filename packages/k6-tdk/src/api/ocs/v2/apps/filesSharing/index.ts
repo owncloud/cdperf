@@ -2,8 +2,6 @@ import { Request } from '@/utils/http';
 
 import { V1 } from './v1';
 
-
-
 export class FilesSharing {
   readonly v1: V1;
 

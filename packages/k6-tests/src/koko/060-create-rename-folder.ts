@@ -1,12 +1,9 @@
-import { auth, client, utils } from '@ownclouders/k6-tdk';
+import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
+import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
+import { k6, queryJson } from '@ownclouders/k6-tdk/lib/utils';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
-import { times } from 'lodash-es';
-
-
-const { Adapter } = auth
-const { Client, Version } = client
-const { queryJson, k6: { utils: { randomString } } } = utils
+import { times } from 'lodash';
 
 interface Credential {
 	login: string;
@@ -24,9 +21,9 @@ interface Data {
 }
 
 interface Settings {
-  authAdapter: auth.Adapter;
+  authAdapter: Adapter;
   baseURL: string;
-  apiVersion: client.Version;
+  apiVersion: Version;
   adminUser: Credential;
   folder: {
     rootCount: number;
@@ -62,7 +59,7 @@ export function setup(): Data {
   const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminCredential);
 
   const userInfos = times<Info>(options.vus || 1, () => {
-    const userCredential = { login: randomString(), password: randomString() };
+    const userCredential = { login: k6.utils.randomString(), password: k6.utils.randomString() };
     adminClient.user.create(userCredential);
     adminClient.user.enable(userCredential.login);
 
@@ -89,7 +86,7 @@ export default function ({ userInfos }: Data): void {
   const userClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, userCredential);
 
   times(settings.folder.rootCount, () => {
-    const tree = times(settings.folder.childCount, () => randomString());
+    const tree = times(settings.folder.childCount, () => k6.utils.randomString());
 
     tree.reduce((acc: string[], name) => {
       const createPath = [ ...acc, name ].join('/');

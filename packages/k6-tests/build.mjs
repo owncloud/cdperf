@@ -12,13 +12,12 @@ const entryPoints = sources.reduce((acc, source) => {
 	return acc
 }, {})
 
-
 await build({
 	entryPoints,
 	outdir: "artifacts",
   format: 'cjs',
   platform: 'browser',
-	external: ['k6/http', 'k6/encoding', 'k6'],
+	external: ['k6'],
 });
 
 
