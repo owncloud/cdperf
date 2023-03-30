@@ -14,7 +14,7 @@ The `upload delete` test is intended to see how the instance behaves when many u
   * `N` can be set with the environment variable `ASSET_LARGE_QUANTITY`.
   * `S` can be set with the environment variable `ASSET_LARGE_SIZE`.
 * each `user` logs into the system individually.
-* each `user` downloads his set of files.
+* each `user` deletes his set of files.
 * `admin` deletes the created users.
 
 the test runs `N` times for each user, for example if you define `--vus 2` and `--iterations 5`
@@ -75,16 +75,16 @@ API_VERSION=legacy \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-050-upload-download.js --vus 2 --iterations 5
+k6 run artifacts/koko-040-upload-delete.js --vus 2 --iterations 5
 
 # run the test on a host with an ocis server
 BASE_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-050-upload-download.js --vus 2 --iterations 5
+k6 run artifacts/koko-040-upload-delete.js --vus 2 --iterations 5
 ```
 
 The same can be reached with docker:
 ```shell
-docker run -e BASE_URL=https://cloud-domain.org:80 -e API_VERSION=legacy -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-050-upload-download.js
+docker run -e BASE_URL=https://cloud-domain.org:80 -e API_VERSION=legacy -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-040-upload-delete.js
 ```
