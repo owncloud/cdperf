@@ -63,7 +63,7 @@
     "tsconfig.json"
   ],
   "scripts": {
-    "build": "pnpm clean:artifacts && concurrently pnpm:build:*",
+    "build": "concurrently pnpm:build:*",
     "build:artifacts": "node build.mjs",
     "build:types": "tsc --outDir dist/types",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",

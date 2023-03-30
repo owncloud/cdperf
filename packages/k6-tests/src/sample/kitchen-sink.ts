@@ -1,14 +1,12 @@
 import { Permission, ShareType } from  '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import { k6, queryJson, queryXml } from '@ownclouders/k6-tdk/lib/utils';
+import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { fail } from 'k6';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
-
-const { utils: { randomString } } = k6
 
 interface Credential {
 	login: string;

@@ -15,7 +15,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "pnpm clean:artifacts && concurrently pnpm:build:*",
+    "build": "concurrently pnpm:build:*",
     "build:artifacts": "node build.mjs",
     "build:types": "tsc --outDir dist",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",

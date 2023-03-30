@@ -16,7 +16,6 @@ await build({
 	entryPoints,
 	outdir: "artifacts",
   format: 'cjs',
-  platform: 'browser',
 	external: ['k6'],
 });
 

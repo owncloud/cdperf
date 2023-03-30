@@ -34,3 +34,4 @@ export const requestFactory = (base: string, authenficator?: Authenficator, fact
     return http.request<RT>(method, cleanURL(base, path), body, merge(params, requestParams));
   };
 };
+

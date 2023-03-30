@@ -12,7 +12,7 @@
   "license": "AGPL-3.0",
   "author": "ownCloud GmbH <devops@owncloud.com>",
   "scripts": {
-    "build": "pnpm clean:artifacts && concurrently pnpm:build:*",
+    "build": "concurrently pnpm:build:*",
     "build:artifacts": "node build.mjs",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli artifacts",

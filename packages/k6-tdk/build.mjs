@@ -47,8 +47,6 @@ instructions.entryPoints.forEach((entryPoint, i) => {
 await Promise.all(instructions.formats.map(format => {
   return build({
     entryPoints: instructions.entryPoints,
-    bundle: true,
-    treeShaking: true,
     outdir: path.join(instructions.outdir, format),
     format: format,
     external: ['k6']

@@ -7,7 +7,6 @@ import { Ocs } from './ocs';
 
 
 export * from './api';
-
 export class Api {
   readonly ocs: Ocs;
   readonly graph: Graph;

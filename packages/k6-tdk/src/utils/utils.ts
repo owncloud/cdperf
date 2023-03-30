@@ -1,22 +1,13 @@
 import { XMLParser } from 'fast-xml-parser';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-ignore
+import { randomString as _randomString } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 import { JSONPath } from 'jsonpath-plus';
 import { JSONValue } from 'k6';
 
-import { URLSearchParams } from './k6/url';
 
-
-export const cleanURL = (...parts: string[]): string => {
-	return parts.join('/').replace(/(?<!:)\/+/gm, '/');
-};
-
-export const objectToQueryString = (o: { [key: string]: string | number }): string => {
-	return Object.keys(o)
-		.map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(o[ key ] || ''))
-		.join('&');
-};
-
-export const queryStringToObject = (qs?: string): { [key: string]: string } => {
-	return new URLSearchParams(new URL(qs || '').search).object();
+export const randomString = (length = 10, charset?: string): string => {
+  return _randomString(length, charset);
 };
 
 export const queryJson = <V extends string>(pathExpression: string, obj?: JSONValue, defaultValue?: V[]): V[] => {
@@ -42,9 +33,7 @@ export const queryJson = <V extends string>(pathExpression: string, obj?: JSONVa
 };
 
 export const queryXml = <V extends string>(pathExpression: string, obj?: JSONValue, defaultValue?: V[]): V[] => {
-	const xmlParser = new XMLParser();
-
-	return queryJson<V>(pathExpression, xmlParser.parse(obj as string), defaultValue);
+	return queryJson<V>(pathExpression, xmlToJson(obj), defaultValue);
 };
 
 export const xmlToJson = (obj?: JSONValue): any => {

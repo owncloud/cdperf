@@ -2,8 +2,7 @@ import { fail } from 'k6';
 import http from 'k6/http';
 import { get } from 'lodash-es';
 
-import { objectToQueryString, queryStringToObject } from '@/utils';
-import { randomString } from '@/utils/k6/utils';
+import { objectToQueryString, queryStringToObject, randomString } from '@/utils';
 
 import { Account, Authenficator, Token } from './auth';
 
