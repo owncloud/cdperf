@@ -39,6 +39,6 @@
     "esbuild": "^0.17.14",
     "fast-glob": "^3.2.12",
     "turbowatch": "^2.20.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.3"
   }
 }

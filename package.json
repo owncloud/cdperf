@@ -20,8 +20,8 @@
     "@roarr/cli": "^5.11.0",
     "del-cli": "^5.0.0",
     "syncpack": "^9.8.4",
-    "turbo": "^1.8.6",
-    "typescript": "^5.0.2"
+    "turbo": "^1.8.8",
+    "typescript": "^5.0.3"
   },
   "packageManager": "pnpm@7.30.5",
   "engines": {
