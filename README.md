@@ -24,10 +24,9 @@ It's important to know how to compare the tests against each other and what thos
 * Docker for macs is slow on file operations compared to linux
 * Sometimes it's possible that one of the clouds will fail on some operations. Keep in mind that it's not valid to compare a test with failures against a test where all checks are green
 
-**Usage at ownCloud:**
+**Test setup at ownCloud:**
 
-Here at ownCloud we use k6 to compare the performance of our cloud systems, also during development it is helpful to see how the changes made affect performance,
-from release to release, from development version to development version, from change to change.
+At ownCloud k6 is used to compare the performance of the products during development. It is very helpful to understand how changes to the codebase affect the performance, between releases, but also between single commits.
 
 The first test run, runs the tests on A which is testing a server on B and then B which is testing on A.
 We collect those metrics over time to get indicators of how the performance changes over time (version to version) and how the clouds perform in comparison to each other.

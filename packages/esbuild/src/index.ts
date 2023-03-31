@@ -8,6 +8,7 @@ export const build = async (config?: BuildOptions): Promise<BuildResult> => {
     outdir: 'dist',
     format: 'esm',
     minify: true,
+    platform: 'node',
     ...config
   })
 };

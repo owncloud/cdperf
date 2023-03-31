@@ -10,16 +10,16 @@
 		"build": {
       "outputMode": "new-only",
       "dependsOn": ["^build"],
-			"outputs": [
-				"dist/**",
-				"lib/**",
-				"artifacts/**"
-			],
       "inputs": [
         "./*.json",
         "./*.mjs",
         "./src/**/*"
-      ]
+      ],
+			"outputs": [
+				"dist/**",
+				"lib/**",
+				"artifacts/**"
+			]
     },
     "dev": {
       "cache": false,

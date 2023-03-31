@@ -1,5 +1,6 @@
 ## Description
 The `navigate file tree` test is intended to see how the instance behaves when many users move through a configurable deep folder hierarchy at the same time.
+Since k6 does not use a browser for the tests, we propfind each folder to simulate the client behavior. 
 
 * `admin` creates `N` users.
   * `N` can be set by using the k6 `--vus` option.
