@@ -2,9 +2,9 @@
 This repository contains the tools we use to test and measure the performance of different cloud systems.
 
 Supported clouds are:
-* [ownCloud](https://github.com/owncloud/core)
-* [ocis](https://github.com/owncloud/ocis)
-* [nextCloud](https://github.com/nextcloud/server/)
+* [ownCloud Core](https://github.com/owncloud/core)
+* [Infinite Scale](https://github.com/owncloud/ocis)
+* [Nextcloud](https://github.com/nextcloud/server/)
 
 ## Requirements
 *  [K6](https://k6.io/) (if k6 should run on the host machine)
