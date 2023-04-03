@@ -1,54 +1,33 @@
 {
-  "name": "oc-k6",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "Apache-2.0",
-  "author": {
-	"name": "Florian Schade",
-	"email": "fschade@owncloud.com",
-	"url": "https://owncloud.com"
-  },
+  "version": "2.0.0-rc.2",
+  "private": true,
+  "homepage": "https://github.com/owncloud/cdperf",
+  "license": "AGPL-3.0",
+  "author": "ownCloud GmbH <devops@owncloud.com>",
   "scripts": {
-	"build": "rm -rf ./run && rollup -c",
-	"build:w": "rollup -c -w",
-	"clean": "rm -rf ./tests",
-	"lint": "eslint './src/**/*.ts'",
-	"lint:f": "yarn lint --fix",
-	"depcheck": "depcheck"
+    "build": "turbo run build --no-daemon",
+    "changeset": "changeset",
+    "changeset:publish": "changeset publish",
+    "changeset:version": "changeset version",
+    "clean": "turbo run clean --no-daemon --parallel && del-cli .pnpm-store node_modules",
+    "dev": "ROARR_LOG=true turbo run dev --parallel --concurrency 64 --no-daemon | roarr",
+    "lint": "eslint package.json && syncpack list-mismatches && turbo run lint --no-daemon",
+    "lint:fix": "eslint package.json --fix && syncpack fix-mismatches && turbo run lint:fix --no-daemon"
   },
   "devDependencies": {
-	"@babel/core": "^7.9.0",
-	"@babel/preset-env": "^7.9.5",
-	"@babel/preset-typescript": "^7.9.0",
-	"@rollup/plugin-commonjs": "^11.1.0",
-	"@rollup/plugin-json": "^4.0.3",
-	"@rollup/plugin-node-resolve": "^7.1.3",
-	"@rollup/pluginutils": "^4.1.0",
-	"@types/k6": "^0.42.0",
-	"@types/lodash": "^4.14.165",
-	"@types/xmldom": "^0.1.30",
-	"@typescript-eslint/eslint-plugin": "^4.9.0",
-	"@typescript-eslint/parser": "^4.9.0",
-	"babel-plugin-lodash": "^3.3.4",
-	"core-js": "3",
-	"depcheck": "^1.3.1",
-	"eslint": "^7.14.0",
-	"eslint-config-prettier": "^6.15.0",
-	"eslint-plugin-import": "^2.22.1",
-	"eslint-plugin-prettier": "^3.2.0",
-	"eslint-plugin-simple-import-sort": "^6.0.1",
-	"k6": "^0.0.0",
-	"lint-staged": "^10.1.7",
-	"lodash": "^4.17.20",
-	"prettier": "^2.2.1",
-	"prettier-eslint": "^12.0.0",
-	"rollup": "^2.7.2",
-	"rollup-plugin-babel": "^4.4.0",
-	"rollup-plugin-multi-input": "^1.1.1",
-	"rollup-plugin-terser": "^5.3.0",
-	"typescript": "^4.1.2"
+    "@changesets/cli": "^2.26.1",
+    "@ownclouders/eslint-config": "workspace:*",
+    "@roarr/cli": "^5.11.0",
+    "del-cli": "^5.0.0",
+    "syncpack": "^9.8.4",
+    "turbo": "^1.8.8",
+    "typescript": "^5.0.3"
   },
-  "dependencies": {
-	"xmldom": "^0.4.0"
+  "packageManager": "pnpm@7.30.5",
+  "engines": {
+    "node": ">=18"
+  },
+  "volta": {
+    "node": "18.9.1"
   }
 }

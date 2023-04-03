@@ -1,0 +1,44 @@
+{
+  "name": "@ownclouders/k6-tests",
+  "version": "0.0.1",
+  "private": true,
+  "description": "ownCloud k6 tests",
+  "homepage": "https://github.com/owncloud/web/tree/master/packages/k6-tests",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owncloud/cdperf",
+    "directory": "packages/k6-tests"
+  },
+  "license": "AGPL-3.0",
+  "author": "ownCloud GmbH <devops@owncloud.com>",
+  "scripts": {
+    "build": "concurrently pnpm:build:*",
+    "build:artifacts": "node build.mjs",
+    "clean": "pnpm clean:artifacts && pnpm clean:vendor",
+    "clean:artifacts": "del-cli artifacts",
+    "clean:vendor": "del-cli .turbo node_modules",
+    "dev": "turbowatch",
+    "lint": "eslint package.json src/**/*.ts",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "dependencies": {
+    "@ownclouders/k6-tdk": "workspace:*",
+    "lodash": "^4.17.21",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@ownclouders/esbuild": "workspace:*",
+    "@ownclouders/eslint-config": "workspace:*",
+    "@ownclouders/tsconfig": "workspace:*",
+    "@ownclouders/turbowatch": "workspace:*",
+    "@types/k6": "^0.43.2",
+    "@types/lodash": "^4.14.192",
+    "@types/node": "^18.15.11",
+    "concurrently": "^8.0.1",
+    "del-cli": "^5.0.0",
+    "esbuild": "^0.17.14",
+    "fast-glob": "^3.2.12",
+    "turbowatch": "^2.20.0",
+    "typescript": "^5.0.3"
+  }
+}

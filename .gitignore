@@ -1,6 +1,7 @@
 .idea
 *.iml
-node_modules
+.turbo
+.pnpm-store
 dist
-yarn-error.log
-/tests
+lib
+node_modules

@@ -1,0 +1,24 @@
+{
+  "name": "@ownclouders/tsconfig",
+  "version": "0.0.1",
+  "private": true,
+  "description": "common tsconfig used withing @ownclouders namespace.",
+  "homepage": "https://github.com/owncloud/web/tree/master/packages/tsconfig",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owncloud/cdperf",
+    "directory": "packages/tsconfig"
+  },
+  "license": "AGPL-3.0",
+  "author": "ownCloud GmbH <devops@owncloud.com>",
+  "scripts": {
+    "clean": "pnpm clean:vendor",
+    "clean:vendor": "del-cli .turbo node_modules",
+    "lint": "eslint package.json",
+    "lint:fix": "pnpm run lint --fix"
+  },
+  "devDependencies": {
+    "@ownclouders/eslint-config": "workspace:*",
+    "del-cli": "^5.0.0"
+  }
+}

@@ -1,6 +1,0 @@
-{
-  "ignores": [
-    "typescript",
-    "prettier-eslint"
-  ]
-}

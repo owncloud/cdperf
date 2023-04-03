@@ -1,0 +1,32 @@
+{
+	"$schema": "https://turborepo.org/schema.json",
+	"pipeline": {
+		"lint": {
+      "cache": false
+    },
+		"lint:fix": {
+      "cache": false
+    },
+		"build": {
+      "outputMode": "new-only",
+      "dependsOn": ["^build"],
+      "inputs": [
+        "./*.json",
+        "./*.mjs",
+        "./src/**/*"
+      ],
+			"outputs": [
+				"dist/**",
+				"lib/**",
+				"artifacts/**"
+			]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    }
+	}
+}
