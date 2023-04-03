@@ -1,3 +1,3 @@
-export { Account, Adapter, Authenficator, Credential, Token } from './auth';
+export { Account, Adapter, Authenticator, Credential, Token } from './auth';
 export { BasicAuth } from './basicAuth';
 export { OpenIDConnect } from './openIDConnect';

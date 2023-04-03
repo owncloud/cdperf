@@ -1,8 +1,8 @@
 import encoding from 'k6/encoding';
 
-import { Account, Authenficator } from './auth';
+import { Account, Authenticator } from './auth';
 
-export class BasicAuth implements Authenficator {
+export class BasicAuth implements Authenticator {
   readonly #account: Account;
   constructor(account: Account) {
     this.#account = account;

@@ -19,6 +19,6 @@ export interface Token {
 
 export type Credential = Token | Account;
 
-export interface Authenficator {
+export interface Authenticator {
   header: string;
 }

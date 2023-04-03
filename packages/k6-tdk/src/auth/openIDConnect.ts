@@ -4,11 +4,11 @@ import { get } from 'lodash-es';
 
 import { objectToQueryString, queryStringToObject, randomString } from '@/utils';
 
-import { Account, Authenficator, Token } from './auth';
+import { Account, Authenticator, Token } from './auth';
 
 
 
-export class OpenIDConnect implements Authenficator {
+export class OpenIDConnect implements Authenticator {
   #account: Account;
   #baseURL: string;
   #redirectURL: string;

@@ -1,7 +1,7 @@
 import http, { Params, RefinedParams, RefinedResponse, RequestBody, ResponseType } from 'k6/http';
 import { merge } from 'lodash-es';
 
-import { Authenficator } from '@/auth';
+import { Authenticator } from '@/auth';
 import { cleanURL } from '@/utils';
 
 
@@ -14,7 +14,7 @@ export type Request = <RT extends ResponseType | undefined>(
   params?: RefinedParams<RT> | null,
 ) => RefinedResponse<RT>;
 
-export const requestFactory = (base: string, authenficator?: Authenficator, factoryParams?: Params): Request => {
+export const requestFactory = (base: string, authenticator?: Authenticator, factoryParams?: Params): Request => {
   return <RT extends ResponseType | undefined>(
     method: RequestMethod,
     path: string,
@@ -23,10 +23,10 @@ export const requestFactory = (base: string, authenficator?: Authenficator, fact
   ) => {
     const params = factoryParams || {};
 
-    if (authenficator) {
+    if (authenticator) {
       merge(params, {
         headers: {
-          Authorization: authenficator.header,
+          Authorization: authenticator.header,
         },
       });
     }
