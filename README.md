@@ -10,7 +10,7 @@ Supported clouds are:
 *  [K6](https://k6.io/) (if k6 should run on the host machine)
 
 ## Usage
-cdPerf is a collection of ready to use scripts which can used via k6 as described
+cdPerf is a collection of ready to use scripts which can used via k6 as described.
 [here](https://k6.io/docs/get-started/running-k6/).
 
 ## How to test
@@ -26,7 +26,7 @@ It's important to know how to compare the tests against each other and what thos
 
 **Test setup at ownCloud:**
 
-At ownCloud k6 is used to compare the performance of the products during development. It is very helpful to understand how changes to the codebase affect the performance, between releases, but also between single commits.
+At ownCloud, k6 is used to compare the performance of the products during development. It is very helpful to understand how changes to the codebase affect the performance, between releases, but also between single commits.
 
 The first test run, runs the tests on A which is testing a server on B and then B which is testing on A.
 We collect those metrics over time to get indicators of how the performance changes over time (version to version) and how the clouds perform in comparison to each other.
@@ -41,7 +41,7 @@ We collect those metrics over time to get indicators of how the performance chan
 for a more detailed instruction how to read the results you should consider reading the k6 manual,
 specially the [end of test](https://k6.io/docs/results-output/end-of-test/) section.
 
-## Available test suits
+## Test Suits
 * koko
   * [010-login](packages/k6-tests/src/koko/010-login.md)
   * [020-navigate-file-tree](packages/k6-tests/src/koko/020-navigate-file-tree.md)
@@ -60,8 +60,7 @@ Read more about [considerations](docs/considerations.md) of performance measurem
 A precise description of what a test does and what the requirements are can be found in the respective test folder.
 
 ## Dashboard
-To visualize the test results, tools such as InfluxDB + Grafana are needed,
-to explain how the results can be visualized would go beyond the scope here and is also not the purpose of cdPerf. All necessary steps and a precise description of what is necessary can be found [here](https://k6.io/docs/results-output/real-time/).
+To visualize the test results, tools such as InfluxDB + Grafana are needed. To explain how the results can be visualized would go beyond the scope of this document and is also not the purpose of cdPerf. All necessary steps and a precise description of what is necessary can be found [here](https://k6.io/docs/results-output/real-time/).
 
 ## Security
 If you find a security issue please contact [security@owncloud.com](mailto:security@owncloud.com) first

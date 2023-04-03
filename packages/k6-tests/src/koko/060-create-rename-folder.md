@@ -12,8 +12,7 @@ deep folder hierarchy and then rename each of these folders after entering.
 * each `user` loops through the folder tree and renames each of them individually.
 * `admin` deletes the created users.
 
-the test runs `N` times for each user, for example if you define `--vus 2` and `--iterations 5`
-the testing steps as a whole will run 10 times (5 times per user).
+The test runs `N` times for each user. For example, if you define `--vus 2` and `--iterations 5`, the testing steps as a whole will run 10 times (5 times per user).
 
 ## Options
 * `BASE_URL`: the host under which the respective cloud can be reached.
