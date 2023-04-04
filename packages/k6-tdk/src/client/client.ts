@@ -1,6 +1,7 @@
 export const Version = {
-  legacy: 'legacy',
-  latest: 'latest',
+  ocis: 'ocis',
+  occ: 'occ',
+  nc: 'nc',
 } as const;
 
 export type Version = (typeof Version)[keyof typeof Version];

@@ -1,7 +1,7 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
 
-import { Api, Permission, ShareType } from '../api';
+import { Api, Permission, ShareType } from '@/api';
 
 
 export class Share {
@@ -14,7 +14,7 @@ export class Share {
     const response = this.#api.ocs.v2.apps.filesSharing.v1.shares.createShare(path, shareWith, shareType, permissions);
 
     check(response, {
-      'client -> ocs.createShare - status': ({ status }) => status === 200,
+      'client -> share.create - status': ({ status }) => status === 200,
     });
 
     return response;
@@ -24,7 +24,7 @@ export class Share {
     const response = this.#api.ocs.v2.apps.filesSharing.v1.shares.acceptShare(id);
 
     check(response, {
-      'client -> ocs.acceptShare - status': ({ status }) => status === 200,
+      'client -> share.accept - status': ({ status }) => status === 200,
     });
 
     return response;

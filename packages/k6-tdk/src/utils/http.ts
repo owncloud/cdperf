@@ -5,7 +5,7 @@ import { Authenticator } from '@/auth';
 import { cleanURL } from '@/utils';
 
 
-export type RequestMethod = 'GET' | 'MKCOL' | 'PROPFIND' | 'DELETE' | 'MOVE' | 'PUT' | 'POST';
+export type RequestMethod = 'GET' | 'MKCOL' | 'PROPFIND' | 'DELETE' | 'MOVE' | 'PUT' | 'POST' | 'REPORT' | 'SEARCH';
 
 export type Request = <RT extends ResponseType | undefined>(
   method: RequestMethod,

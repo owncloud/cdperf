@@ -5,6 +5,7 @@ import { Request } from '@/utils/http';
 
 export class Files {
   protected request: Request;
+
   constructor(request: Request) {
     this.request = request;
   }
@@ -32,7 +33,12 @@ export class Files {
       },
     });
   }
-  propfind(id: string, path: string): RefinedResponse<'text'> {
-    return this.request('PROPFIND', `/remote.php/dav/files/${id}/${path}`);
+
+  propfind(id: string, path: string, body?: RequestBody): RefinedResponse<'text'> {
+    return this.request('PROPFIND', `/remote.php/dav/files/${id}/${path}`, body);
+  }
+
+  report(id: string, body?: RequestBody): RefinedResponse<'text'> {
+    return this.request('REPORT', `/remote.php/dav/files/${id}`, body);
   }
 }

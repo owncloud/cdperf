@@ -23,7 +23,7 @@ interface Data {
 interface Settings {
 	authAdapter: Adapter;
 	baseURL: string;
-	apiVersion: Version;
+	clientVersion: Version;
 	adminUser: Credential;
 	k6: Options;
 }
@@ -32,7 +32,7 @@ interface Settings {
 const settings: Settings = {
 	baseURL: __ENV.BASE_URL || 'https://localhost:9200',
 	authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-	apiVersion: __ENV.API_VERSION == Version.legacy ? Version.legacy : Version.latest,
+	clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
 	adminUser: {
 		login: __ENV.ADMIN_LOGIN || 'admin',
 		password: __ENV.ADMIN_PASSWORD || 'admin',
@@ -48,7 +48,7 @@ export const options: Options = settings.k6;
 
 export function setup(): Data {
 	const adminCredential = settings.adminUser;
-	const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminCredential);
+	const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
 	const userInfos = times<Info>(options.vus || 1, () => {
 		const userCredential = { login: randomString(), password: randomString() };
@@ -68,9 +68,9 @@ export function setup(): Data {
 
 export default function ({ userInfos }: Data): void {
 	const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
-	const userClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, userCredential);
+	const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 	const userMeResponse = userClient.user.me();
-	const [ userDisplayName ] = queryJson('displayNamed', userMeResponse?.json(), [ userCredential.login ]);
+	const [ userDisplayName = userCredential.login ] = queryJson('displayNamed', userMeResponse?.json());
 
 	check(userDisplayName, {
 		'user displayName': (displayName) => displayName === userCredential.login,
@@ -78,7 +78,7 @@ export default function ({ userInfos }: Data): void {
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
-	const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminCredential);
+	const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
 	userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
 }

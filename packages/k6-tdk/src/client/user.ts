@@ -1,8 +1,9 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
 
-import { Api } from '../api';
-import { Account } from '../auth';
+import { Api } from '@/api';
+import { Account } from '@/auth';
+
 import { Version } from './client';
 
 
@@ -15,21 +16,21 @@ export class User {
   }
 
   drives(): RefinedResponse<'text'> | undefined {
-    if (this.#version === Version.legacy) {
+    if (this.#version !== Version.ocis) {
       return;
     }
 
     const response = this.#api.graph.v1.me.drives();
 
     check(response, {
-      'client -> dav.drives - status': ({ status }) => status === 200,
+      'client -> user.drives - status': ({ status }) => status === 200,
     });
 
     return response;
   }
 
   me(): RefinedResponse<'text'> | undefined {
-    if (this.#version === Version.legacy) {
+    if (this.#version !== Version.ocis) {
       return;
     }
 
@@ -47,7 +48,7 @@ export class User {
   }
 
   enable(id: string): RefinedResponse<'text'> | undefined {
-    if (this.#version === Version.latest) {
+    if (this.#version === Version.ocis) {
       return;
     }
 
@@ -63,10 +64,11 @@ export class User {
   create(account: Account): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-      case Version.latest:
+      case Version.ocis:
         response = this.#api.graph.v1.users.create(account);
         break;
-      case Version.legacy:
+      case Version.occ:
+      case Version.nc:
         response = this.#api.ocs.v2.cloud.users.create(account);
         break;
     }
@@ -83,11 +85,12 @@ export class User {
     let statusSuccess: number;
 
     switch (this.#version) {
-      case Version.latest:
+      case Version.ocis:
         response = this.#api.graph.v1.users.delete(id);
         statusSuccess = 204;
         break;
-      case Version.legacy:
+      case Version.occ:
+      case Version.nc:
         response = this.#api.ocs.v2.cloud.users.delete(id);
         statusSuccess = 200;
         break;

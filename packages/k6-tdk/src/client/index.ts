@@ -6,9 +6,9 @@ import { requestFactory } from '@/utils/http';
 
 import { Version } from './client';
 import { Resource } from './resource';
+import { Search } from './search';
 import { Share } from './share';
 import { User } from './user';
-
 
 export { Version } from './client';
 
@@ -16,6 +16,8 @@ export class Client {
   user: User;
   share: Share;
   resource: Resource;
+  search: Search;
+
   constructor(url: string, version: Version, authAdapter: Adapter, account: Account) {
     let authenticator: Authenticator;
     switch (authAdapter) {
@@ -35,5 +37,6 @@ export class Client {
     this.resource = new Resource(version, api);
     this.user = new User(version, api);
     this.share = new Share(api);
+    this.search = new Search(version, api);
   }
 }
