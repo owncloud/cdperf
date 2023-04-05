@@ -24,7 +24,7 @@ interface Data {
 interface Settings {
   authAdapter: Adapter;
   baseURL: string;
-  apiVersion: Version;
+  clientVersion: Version;
   adminUser: Credential;
   assets: {
     quantity: number;
@@ -37,7 +37,7 @@ interface Settings {
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
   authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  apiVersion: __ENV.API_VERSION == Version.legacy ? Version.legacy : Version.latest,
+  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
     password: __ENV.ADMIN_PASSWORD || 'admin',
@@ -57,18 +57,16 @@ export const options: Options = settings.k6;
 
 export function setup(): Data {
   const adminCredential = settings.adminUser;
-  const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminCredential);
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   const userInfos = times<Info>(options.vus || 1, () => {
     const userCredential = { login: randomString(), password: randomString() };
     adminClient.user.create(userCredential);
     adminClient.user.enable(userCredential.login);
 
-    const userClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, userCredential);
+    const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json(), [
-      userCredential.login,
-    ]);
+    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
 
     return {
       credential: userCredential,
@@ -84,7 +82,7 @@ export function setup(): Data {
 
 export default function ({ userInfos }: Data): void {
   const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
-  const userClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, userCredential);
+  const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   const data = randomBytes(settings.assets.size * 1000);
   times(settings.assets.quantity, (i) => {
     userClient.resource.upload(userHome, [ exec.scenario.iterationInTest, userCredential.login, i ].join('-'), data);
@@ -92,7 +90,7 @@ export default function ({ userInfos }: Data): void {
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
-  const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminCredential);
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
 }

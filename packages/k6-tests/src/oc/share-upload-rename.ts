@@ -25,7 +25,7 @@ interface Data {
 interface Settings {
   authAdapter: Adapter;
   baseURL: string;
-  apiVersion: Version;
+  clientVersion: Version;
   adminUser: Credential;
   testFolder: string;
   assets: {
@@ -39,7 +39,7 @@ interface Settings {
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
   authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  apiVersion: __ENV.API_VERSION == Version.legacy ? Version.legacy : Version.latest,
+  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
     password: __ENV.ADMIN_PASSWORD || 'admin',
@@ -60,11 +60,9 @@ export const options: Options = settings.k6;
 
 export function setup(): Data {
   const adminCredential = settings.adminUser;
-  const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminCredential);
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const adminDrivesResponse = adminClient.user.drives();
-  const [ adminHome ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.json(), [
-    adminCredential.login,
-  ]);
+  const [ adminHome = adminCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.json());
 
   adminClient.resource.create(adminHome, settings.testFolder);
 
@@ -81,11 +79,9 @@ export function setup(): Data {
     );
     const [ createdShareId ] = queryXml('ocs.data.id', createdShareResponse.body);
 
-    const userClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, userCredential);
+    const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json(), [
-      userCredential.login,
-    ]);
+    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
     userClient.share.accept(createdShareId);
 
     return {
@@ -105,7 +101,7 @@ export function setup(): Data {
 
 export default function ({ userInfos }: Data): void {
   const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
-  const userClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, userCredential);
+  const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 
   const folderCreationName = [ exec.scenario.iterationInTest, 'initial', userCredential.login ].join('-');
   userClient.resource.create(userHome, folderCreationName);
@@ -120,7 +116,7 @@ export default function ({ userInfos }: Data): void {
 }
 
 export function teardown({ userInfos, adminInfo }: Data): void {
-  const adminClient = new Client(settings.baseURL, settings.apiVersion, settings.authAdapter, adminInfo.credential);
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminInfo.credential);
   adminClient.resource.delete(adminInfo.home, settings.testFolder);
   userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
 }

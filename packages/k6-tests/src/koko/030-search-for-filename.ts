@@ -1,10 +1,10 @@
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import { queryJson, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import { randomBytes } from 'k6/crypto';
+import { queryJson, queryXml, Queue, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import { check } from 'k6';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
-import { times } from 'lodash';
+import { times } from 'lodash'
 
 interface Credential {
   login: string;
@@ -27,18 +27,8 @@ interface Settings {
   clientVersion: Version;
   adminUser: Credential;
   assets: {
-    small: {
-      quantity: number;
-      size: number;
-    };
-    medium: {
-      quantity: number;
-      size: number;
-    };
-    large: {
-      quantity: number;
-      size: number;
-    };
+    folderCount: number;
+    textDocumentCount: number;
   };
   k6: Options;
 }
@@ -53,18 +43,8 @@ const settings: Settings = {
     password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
-    small: {
-      size: parseInt(__ENV.ASSET_SMALL_SIZE) || 10,
-      quantity: parseInt(__ENV.ASSET_SMALL_QUANTITY) || 1,
-    },
-    medium: {
-      size: parseInt(__ENV.ASSET_MEDIUM_SIZE) || 10 * 20,
-      quantity: parseInt(__ENV.ASSET_MEDIUM_QUANTITY) || 1,
-    },
-    large: {
-      size: parseInt(__ENV.ASSET_LARGE_SIZE) || 10 * 100,
-      quantity: parseInt(__ENV.ASSET_LARGE_QUANTITY) || 1,
-    },
+    folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT) || 2,
+    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT) || 2,
   },
   k6: {
     vus: 1,
@@ -89,8 +69,8 @@ export function setup(): Data {
     const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
 
     return {
-      credential: userCredential,
       home: userHome,
+      credential: userCredential,
     };
   });
 
@@ -104,17 +84,55 @@ export default function ({ userInfos }: Data): void {
   const defer: (() => void)[] = [];
   const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
+  const searchTasks = new Queue({ delay: 1000, delayMultiplier: 0 })
+  const folderNames = times(settings.assets.folderCount, () => randomString())
+  const textDocuments = times(settings.assets.textDocumentCount, () => [randomString() + '.txt', randomString()])
 
-  for (const [k, v] of Object.entries(settings.assets)) {
-    times(v.quantity, (i) => {
-      const assetName = [exec.scenario.iterationInTest, k, i].join('-');
+  const searchTask = (query: string, expectedId: string, description: string) => {
+    const searchResponse = userClient.search.resource(userCredential.login, { query })
+    const [searchFileID] = queryXml('$..oc:fileid', searchResponse?.body);
+    const ready = !!searchFileID
 
-      userClient.resource.upload(userHome, assetName, randomBytes(v.size * 1000));
-      defer.push(() => userClient.resource.download(userHome, assetName));
-    });
+    if(!ready) {
+      return Promise.reject()
+    }
+
+    check(undefined, {
+      [ `test -> search.${description} - found` ]: () => expectedId === searchFileID
+    })
+
+    return Promise.resolve()
   }
 
-  defer.forEach((c) => c());
+  folderNames.forEach(folderName => {
+    userClient.resource.create(userHome, folderName)
+    const propfindResponse = userClient.resource.propfind(userHome, folderName);
+    const [expectedId] = queryXml('$..oc:fileid', propfindResponse?.body);
+
+    searchTasks.add(() => searchTask(folderName, expectedId, 'folder-name'))
+
+    defer.push(() => {
+      userClient.resource.delete(userHome, folderName)
+    });
+  })
+
+  textDocuments.forEach(([documentName, documentContent]) => {
+    userClient.resource.upload(userHome, documentName, documentContent);
+    const propfindResponse = userClient.resource.propfind(userHome, documentName);
+    const [expectedId] = queryXml('$..oc:fileid', propfindResponse?.body);
+
+    searchTasks.add(() => searchTask(documentName, expectedId, 'file-name'))
+    // idea for later:
+    // content search only works if ocis has content extraction enabled (SEARCH_EXTRACTOR_TYPE=tika),
+    // needs further testing, therefore deactivated for the moment.
+    // searchTasks.add(() => searchTask(documentContent, expectedId, 'file-content'))
+
+    defer.push(() => {
+      userClient.resource.delete(userHome, documentName)
+    });
+  })
+
+  searchTasks.exec().then(() => defer.forEach((d) => d()))
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {

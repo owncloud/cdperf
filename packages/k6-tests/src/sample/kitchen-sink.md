@@ -13,10 +13,11 @@ the testing steps as a whole will run 10 times (5 times per user).
   * default value: `openIDConnect`
   * `export AUTH_ADAPTER=openIDConnect`
   * `export AUTH_ADAPTER=basicAuth`
-* `API_VERSION`: specifies which cloud api version should be used
-  * default value: `latest`
-  * `export API_VERSION=legacy`
-  * `export API_VERSION=latest`
+* `CLIENT_VERSION`: specifies which client version should be used
+  * default value: `ocis`
+  * `export CLIENT_VERSION=ocis`
+  * `export CLIENT_VERSION=occ`
+  * `export CLIENT_VERSION=nc`
 * `ADMIN_LOGIN`: the login name of an administrative user
   * default value: `admin`
   * `export ADMIN_LOGIN=main`
@@ -35,7 +36,7 @@ the testing steps as a whole will run 10 times (5 times per user).
 ```shell
 # run the test on a host with an ownCloud classic server
 BASE_URL=https://cloud-domain.org:80 \
-API_VERSION=legacy \
+CLIENT_VERSION=occ \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
@@ -50,5 +51,5 @@ k6 run artifacts/sample-kitchen-sink.js --vus 2 --iterations 5
 
 The same can be reached with docker:
 ```shell
-docker run -e BASE_URL=https://cloud-domain.org:80 -e API_VERSION=legacy -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/sample-kitchen-sink.js
+docker run -e BASE_URL=https://cloud-domain.org:80 -e CLIENT_VERSION=occ -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/sample-kitchen-sink.js
 ```

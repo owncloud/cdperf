@@ -21,10 +21,11 @@ The test runs `N` times for each user. For example, if you define `--vus 2` and 
   * default value: `openIDConnect`
   * `export AUTH_ADAPTER=openIDConnect`
   * `export AUTH_ADAPTER=basicAuth`
-* `API_VERSION`: specifies which cloud api version should be used
-  * default value: `latest`
-  * `export API_VERSION=legacy`
-  * `export API_VERSION=latest`
+* `CLIENT_VERSION`: specifies which client version should be used
+  * default value: `ocis`
+  * `export CLIENT_VERSION=ocis`
+  * `export CLIENT_VERSION=occ`
+  * `export CLIENT_VERSION=nc`
 * `ADMIN_LOGIN`: the login name of an administrative user
   * default value: `admin`
   * `export ADMIN_LOGIN=main`
@@ -49,7 +50,7 @@ The test runs `N` times for each user. For example, if you define `--vus 2` and 
 ```shell
 # run the test on a host with an ownCloud classic server
 BASE_URL=https://cloud-domain.org:80 \
-API_VERSION=legacy \
+CLIENT_VERSION=occ \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
@@ -64,5 +65,5 @@ k6 run artifacts/koko-020-navigate-file-tree.js --vus 2 --iterations 5
 
 The same can be reached with docker:
 ```shell
-docker run -e BASE_URL=https://cloud-domain.org:80 -e API_VERSION=legacy -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-020-navigate-file-tree.js
+docker run -e BASE_URL=https://cloud-domain.org:80 -e CLIENT_VERSION=occ -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-020-navigate-file-tree.js
 ```
