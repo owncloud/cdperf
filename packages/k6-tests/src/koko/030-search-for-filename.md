@@ -1,5 +1,6 @@
 ## Description
-The `ssearch for filename` test is intended to see how the instance behaves when a user creates a configurable amount of files and folders and then searches for them.
+The `search for filename` test creates a configurable amount of files and folders for each user,
+after that, the test searches for each of these resources using their filenames. 
 
 * `admin` creates `N` users.
   * `N` can be set by using the k6 `--vus` option.
