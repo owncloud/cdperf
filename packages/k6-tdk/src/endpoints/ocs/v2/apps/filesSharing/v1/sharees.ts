@@ -1,12 +1,11 @@
 import { RefinedResponse } from 'k6/http';
-import { ItemType } from 'src/endpoints';
 
+import { ItemType } from '@/api';
 import { objectToQueryString } from '@/utils';
 import { Request } from '@/utils/http';
 
 export class Sharees {
   protected request: Request;
-
   constructor(request: Request) {
     this.request = request;
   }
@@ -23,8 +22,8 @@ export class Sharees {
       undefined,
       {
         headers: {
-          'OCS-APIRequest': 'true'
-        }
+          'OCS-APIRequest': 'true',
+        },
       });
   }
 }

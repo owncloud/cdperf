@@ -1,40 +1,24 @@
 import { CookieJar } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
 
+import { Api } from '@/api';
 import { Account, Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
 import { requestFactory } from '@/utils/http';
 
-import { Application } from './application';
 import { Version } from './client';
-import { Drive } from './drive';
 import { Group } from './group';
 import { Resource } from './resource';
-import { Role } from './role';
 import { Search } from './search';
 import { Share } from './share';
-import { Tag } from './tag';
 import { User } from './user';
 
-export * from './client';
+export { Version } from './client';
 
 export class Client {
-  application: Application;
-
-  drive: Drive;
-
-  group: Group;
-
-  resource: Resource;
-
-  role: Role;
-
-  search: Search;
-
-  share: Share;
-
-  tag: Tag;
-
   user: User;
+  share: Share;
+  resource: Resource;
+  search: Search;
+  group: Group;
 
   constructor(url: string, version: Version, authAdapter: Adapter, account: Account) {
     let authenticator: Authenticator;
@@ -48,18 +32,14 @@ export class Client {
     }
 
     const request = requestFactory(url, authenticator, {
-      jar: new CookieJar()
+      jar: new CookieJar(),
     });
-    const endpoints = new Endpoints(request);
+    const api = new Api(request);
 
-    this.application = new Application(version, endpoints);
-    this.drive = new Drive(version, endpoints);
-    this.group = new Group(version, endpoints);
-    this.resource = new Resource(version, endpoints);
-    this.role = new Role(version, endpoints);
-    this.search = new Search(version, endpoints);
-    this.share = new Share(endpoints);
-    this.tag = new Tag(version, endpoints);
-    this.user = new User(version, endpoints);
+    this.resource = new Resource(version, api);
+    this.user = new User(version, api);
+    this.share = new Share(api);
+    this.search = new Search(version, api);
+    this.group = new Group(version, api);
   }
 }

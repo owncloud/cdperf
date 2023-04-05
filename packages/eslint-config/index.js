@@ -5,12 +5,12 @@ module.exports = {
     'turbo',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:import/recommended'
+    'plugin:import/recommended',
   ],
   processor: 'disable/disable',
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: './tsconfig.json'
+    project: './tsconfig.json',
   },
   plugins: [ '@typescript-eslint', 'eslint-plugin-unicorn', 'disable', 'simple-import-sort', 'json-files', 'no-relative-import-paths', 'relative-imports-when-same-folder'],
   rules: {
@@ -33,7 +33,6 @@ module.exports = {
     'import/no-relative-packages': 'error',
     'object-curly-spacing': [ 'error', 'always' ],
     'comma-spacing': ['error', { 'before': false, 'after': true }],
-    'comma-dangle': ['error', 'never'],
     'computed-property-spacing': [ 'error', 'always' ],
     'no-console': 'off',
     'arrow-body-style': ['error', 'always'],
@@ -58,13 +57,12 @@ module.exports = {
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-loop-func': 'off',
-    'lines-between-class-members': ['error', 'always'],
     'no-continue': 'off',
     'no-relative-import-paths/no-relative-import-paths': [
       'error',
       { 'allowSameFolder': true, 'rootDir': 'src', 'prefix': '@' }
     ],
-    'relative-imports-when-same-folder/no-relative-imports-when-same-folder': 'error'
+    'relative-imports-when-same-folder/no-relative-imports-when-same-folder': 'error',
   },
   'settings': {
     'import/resolver': {
@@ -82,14 +80,14 @@ module.exports = {
         'json-files/restrict-ranges': 'error',
         'json-files/require-unique-dependency-names': 'error',
         'relative-imports-when-same-folder/no-relative-imports-when-same-folder': 'off'
-      }
+      },
     },
     {
       files: [ '**/*.js' ],
       parser: 'espree',
       rules: {
         'relative-imports-when-same-folder/no-relative-imports-when-same-folder': 'off'
-      }
-    }
+      },
+    },
   ]
 };
