@@ -5,6 +5,7 @@ import { Account, Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/aut
 import { requestFactory } from '@/utils/http';
 
 import { Version } from './client';
+import { Group } from './group';
 import { Resource } from './resource';
 import { Search } from './search';
 import { Share } from './share';
@@ -17,16 +18,17 @@ export class Client {
   share: Share;
   resource: Resource;
   search: Search;
+  group: Group;
 
   constructor(url: string, version: Version, authAdapter: Adapter, account: Account) {
     let authenticator: Authenticator;
     switch (authAdapter) {
-      case Adapter.openIDConnect:
-        authenticator = new OpenIDConnect(account, url);
-        break;
-      case Adapter.basicAuth:
-        authenticator = new BasicAuth(account);
-        break;
+    case Adapter.openIDConnect:
+      authenticator = new OpenIDConnect(account, url);
+      break;
+    case Adapter.basicAuth:
+      authenticator = new BasicAuth(account);
+      break;
     }
 
     const request = requestFactory(url, authenticator, {
@@ -38,5 +40,6 @@ export class Client {
     this.user = new User(version, api);
     this.share = new Share(api);
     this.search = new Search(version, api);
+    this.group = new Group(version, api);
   }
 }

@@ -2,7 +2,6 @@ import { RefinedResponse, RequestBody } from 'k6/http';
 
 import { Request } from '@/utils/http';
 
-
 export class Spaces {
   protected request: Request;
   constructor(request: Request) {

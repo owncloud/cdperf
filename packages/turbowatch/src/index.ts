@@ -5,7 +5,8 @@ export interface ConfigurationInput {
   onChange: (event: ChangeEvent) => Promise<any>;
 }
 
-export const watch = ({ project, onChange }: ConfigurationInput) =>_watch({
+export const watch = ({ project, onChange }: ConfigurationInput) =>{
+  return _watch({
     project,
     debounce: {
       wait: 250,
@@ -32,5 +33,6 @@ export const watch = ({ project, onChange }: ConfigurationInput) =>_watch({
         onChange,
       },
     ],
-  });
+  })
+};
 

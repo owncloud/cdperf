@@ -2,8 +2,8 @@ import http, { Params, RefinedParams, RefinedResponse, RequestBody, ResponseType
 import { merge } from 'lodash-es';
 
 import { Authenticator } from '@/auth';
-import { cleanURL } from '@/utils';
 
+import { cleanURL } from './url';
 
 export type RequestMethod = 'GET' | 'MKCOL' | 'PROPFIND' | 'DELETE' | 'MOVE' | 'PUT' | 'POST' | 'REPORT' | 'SEARCH';
 

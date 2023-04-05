@@ -71,12 +71,10 @@ export function setup(): Data {
     adminClient.user.create(userCredential);
     adminClient.user.enable(userCredential.login);
 
-    const createdShareResponse = adminClient.share.create(
-      settings.testFolder,
+    const createdShareResponse = adminClient.share.create(settings.testFolder,
       userCredential.login,
       ShareType.user,
-      Permission.all,
-    );
+      Permission.all,);
     const [ createdShareId ] = queryXml('ocs.data.id', createdShareResponse.body);
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
@@ -118,5 +116,7 @@ export default function ({ userInfos }: Data): void {
 export function teardown({ userInfos, adminInfo }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminInfo.credential);
   adminClient.resource.delete(adminInfo.home, settings.testFolder);
-  userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
+  userInfos.forEach(({ credential }) => {
+    return adminClient.user.delete(credential.login)
+  });
 }

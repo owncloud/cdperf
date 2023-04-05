@@ -110,15 +110,21 @@ export default function ({ userInfos }: Data): void {
       const assetName = [exec.scenario.iterationInTest, k, i].join('-');
 
       userClient.resource.upload(userHome, assetName, randomBytes(v.size * 1000));
-      defer.push(() => userClient.resource.download(userHome, assetName));
+      defer.push(() => {
+        return userClient.resource.download(userHome, assetName)
+      });
     });
   }
 
-  defer.forEach((c) => c());
+  defer.forEach((c) => {
+    return c()
+  });
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
-  userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
+  userInfos.forEach(({ credential }) => {
+    return adminClient.user.delete(credential.login)
+  });
 }

@@ -2,7 +2,6 @@ import { RefinedResponse } from 'k6/http';
 
 import { Request } from '@/utils/http';
 
-
 export class Me {
   protected request: Request;
   constructor(request: Request) {

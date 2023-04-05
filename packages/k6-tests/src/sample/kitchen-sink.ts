@@ -1,7 +1,7 @@
-import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/api';
+import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import { backOff, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { fail } from 'k6';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
@@ -89,17 +89,20 @@ export default function ({ userInfos, adminCredential }: Data): void {
   const folderMovedName = randomString();
   const assetName = randomString();
   userClient.resource.create(userHome, folderCreationName);
-  defer.push(() => userClient.resource.delete(userHome, folderMovedName));
+  defer.push(() => {
+    return userClient.resource.delete(userHome, folderMovedName)
+  });
   userClient.resource.move(userHome, folderCreationName, folderMovedName);
   userClient.resource.upload(userHome, [folderMovedName, assetName].join('/'), randomBytes(1000));
   userClient.resource.download(userHome, [folderMovedName, assetName].join('/'));
 
-  const createdShareResponse = userClient.share.create(
-    folderMovedName,
-    adminCredential.login,
+  const shareeSearchResponse = userClient.search.sharee(adminCredential.login, ItemType.folder)
+  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.json())
+
+  const createdShareResponse = userClient.share.create(folderMovedName,
+    foundSharee,
     ShareType.user,
-    Permission.all,
-  );
+    Permission.all,);
   const [createdShareId] = queryXml('ocs.data.id', createdShareResponse.body);
   if (!createdShareId) {
     fail('createdShareId is empty');
@@ -108,11 +111,27 @@ export default function ({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   adminClient.share.accept(createdShareId);
 
-  defer.forEach((d) => d());
+  backOff(() => {
+    const searchResponse = userClient.search.resource(userCredential.login, { query: folderMovedName })
+    const [searchFileID] = queryXml('$..oc:fileid', searchResponse?.body);
+    const found = !!searchFileID
+
+    if(!found) {
+      return Promise.reject()
+    }
+
+    return Promise.resolve()
+  }, { delay: 500, delayMultiplier: 1 }).then(() => {
+    return defer.forEach((d) => {
+      return d()
+    })
+  })
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
-  userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
+  userInfos.forEach(({ credential }) => {
+    return adminClient.user.delete(credential.login)
+  });
 }
