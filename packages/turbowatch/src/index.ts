@@ -9,7 +9,7 @@ export const watch = ({ project, onChange }: ConfigurationInput) =>{
   return _watch({
     project,
     debounce: {
-      wait: 250
+      wait: 250,
     },
     triggers: [
       {
@@ -21,18 +21,18 @@ export const watch = ({ project, onChange }: ConfigurationInput) =>{
             'allof',
             ['dirname', 'node_modules'],
             ['dirname', 'dist'],
-            ['match', '*', 'basename']
+            ['match', '*', 'basename'],
           ],
           [
             'allof',
             ['not', ['dirname', 'node_modules']],
             ['dirname', 'src'],
-            ['match', '*', 'basename']
-          ]
+            ['match', '*', 'basename'],
+          ],
         ],
-        onChange
-      }
-    ]
+        onChange,
+      },
+    ],
   })
 };
 

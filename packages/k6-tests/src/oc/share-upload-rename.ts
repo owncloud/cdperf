@@ -1,6 +1,6 @@
+import { Permission, ShareType } from  '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import { Permission, ShareType } from  '@ownclouders/k6-tdk/lib/endpoints';
 import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
@@ -42,17 +42,17 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   testFolder: __ENV.TEST_FOLDER || 'oc-share-upload-rename',
   assets: {
     size: parseInt(__ENV.ASSET_SIZE) || 1000,
-    quantity: parseInt(__ENV.ASSET_QUANTITY) || 10
+    quantity: parseInt(__ENV.ASSET_QUANTITY) || 10,
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -62,7 +62,7 @@ export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const adminDrivesResponse = adminClient.user.drives();
-  const [ adminHome = adminCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.body);
+  const [ adminHome = adminCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.json());
 
   adminClient.resource.create(adminHome, settings.testFolder);
 
@@ -74,26 +74,26 @@ export function setup(): Data {
     const createdShareResponse = adminClient.share.create(settings.testFolder,
       userCredential.login,
       ShareType.user,
-      Permission.all);
+      Permission.all,);
     const [ createdShareId ] = queryXml('ocs.data.id', createdShareResponse.body);
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
+    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
     userClient.share.accept(createdShareId);
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
   return {
     adminInfo: {
       credential: adminCredential,
-      home: adminHome
+      home: adminHome,
     },
-    userInfos
+    userInfos,
   };
 }
 

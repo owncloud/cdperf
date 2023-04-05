@@ -1,27 +1,27 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints, ItemType } from 'src/endpoints';
 import { create } from 'xmlbuilder2';
+
+import { Api, ItemType } from '@/api';
 
 import { Version } from './client';
 
 export class Search {
-  #endpoints: Endpoints;
-
+  #api: Api;
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  constructor(version: Version, api: Api) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#api = api;
   }
 
   sharee(search: string, itemType: ItemType): RefinedResponse<'text'> {
-    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.sharees.search(search, itemType)
+    const response = this.#api.ocs.v2.apps.filesSharing.v1.sharees.search(search, itemType)
 
     check(response, {
       'client -> search.sharee - status': ({ status }) => {
         return status === 200
-      }
+      },
     });
 
     return response
@@ -35,7 +35,7 @@ export class Search {
     switch (this.#version) {
     case Version.ocis:
     case Version.occ:
-      response = this.#endpoints.dav.files.report(id,
+      response = this.#api.dav.files.report(id,
         create({ version: '1.0', encoding: 'UTF-8' })
           .ele(oc, 'search-files')
           .ele(dav, 'prop')
@@ -47,7 +47,7 @@ export class Search {
           .end());
       break;
     case Version.nc:
-      response = this.#endpoints.dav.search(create({ version: '1.0', encoding: 'UTF-8' })
+      response = this.#api.dav.search(create({ version: '1.0', encoding: 'UTF-8' })
         .ele(dav, 'searchrequest')
         .ele(dav, 'basicsearch')
         .ele(dav, 'select')
@@ -74,7 +74,7 @@ export class Search {
     check(response, {
       'client -> search.resource - status': ({ status }) => {
         return status === 207
-      }
+      },
     });
 
     return response;
