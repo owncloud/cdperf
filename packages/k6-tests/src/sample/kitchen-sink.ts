@@ -1,8 +1,8 @@
+import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
 import { backOff, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import { check, fail } from 'k6';
+import { fail } from 'k6';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
@@ -52,27 +52,15 @@ export const options: Options = settings.k6;
 export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
-  const roleListResponse = adminClient.role.list()
-  const [appRoleId] = queryJson('$.bundles[?(@.name === \'spaceadmin\')].id', roleListResponse?.body);
-  const applicationListResponse = adminClient.application.list()
-  const [resourceId] = queryJson('$.value[?(@.displayName === \'ownCloud Infinite Scale\')].id', applicationListResponse?.body);
-
-  const groupName = randomString()
-  const groupCreateResponse = adminClient.group.create(groupName)
-  const [groupId = groupName] = queryJson('$.id', groupCreateResponse?.body);
-  adminClient.group.delete(groupId)
 
   const userInfos = times<Info>(options.vus || 1, () => {
     const userCredential = { login: randomString(), password: randomString() };
-    const userCreateResponse = adminClient.user.create(userCredential);
-    const [principalId] = queryJson('$.id', userCreateResponse.body);
-
+    adminClient.user.create(userCredential);
     adminClient.user.enable(userCredential.login);
-    adminClient.user.assignRole(principalId, appRoleId, resourceId)
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
+    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
 
     return {
       credential: userCredential,
@@ -92,16 +80,10 @@ export default function ({ userInfos, adminCredential }: Data): void {
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 
   const userMeResponse = userClient.user.me();
-  const [userDisplayName = userCredential.login] = queryJson('displayNamed', userMeResponse?.body);
+  const [userDisplayName = userCredential.login] = queryJson('displayNamed', userMeResponse?.json());
   if (userDisplayName !== userCredential.login) {
     fail('userDisplayName does not match');
   }
-
-  const driveCreateResponse = userClient.drive.create(randomString())
-  const [spaceId] = queryJson('$.id', driveCreateResponse?.body);
-  defer.push(() => {
-    userClient.drive.delete(spaceId)
-  });
 
   const folderCreationName = randomString();
   const folderMovedName = randomString();
@@ -115,7 +97,7 @@ export default function ({ userInfos, adminCredential }: Data): void {
   userClient.resource.download(userHome, [folderMovedName, assetName].join('/'));
 
   const shareeSearchResponse = userClient.search.sharee(adminCredential.login, ItemType.folder)
-  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.body)
+  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.json())
 
   const createdShareResponse = userClient.share.create(folderMovedName,
     foundSharee,
@@ -137,15 +119,6 @@ export default function ({ userInfos, adminCredential }: Data): void {
     if(!found) {
       return Promise.reject()
     }
-
-    const propfindResponse = userClient.resource.propfind(userHome, folderMovedName);
-    const [expectedId] = queryXml('$..oc:fileid', propfindResponse?.body);
-
-    check(undefined, {
-      'test -> searchId and propfindId match': () => {
-        return searchFileID === expectedId
-      }
-    })
 
     return Promise.resolve()
   }, { delay: 500, delayMultiplier: 1 }).then(() => {

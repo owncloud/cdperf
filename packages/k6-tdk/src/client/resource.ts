@@ -1,29 +1,29 @@
 import { check } from 'k6';
 import { RefinedResponse, RequestBody } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
 import { create } from 'xmlbuilder2';
+
+import { Api } from '@/api';
 
 import { Version } from './client';
 
 export class Resource {
-  #endpoints: Endpoints;
-
+  #api: Api;
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  constructor(version: Version, api: Api) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#api = api;
   }
 
   upload(id: string, path: string, body: RequestBody): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.upload(id, path, body);
+      response = this.#api.dav.spaces.upload(id, path, body);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.upload(id, path, body);
+      response = this.#api.dav.files.upload(id, path, body);
       break;
     }
 
@@ -40,11 +40,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.create(id, path);
+      response = this.#api.dav.spaces.create(id, path);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.create(id, path);
+      response = this.#api.dav.files.create(id, path);
       break;
     }
 
@@ -61,11 +61,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.download(id, path);
+      response = this.#api.dav.spaces.download(id, path);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.download(id, path);
+      response = this.#api.dav.files.download(id, path);
       break;
     }
 
@@ -90,11 +90,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.propfind(id, path);
+      response = this.#api.dav.spaces.propfind(id, path);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.propfind(id, path, body);
+      response = this.#api.dav.files.propfind(id, path, body);
       break;
     }
 
@@ -111,11 +111,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.delete(id, path);
+      response = this.#api.dav.spaces.delete(id, path);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.delete(id, path);
+      response = this.#api.dav.files.delete(id, path);
       break;
     }
 
@@ -132,11 +132,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.move(id, from, to);
+      response = this.#api.dav.spaces.move(id, from, to);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.move(id, from, to);
+      response = this.#api.dav.files.move(id, from, to);
       break;
     }
 

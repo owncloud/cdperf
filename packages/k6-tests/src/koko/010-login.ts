@@ -70,7 +70,7 @@ export default function ({ userInfos }: Data): void {
   const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   const userMeResponse = userClient.user.me();
-  const [ userDisplayName = userCredential.login ] = queryJson('displayNamed', userMeResponse?.body);
+  const [ userDisplayName = userCredential.login ] = queryJson('displayNamed', userMeResponse?.json());
 
   check(userDisplayName, {
     'user displayName': (displayName) => {

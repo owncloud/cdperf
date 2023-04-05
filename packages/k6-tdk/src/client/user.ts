@@ -1,19 +1,17 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
 
+import { Api } from '@/api';
 import { Account } from '@/auth';
 
 import { Version } from './client';
 
 export class User {
-  #endpoints: Endpoints;
-
+  #api: Api;
   #version: Version;
-
-  constructor(version: Version, endpoints: Endpoints) {
+  constructor(version: Version, api: Api) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#api = api;
   }
 
   drives(): RefinedResponse<'text'> | undefined {
@@ -21,7 +19,7 @@ export class User {
       return;
     }
 
-    const response = this.#endpoints.graph.v1.me.drives();
+    const response = this.#api.graph.v1.me.drives();
 
     check(response, {
       'client -> user.drives - status': ({ status }) => {
@@ -37,7 +35,7 @@ export class User {
       return;
     }
 
-    const response = this.#endpoints.graph.v1.me.me();
+    const response = this.#api.graph.v1.me.me();
 
     if (!response) {
       return;
@@ -57,7 +55,7 @@ export class User {
       return;
     }
 
-    const response = this.#endpoints.ocs.v2.cloud.users.enable(id);
+    const response = this.#api.ocs.v2.cloud.users.enable(id);
 
     check(response, {
       'client -> user.enable - status': ({ status }) => {
@@ -72,11 +70,11 @@ export class User {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.users.create(account);
+      response = this.#api.graph.v1.users.create(account);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.users.create(account);
+      response = this.#api.ocs.v2.cloud.users.create(account);
       break;
     }
 
@@ -95,12 +93,12 @@ export class User {
 
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.users.delete(id);
+      response = this.#api.graph.v1.users.delete(id);
       statusSuccess = 204;
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.users.delete(id);
+      response = this.#api.ocs.v2.cloud.users.delete(id);
       statusSuccess = 200;
       break;
     }
@@ -108,21 +106,6 @@ export class User {
     check(response, {
       'client -> user.delete - status': ({ status }) => {
         return status === statusSuccess
-      },
-    });
-
-    return response;
-  }
-
-  assignRole(principalId: string, appRoleId: string, resourceId: string): RefinedResponse<'text'> | undefined {
-    if (this.#version !== Version.ocis) {
-      return;
-    }
-
-    const response = this.#endpoints.graph.v1.users.appRoleAssignments(principalId, appRoleId, resourceId);
-    check(response, {
-      'client -> user.assignRole - status': ({ status }) => {
-        return status === 201
       },
     });
 

@@ -1,28 +1,27 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+
+import { Api } from '@/api';
 
 import { Version } from './client';
 
 export class Group {
-  #endpoints: Endpoints;
-
+  #api: Api;
   #version: Version;
-
-  constructor(version: Version, endpoints: Endpoints) {
+  constructor(version: Version, api: Api) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#api = api;
   }
 
   create(id: string): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.groups.create(id);
+      response = this.#api.graph.v1.groups.create(id);
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.groups.create(id);
+      response = this.#api.ocs.v2.cloud.groups.create(id);
       break;
     }
 
@@ -41,12 +40,12 @@ export class Group {
 
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.groups.delete(id);
+      response = this.#api.graph.v1.groups.delete(id);
       statusSuccess = 204;
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.groups.delete(id);
+      response = this.#api.ocs.v2.cloud.groups.delete(id);
       statusSuccess = 200;
       break;
     }

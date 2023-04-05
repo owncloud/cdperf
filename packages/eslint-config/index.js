@@ -57,7 +57,6 @@ module.exports = {
     '@typescript-eslint/no-unused-expressions': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-loop-func': 'off',
-    'lines-between-class-members': ['error', 'always'],
     'no-continue': 'off',
     'no-relative-import-paths/no-relative-import-paths': [
       'error',
