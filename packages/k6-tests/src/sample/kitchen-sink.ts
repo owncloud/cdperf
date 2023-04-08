@@ -1,6 +1,6 @@
-import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
+import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
 import { backOff, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { fail } from 'k6';
 import { randomBytes } from 'k6/crypto';
@@ -60,7 +60,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
+    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
 
     return {
       credential: userCredential,
@@ -80,7 +80,7 @@ export default function ({ userInfos, adminCredential }: Data): void {
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 
   const userMeResponse = userClient.user.me();
-  const [userDisplayName = userCredential.login] = queryJson('displayNamed', userMeResponse?.json());
+  const [userDisplayName = userCredential.login] = queryJson('displayNamed', userMeResponse?.body);
   if (userDisplayName !== userCredential.login) {
     fail('userDisplayName does not match');
   }
@@ -97,7 +97,7 @@ export default function ({ userInfos, adminCredential }: Data): void {
   userClient.resource.download(userHome, [folderMovedName, assetName].join('/'));
 
   const shareeSearchResponse = userClient.search.sharee(adminCredential.login, ItemType.folder)
-  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.json())
+  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.body)
 
   const createdShareResponse = userClient.share.create(folderMovedName,
     foundSharee,
