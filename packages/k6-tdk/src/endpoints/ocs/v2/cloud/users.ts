@@ -13,8 +13,8 @@ export class Users {
   enable(id: string): RefinedResponse<'text'> {
     return this.request('PUT', `/ocs/v2.php/cloud/users/${id}/enable`, undefined, {
       headers: {
-        'OCS-APIRequest': 'true',
-      },
+        'OCS-APIRequest': 'true'
+      }
     });
   }
 
@@ -24,16 +24,16 @@ export class Users {
       { userid: account.login, password: account.password, email: `${account.login}@owncloud.org` },
       {
         headers: {
-          'OCS-APIRequest': 'true',
-        },
+          'OCS-APIRequest': 'true'
+        }
       });
   }
 
   delete(id: string): RefinedResponse<'text'> {
     return this.request('DELETE', `/ocs/v2.php/cloud/users/${id}`, undefined, {
       headers: {
-        'OCS-APIRequest': 'true',
-      },
+        'OCS-APIRequest': 'true'
+      }
     });
   }
 }
