@@ -15,8 +15,8 @@ export class Roles {
       undefined,
       {
         headers: {
-          'OCS-APIRequest': 'true'
-        }
-      });
+          'OCS-APIRequest': 'true',
+        },
+      },);
   }
 }

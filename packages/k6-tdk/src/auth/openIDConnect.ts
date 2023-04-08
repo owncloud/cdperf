@@ -8,14 +8,20 @@ import { Account, Authenticator, Token } from './auth';
 
 export class OpenIDConnect implements Authenticator {
   #account: Account;
+
   #baseURL: string;
+
   #redirectURL: string;
+
   #logonURL: string;
+
   #tokenURL: string;
+
   #cache?: {
     validTo: Date;
     token: Token;
   };
+
   constructor(account: Account, baseURL: string) {
     this.#account = account;
     this.#baseURL = baseURL;

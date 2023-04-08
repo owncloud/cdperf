@@ -2,7 +2,7 @@ import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
 import { Endpoints } from 'src/endpoints';
 
-import { Version, versionSupported } from './client';
+import { Version } from './client';
 
 export class Application {
   #endpoints: Endpoints;
@@ -15,7 +15,7 @@ export class Application {
   }
 
   list(): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
+    if (this.#version !== Version.ocis) {
       return;
     }
 
@@ -24,7 +24,7 @@ export class Application {
     check(response, {
       'client -> application.list - status': ({ status }) => {
         return status === 200
-      }
+      },
     });
 
     return response;

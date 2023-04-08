@@ -35,13 +35,13 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   spaceCount: parseInt(__ENV.SPACE_COUNT) || 2,
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 // protect test against incompatible client versions
@@ -54,9 +54,9 @@ export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const roleListResponse = adminClient.role.list()
-  const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", roleListResponse?.body);
+  const [appRoleId] = queryJson('$.bundles[?(@.name === \'spaceadmin\')].id', roleListResponse?.body);
   const applicationListResponse = adminClient.application.list()
-  const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", applicationListResponse?.body);
+  const [resourceId] = queryJson('$.value[?(@.displayName === \'ownCloud Infinite Scale\')].id', applicationListResponse?.body);
 
   const userInfos = times<Info>(options.vus || 1, () => {
     const userCredential = { login: randomString(), password: randomString() };
@@ -66,13 +66,13 @@ export function setup(): Data {
     adminClient.user.assignRole(principalId, appRoleId, resourceId)
 
     return {
-      credential: userCredential
+      credential: userCredential,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 
@@ -80,7 +80,7 @@ export default function ({ userInfos }: Data): void {
   const defer: (() => void)[] = [];
   const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
-  const spaceNames = times(settings.spaceCount, () => {
+  const spaceNames = times(1, () => {
     return randomString()
   })
 

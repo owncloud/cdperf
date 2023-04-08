@@ -5,10 +5,11 @@ import { Request } from '@/utils/http';
 
 export class Users {
   protected request: Request;
+
   constructor(request: Request) {
     this.request = request;
   }
-  
+
   create(account: Account): RefinedResponse<'text'> {
     return this.request('POST',
       '/graph/v1.0/users',
@@ -19,7 +20,17 @@ export class Users {
         passwordProfile: { password: account.password },
       }),);
   }
+
   delete(id: string): RefinedResponse<'text'> {
     return this.request('DELETE', `/graph/v1.0/users/${id}`);
+  }
+
+  appRoleAssignments(principalId: string, appRoleId: string, resourceId: string): RefinedResponse<'text'> {
+    return this.request('POST', `/graph/v1.0/users/${principalId}/appRoleAssignments`,
+      JSON.stringify({
+        appRoleId,
+        principalId,
+        resourceId,
+      }))
   }
 }

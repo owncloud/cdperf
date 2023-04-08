@@ -2,7 +2,6 @@ import { Request } from '@/utils/http';
 
 import { Applications } from './applications';
 import { Drives } from './drives';
-import { Extensions } from './extensions';
 import { Groups } from './groups';
 import { Me } from './me';
 import { Users } from './users';
@@ -11,8 +10,6 @@ export class V1 {
   readonly applications: Applications;
 
   readonly drives: Drives;
-
-  readonly extensions: Extensions;
 
   readonly groups: Groups;
 
@@ -23,7 +20,6 @@ export class V1 {
   constructor(request: Request) {
     this.applications = new Applications(request);
     this.drives = new Drives(request);
-    this.extensions = new Extensions(request);
     this.groups = new Groups(request);
     this.me = new Me(request);
     this.users = new Users(request);

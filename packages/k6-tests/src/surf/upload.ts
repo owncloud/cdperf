@@ -40,16 +40,16 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
     size: parseInt(__ENV.ASSET_SIZE) || 1000,
-    quantity: parseInt(__ENV.ASSET_QUANTITY) || 10
+    quantity: parseInt(__ENV.ASSET_QUANTITY) || 10,
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -66,17 +66,17 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome = userCredential.login ] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
+    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 

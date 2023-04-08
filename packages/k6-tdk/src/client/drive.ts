@@ -2,7 +2,7 @@ import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
 import { Endpoints } from 'src/endpoints';
 
-import { Version, versionSupported } from './client';
+import { Version } from './client';
 
 export class Drive {
   #endpoints: Endpoints;
@@ -15,7 +15,7 @@ export class Drive {
   }
 
   create(name: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
+    if (this.#version !== Version.ocis) {
       return;
     }
 
@@ -24,14 +24,14 @@ export class Drive {
     check(response, {
       'client -> drive.create - status': ({ status }) => {
         return status === 201
-      }
+      },
     });
 
     return response;
   }
 
   delete(id: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
+    if (this.#version !== Version.ocis) {
       return;
     }
 
@@ -40,7 +40,7 @@ export class Drive {
     check(response, {
       'client -> drive.delete - status': ({ status }) => {
         return status === 204
-      }
+      },
     });
 
     return response;
