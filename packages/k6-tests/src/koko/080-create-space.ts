@@ -80,7 +80,7 @@ export default function ({ userInfos }: Data): void {
   const defer: (() => void)[] = [];
   const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
-  const spaceNames = times(1, () => {
+  const spaceNames = times(settings.spaceCount, () => {
     return randomString()
   })
 
