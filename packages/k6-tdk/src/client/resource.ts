@@ -30,7 +30,7 @@ export class Resource {
     check(response, {
       'client -> resource.upload - status': ({ status }) => {
         return status === 201
-      },
+      }
     });
 
     return response;
@@ -51,7 +51,7 @@ export class Resource {
     check(response, {
       'client -> resource.create - status': ({ status }) => {
         return status === 201
-      },
+      }
     });
 
     return response;
@@ -72,7 +72,7 @@ export class Resource {
     check(response, {
       'client -> resource.download - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
@@ -101,7 +101,7 @@ export class Resource {
     check(response, {
       'client -> resource.propfind - status': ({ status }) => {
         return status === 207
-      },
+      }
     });
 
     return response;
@@ -122,7 +122,7 @@ export class Resource {
     check(response, {
       'client -> resource.delete - status': ({ status }) => {
         return status === 204
-      },
+      }
     });
 
     return response;
@@ -143,7 +143,7 @@ export class Resource {
     check(response, {
       'client -> resource.move - status': ({ status }) => {
         return status === 201
-      },
+      }
     });
 
     return response;

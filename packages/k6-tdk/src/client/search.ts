@@ -21,7 +21,7 @@ export class Search {
     check(response, {
       'client -> search.sharee - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response
@@ -74,7 +74,7 @@ export class Search {
     check(response, {
       'client -> search.resource - status': ({ status }) => {
         return status === 207
-      },
+      }
     });
 
     return response;

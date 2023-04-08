@@ -1,6 +1,6 @@
 export const Adapter = {
   openIDConnect: 'openIDConnect',
-  basicAuth: 'basicAuth',
+  basicAuth: 'basicAuth'
 } as const;
 
 export type Adapter = (typeof Adapter)[keyof typeof Adapter];

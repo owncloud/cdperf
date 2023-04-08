@@ -38,12 +38,12 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin'
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true,
-  },
+    insecureSkipTLSVerify: true
+  }
 };
 
 /**/
@@ -76,13 +76,13 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome,
+      home: userHome
     };
   });
 
   return {
     adminCredential,
-    userInfos,
+    userInfos
   };
 }
 
@@ -120,7 +120,7 @@ export default function ({ userInfos, adminCredential }: Data): void {
   const createdShareResponse = userClient.share.create(folderMovedName,
     foundSharee,
     ShareType.user,
-    Permission.all,);
+    Permission.all);
   const [createdShareId] = queryXml('ocs.data.id', createdShareResponse.body);
   if (!createdShareId) {
     fail('createdShareId is empty');

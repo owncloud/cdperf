@@ -26,7 +26,7 @@ export class User {
     check(response, {
       'client -> user.drives - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
@@ -46,7 +46,7 @@ export class User {
     check(response, {
       'client -> user.me - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
@@ -62,7 +62,7 @@ export class User {
     check(response, {
       'client -> user.enable - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
@@ -83,7 +83,7 @@ export class User {
     check(response, {
       'client -> user.create - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
@@ -108,7 +108,7 @@ export class User {
     check(response, {
       'client -> user.delete - status': ({ status }) => {
         return status === statusSuccess
-      },
+      }
     });
 
     return response;
@@ -123,7 +123,7 @@ export class User {
     check(response, {
       'client -> user.assignRole - status': ({ status }) => {
         return status === 201
-      },
+      }
     });
 
     return response;

@@ -23,8 +23,8 @@ export class Sharees {
       undefined,
       {
         headers: {
-          'OCS-APIRequest': 'true',
-        },
+          'OCS-APIRequest': 'true'
+        }
       });
   }
 }
