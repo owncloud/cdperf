@@ -8,6 +8,7 @@ export class URLSearchParams {
   constructor(p: unknown) {
     this.#ref = new _URLSearchParams(p);
   }
+
   object(): { [p: string]: string } {
     return Object.fromEntries(this.#ref);
   }

@@ -1,6 +1,6 @@
-import { Permission, ShareType } from  '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
+import { Permission, ShareType } from  '@ownclouders/k6-tdk/lib/endpoints';
 import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
@@ -62,7 +62,7 @@ export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const adminDrivesResponse = adminClient.user.drives();
-  const [ adminHome = adminCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.json());
+  const [ adminHome = adminCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.body);
 
   adminClient.resource.create(adminHome, settings.testFolder);
 
@@ -79,7 +79,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
+    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
     userClient.share.accept(createdShareId);
 
     return {

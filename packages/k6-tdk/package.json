@@ -18,10 +18,10 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/client/cjs/index.js"
     },
-    "./lib/api": {
-      "types": "./dist/types/api/index.d.ts",
-      "import": "./dist/esm/api/index.js",
-      "require": "./dist/client/cjs/index.js"
+    "./lib/endpoints": {
+      "types": "./dist/types/endpoints/index.d.ts",
+      "import": "./dist/esm/endpoints/index.js",
+      "require": "./dist/endpoints/cjs/index.js"
     },
     "./lib/auth": {
       "types": "./dist/types/auth/index.d.ts",

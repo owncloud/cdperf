@@ -5,6 +5,7 @@ import { Cloud } from './cloud';
 
 export class V2 {
   readonly cloud: Cloud;
+
   readonly apps: Apps;
 
   constructor(request: Request) {

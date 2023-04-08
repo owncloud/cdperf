@@ -4,6 +4,7 @@ import { Account, Authenticator } from './auth';
 
 export class BasicAuth implements Authenticator {
   readonly #account: Account;
+
   constructor(account: Account) {
     this.#account = account;
   }
