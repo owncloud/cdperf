@@ -134,7 +134,7 @@ export default function ({ userInfos, shareReceiverInfos }: Data): void {
     const createShareResponse = userClient.share.create(folder,
       foundSharee,
       shareType,
-      Permission.all,);
+      Permission.all);
 
     const [foundShareRecipient] = queryXml('ocs.data.share_with', createShareResponse.body);
     const humanShareType = Object.keys(ShareType).find((key) => {
