@@ -53,7 +53,7 @@ export class Client {
     }
 
     const request = requestFactory(url, authenticator, {
-      jar: new CookieJar(),
+      jar: new CookieJar()
     });
     const endpoints = new Endpoints(request);
 

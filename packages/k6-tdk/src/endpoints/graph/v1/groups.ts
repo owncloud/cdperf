@@ -13,8 +13,8 @@ export class Groups {
     return this.request('POST',
       '/graph/v1.0/groups',
       JSON.stringify({
-        displayName,
-      }),);
+        displayName
+      }));
   }
 
   delete(displayName: string): RefinedResponse<'text'> {

@@ -17,8 +17,8 @@ export class Users {
         onPremisesSamAccountName: account.login,
         displayName: account.login,
         mail: `${account.login}@owncloud.org`,
-        passwordProfile: { password: account.password },
-      }),);
+        passwordProfile: { password: account.password }
+      }));
   }
 
   delete(id: string): RefinedResponse<'text'> {
@@ -30,7 +30,7 @@ export class Users {
       JSON.stringify({
         appRoleId,
         principalId,
-        resourceId,
+        resourceId
       }))
   }
 }

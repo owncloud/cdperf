@@ -49,20 +49,20 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin'
   },
   shareReceivers: {
     groupCount: parseInt(__ENV.SHARE_RECEIVERS_GROUP_COUNT) || 1,
-    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT) || 1,
+    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT) || 1
   },
   assets: {
     folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT) || 1,
-    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT) || 1,
+    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT) || 1
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true,
-  },
+    insecureSkipTLSVerify: true
+  }
 };
 
 /**/
@@ -83,7 +83,7 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome,
+      home: userHome
     };
   });
 
@@ -111,8 +111,8 @@ export function setup(): Data {
     userInfos,
     shareReceiverInfos: {
       users: shareReceiverUserInfos,
-      groups: shareReceiverGroupInfos,
-    },
+      groups: shareReceiverGroupInfos
+    }
   };
 }
 

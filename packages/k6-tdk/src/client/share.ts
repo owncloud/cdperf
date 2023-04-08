@@ -15,7 +15,19 @@ export class Share {
     check(response, {
       'client -> share.create - status': ({ status }) => {
         return status === 200
-      },
+      }
+    });
+
+    return response;
+  }
+
+  delete(id: string): RefinedResponse<'text'> {
+    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.shares.delete(id);
+
+    check(response, {
+      'client -> share.delete - status': ({ status }) => {
+        return status === 200
+      }
     });
 
     return response;
@@ -27,7 +39,7 @@ export class Share {
     check(response, {
       'client -> share.accept - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
