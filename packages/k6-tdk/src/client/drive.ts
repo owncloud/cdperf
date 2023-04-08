@@ -24,7 +24,7 @@ export class Drive {
     check(response, {
       'client -> drive.create - status': ({ status }) => {
         return status === 201
-      }
+      },
     });
 
     return response;
@@ -40,7 +40,7 @@ export class Drive {
     check(response, {
       'client -> drive.delete - status': ({ status }) => {
         return status === 204
-      }
+      },
     });
 
     return response;

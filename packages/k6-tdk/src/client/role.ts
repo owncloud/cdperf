@@ -24,7 +24,7 @@ export class Role {
     check(response, {
       'client -> role.list - status': ({ status }) => {
         return status === 201
-      }
+      },
     });
 
     return response;

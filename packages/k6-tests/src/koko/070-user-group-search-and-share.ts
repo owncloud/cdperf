@@ -1,6 +1,6 @@
-import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/api';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
+import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
 import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { check } from 'k6';
 import exec from 'k6/execution';
@@ -79,7 +79,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
+    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
 
     return {
       credential: userCredential,
@@ -129,7 +129,7 @@ export default function ({ userInfos, shareReceiverInfos }: Data): void {
 
   const shareWith = (sharee: string, folder: string, shareType: ShareType, itemType: ItemType) => {
     const searchResponse = userClient.search.sharee(sharee, itemType)
-    const [foundSharee] = queryJson('$..shareWith', searchResponse?.json())
+    const [foundSharee] = queryJson('$..shareWith', searchResponse?.body)
 
     const createShareResponse = userClient.share.create(folder,
       foundSharee,

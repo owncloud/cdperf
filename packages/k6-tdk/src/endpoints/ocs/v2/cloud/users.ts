@@ -17,6 +17,7 @@ export class Users {
       },
     });
   }
+
   create(account: Account): RefinedResponse<'text'> {
     return this.request('POST',
       '/ocs/v2.php/cloud/users',
@@ -27,6 +28,7 @@ export class Users {
         },
       });
   }
+
   delete(id: string): RefinedResponse<'text'> {
     return this.request('DELETE', `/ocs/v2.php/cloud/users/${id}`, undefined, {
       headers: {

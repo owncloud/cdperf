@@ -1,16 +1,16 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-
-import { Api, Permission, ShareType } from '@/api';
+import { Endpoints, Permission, ShareType } from 'src/endpoints';
 
 export class Share {
-  #api: Api;
-  constructor(api: Api) {
-    this.#api = api;
+  #endpoints: Endpoints;
+
+  constructor(endpoints: Endpoints) {
+    this.#endpoints = endpoints;
   }
 
   create(path: string, shareWith: string, shareType: ShareType, permissions: Permission): RefinedResponse<'text'> {
-    const response = this.#api.ocs.v2.apps.filesSharing.v1.shares.create(path, shareWith, shareType, permissions);
+    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.shares.create(path, shareWith, shareType, permissions);
 
     check(response, {
       'client -> share.create - status': ({ status }) => {
@@ -22,7 +22,7 @@ export class Share {
   }
 
   accept(id: string): RefinedResponse<'text'> {
-    const response = this.#api.ocs.v2.apps.filesSharing.v1.shares.accept(id);
+    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.shares.accept(id);
 
     check(response, {
       'client -> share.accept - status': ({ status }) => {
