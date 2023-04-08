@@ -149,6 +149,9 @@ export default function ({ userInfos, adminCredential }: Data): void {
 
     return Promise.resolve()
   }, { delay: 500, delayMultiplier: 1 }).then(() => {
+
+    userClient.share.delete(createdShareId);
+
     return defer.forEach((d) => {
       return d()
     })
