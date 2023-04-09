@@ -79,4 +79,47 @@ export class Search {
 
     return response;
   }
+
+  tag(id: string, tag: string): RefinedResponse<'text'> {
+    const oc = 'http://owncloud.org/ns'
+    const dav = 'DAV:'
+    let response;
+    switch (this.#version) {
+    case Version.ocis:
+      response = this.#endpoints.dav.files.report(id,
+        create({ version: '1.0', encoding: 'UTF-8' })
+          .ele(oc, 'search-files')
+          .ele(dav, 'prop')
+          .ele(oc, 'fileid').up()
+          .up()
+          .ele(oc, 'search')
+          .ele(oc, 'pattern')
+          .txt(`Tags:${tag}`).up()
+          .ele(oc, 'limit').txt('200')
+          .end());
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#endpoints.dav.files.report(id,
+        create({ version: '1.0', encoding: 'UTF-8' })
+          .ele(oc, 'filter-files')
+          .ele(dav, 'prop')
+          .ele(oc, 'fileid')
+          .up()
+          .up()
+          .ele(oc, 'filter-rules')
+          .ele(oc, 'systemtag')
+          .txt(tag)
+          .end());
+      break;
+    }
+
+    check(response, {
+      'client -> search.tag - status': ({ status }) => {
+        return status === 207
+      }
+    });
+
+    return response;
+  }
 }

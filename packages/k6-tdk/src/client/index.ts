@@ -12,17 +12,10 @@ import { Resource } from './resource';
 import { Role } from './role';
 import { Search } from './search';
 import { Share } from './share';
+import { Tag } from './tag';
 import { User } from './user';
 
-export { Version } from './client';
-
-export const versionGuard = (currentVersion: Version, ...allowedVersions: Version[]) => {
-  if(allowedVersions.includes(currentVersion)) {
-    return
-  }
-
-  throw new Error(`you are using the client version [${currentVersion}] which is not compatible with the test, the following versions are compatible: [${allowedVersions.join(', ')}]`)
-}
+export * from './client';
 
 export class Client {
   application: Application;
@@ -38,6 +31,8 @@ export class Client {
   search: Search;
 
   share: Share;
+
+  tag: Tag;
 
   user: User;
 
@@ -64,6 +59,7 @@ export class Client {
     this.role = new Role(version, endpoints);
     this.search = new Search(version, endpoints);
     this.share = new Share(endpoints);
+    this.tag = new Tag(version, endpoints);
     this.user = new User(version, endpoints);
   }
 }
