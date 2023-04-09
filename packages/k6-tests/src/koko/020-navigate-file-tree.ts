@@ -64,7 +64,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
+    const [ userHome = userCredential.login ] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
 
     const userFolders = times(settings.folder.rootCount, () => {
       const tree = times(settings.folder.childCount, () => {

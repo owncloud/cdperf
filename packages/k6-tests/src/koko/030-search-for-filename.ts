@@ -66,7 +66,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
+    const [userHome = userCredential.login] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
 
     return {
       home: userHome,
@@ -94,7 +94,7 @@ export default function ({ userInfos }: Data): void {
 
   const searchTask = (query: string, expectedId: string, description: string) => {
     const searchResponse = userClient.search.resource(userCredential.login, { query })
-    const [searchFileID] = queryXml('$..oc:fileid', searchResponse?.body);
+    const [searchFileID] = queryXml("$..['oc:fileid']", searchResponse?.body);
     const ready = !!searchFileID
 
     if(!ready) {
@@ -113,7 +113,7 @@ export default function ({ userInfos }: Data): void {
   folderNames.forEach((folderName) => {
     userClient.resource.create(userHome, folderName)
     const propfindResponse = userClient.resource.propfind(userHome, folderName);
-    const [expectedId] = queryXml('$..oc:fileid', propfindResponse?.body);
+    const [expectedId] = queryXml("$..['oc:fileid']", propfindResponse?.body);
 
     searchTasks.add(() => {
       return searchTask(folderName, expectedId, 'folder-name')
@@ -127,7 +127,7 @@ export default function ({ userInfos }: Data): void {
   textDocuments.forEach(([documentName, documentContent]) => {
     userClient.resource.upload(userHome, documentName, documentContent);
     const propfindResponse = userClient.resource.propfind(userHome, documentName);
-    const [expectedId] = queryXml('$..oc:fileid', propfindResponse?.body);
+    const [expectedId] = queryXml("$..['oc:fileid']", propfindResponse?.body);
 
     searchTasks.add(() => {
       return searchTask(documentName, expectedId, 'file-name')

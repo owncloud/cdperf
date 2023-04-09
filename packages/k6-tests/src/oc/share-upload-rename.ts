@@ -62,7 +62,7 @@ export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const adminDrivesResponse = adminClient.user.drives();
-  const [ adminHome = adminCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', adminDrivesResponse?.body);
+  const [ adminHome = adminCredential.login ] = queryJson("$.value[?(@.driveType === 'personal')].id", adminDrivesResponse?.body);
 
   adminClient.resource.create(adminHome, settings.testFolder);
 
@@ -79,7 +79,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
+    const [ userHome = userCredential.login ] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
     userClient.share.accept(createdShareId);
 
     return {

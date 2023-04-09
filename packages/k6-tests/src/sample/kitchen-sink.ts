@@ -53,9 +53,9 @@ export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const roleListResponse = adminClient.role.list()
-  const [appRoleId] = queryJson('$.bundles[?(@.name === \'spaceadmin\')].id', roleListResponse?.body);
+  const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", roleListResponse?.body);
   const applicationListResponse = adminClient.application.list()
-  const [resourceId] = queryJson('$.value[?(@.displayName === \'ownCloud Infinite Scale\')].id', applicationListResponse?.body);
+  const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", applicationListResponse?.body);
 
   const groupName = randomString()
   const groupCreateResponse = adminClient.group.create(groupName)
@@ -72,7 +72,7 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
+    const [userHome = userCredential.login] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
 
     return {
       credential: userCredential,
@@ -131,7 +131,7 @@ export default function ({ userInfos, adminCredential }: Data): void {
 
   backOff(() => {
     const searchResponse = userClient.search.resource(userCredential.login, { query: folderMovedName })
-    const [searchFileID] = queryXml('$..oc:fileid', searchResponse?.body);
+    const [searchFileID] = queryXml("$..['oc:fileid']", searchResponse?.body);
     const found = !!searchFileID
 
     if(!found) {
@@ -139,7 +139,7 @@ export default function ({ userInfos, adminCredential }: Data): void {
     }
 
     const propfindResponse = userClient.resource.propfind(userHome, folderMovedName);
-    const [expectedId] = queryXml('$..oc:fileid', propfindResponse?.body);
+    const [expectedId] = queryXml("$..['oc:fileid']", propfindResponse?.body);
 
     check(undefined, {
       'test -> searchId and propfindId match': () => {

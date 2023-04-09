@@ -4,7 +4,7 @@ import { Endpoints } from 'src/endpoints';
 
 import { Account } from '@/auth';
 
-import { Version } from './client';
+import { Version, versionSupported } from './client';
 
 export class User {
   #endpoints: Endpoints;
@@ -17,7 +17,7 @@ export class User {
   }
 
   drives(): RefinedResponse<'text'> | undefined {
-    if (this.#version !== Version.ocis) {
+    if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
 
@@ -33,7 +33,7 @@ export class User {
   }
 
   me(): RefinedResponse<'text'> | undefined {
-    if (this.#version !== Version.ocis) {
+    if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
 
@@ -53,7 +53,7 @@ export class User {
   }
 
   enable(id: string): RefinedResponse<'text'> | undefined {
-    if (this.#version === Version.ocis) {
+    if (!versionSupported(this.#version, Version.occ, Version.nc)) {
       return;
     }
 
@@ -115,7 +115,7 @@ export class User {
   }
 
   assignRole(principalId: string, appRoleId: string, resourceId: string): RefinedResponse<'text'> | undefined {
-    if (this.#version !== Version.ocis) {
+    if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
 
