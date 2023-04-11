@@ -7,18 +7,18 @@ import { Options } from 'k6/options';
 import { times } from 'lodash';
 
 interface Credential {
-	login: string;
-	password: string;
+  login: string;
+  password: string;
 }
 
 interface Info {
-	credential: Credential;
-	home: string;
+  credential: Credential;
+  home: string;
 }
 
 interface Data {
-	adminCredential: Credential;
-	userInfos: Info[];
+  adminCredential: Credential;
+  userInfos: Info[];
 }
 
 interface Settings {
@@ -36,20 +36,20 @@ interface Settings {
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
-    size: parseInt(__ENV.ASSET_SIZE) || 1000,
-    quantity: parseInt(__ENV.ASSET_QUANTITY) || 10
+    size: parseInt(__ENV.ASSET_SIZE, 10) || 1000,
+    quantity: parseInt(__ENV.ASSET_QUANTITY, 10) || 10,
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -66,26 +66,26 @@ export function setup(): Data {
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
-    const [ userHome = userCredential.login ] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
+    const [userHome = userCredential.login] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 
-export default function ({ userInfos }: Data): void {
-  const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+export default function run({ userInfos }: Data): void {
+  const { home: userHome, credential: userCredential } = userInfos[exec.vu.idInTest - 1];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   const data = randomBytes(settings.assets.size * 1000);
   times(settings.assets.quantity, (i) => {
-    userClient.resource.upload(userHome, [ exec.scenario.iterationInTest, userCredential.login, i ].join('-'), data);
+    userClient.resource.upload(userHome, [exec.scenario.iterationInTest, userCredential.login, i].join('-'), data);
   });
 }
 
@@ -93,6 +93,6 @@ export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
 }

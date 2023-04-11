@@ -7,40 +7,40 @@ import { Options } from 'k6/options';
 import { times } from 'lodash';
 
 interface Credential {
-	login: string;
-	password: string;
+  login: string;
+  password: string;
 }
 
 interface Info {
-	credential: Credential;
+  credential: Credential;
 }
 
 interface Data {
-	adminCredential: Credential;
-	userInfos: Info[];
+  adminCredential: Credential;
+  userInfos: Info[];
 }
 
 interface Settings {
-	authAdapter: Adapter;
-	baseURL: string;
-	clientVersion: Version;
-	adminUser: Credential;
-	k6: Options;
+  authAdapter: Adapter;
+  baseURL: string;
+  clientVersion: Version;
+  adminUser: Credential;
+  k6: Options;
 }
 
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -56,26 +56,26 @@ export function setup(): Data {
     adminClient.user.enable(userCredential.login);
 
     return {
-      credential: userCredential
+      credential: userCredential,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 
-export default function ({ userInfos }: Data): void {
-  const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+export default function run({ userInfos }: Data): void {
+  const { credential: userCredential } = userInfos[exec.vu.idInTest - 1];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   const userMeResponse = userClient.user.me();
-  const [ userDisplayName = userCredential.login ] = queryJson('displayNamed', userMeResponse?.body);
+  const [userDisplayName = userCredential.login] = queryJson('displayNamed', userMeResponse?.body);
 
   check(userDisplayName, {
     'user displayName': (displayName) => {
-      return displayName === userCredential.login
-    }
+      return displayName === userCredential.login;
+    },
   });
 }
 
@@ -83,6 +83,6 @@ export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
 }

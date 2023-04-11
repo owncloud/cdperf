@@ -1,6 +1,8 @@
 import { CookieJar } from 'k6/http';
 
-import { Account, Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
+import {
+  Account, Adapter, Authenticator, BasicAuth, OpenIDConnect,
+} from '@/auth';
 import { requestFactory } from '@/utils/http';
 
 import { Application } from './application';
@@ -38,16 +40,17 @@ export class Client {
   constructor(url: string, version: Version, authAdapter: Adapter, account: Account) {
     let authenticator: Authenticator;
     switch (authAdapter) {
-    case Adapter.openIDConnect:
-      authenticator = new OpenIDConnect(account, url);
-      break;
-    case Adapter.basicAuth:
-      authenticator = new BasicAuth(account);
-      break;
+      case Adapter.basicAuth:
+        authenticator = new BasicAuth(account);
+        break;
+      case Adapter.openIDConnect:
+      default:
+        authenticator = new OpenIDConnect(account, url);
+        break;
     }
 
     const request = requestFactory(url, authenticator, {
-      jar: new CookieJar()
+      jar: new CookieJar(),
     });
 
     this.application = new Application(version, request);

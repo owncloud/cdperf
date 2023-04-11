@@ -37,19 +37,19 @@ interface Settings {
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   shareReceivers: {
-    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT) || 35
+    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT, 10) || 35,
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -68,12 +68,12 @@ export function setup(): Data {
     const userDrivesResponse = userClient.user.drives();
     const [userHome = userCredential.login] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
 
-    const userShareFolder = randomString()
+    const userShareFolder = randomString();
     userClient.resource.create(userHome, userShareFolder);
 
     return {
       credential: userCredential,
-      shareFolder: userShareFolder
+      shareFolder: userShareFolder,
     };
   });
 
@@ -82,49 +82,49 @@ export function setup(): Data {
     adminClient.user.create(shareeCredential);
     adminClient.user.enable(shareeCredential.login);
 
-    return shareeCredential
-  })
+    return shareeCredential;
+  });
 
   return {
     adminCredential,
     userInfos,
-    shareReceiverUserInfos
+    shareReceiverUserInfos,
   };
 }
 
-export default function ({ userInfos, shareReceiverUserInfos }: Data): void {
+export default function run({ userInfos, shareReceiverUserInfos }: Data): void {
   const defer: (() => void)[] = [];
-  const { credential: userCredential, shareFolder: userShareFolder } = userInfos[ exec.vu.idInTest - 1 ];
+  const { credential: userCredential, shareFolder: userShareFolder } = userInfos[exec.vu.idInTest - 1];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   shareReceiverUserInfos.forEach(({ login }) => {
     const createShareResponse = userClient.share.create(userShareFolder, login, ShareType.user, Permission.all);
     const [foundShareRecipient] = queryXml('ocs.data.share_with', createShareResponse.body);
 
     check(undefined, {
-      [ 'test -> share received - match' ]: () => {
-        return foundShareRecipient === login
-      }
-    })
+      'test -> share received - match': () => {
+        return foundShareRecipient === login;
+      },
+    });
 
     defer.push(() => {
       const [shareId] = queryXml('ocs.data.id', createShareResponse.body);
       userClient.share.delete(shareId);
     });
-  })
+  });
 
   defer.forEach((d) => {
-    return d()
-  })
+    return d();
+  });
 }
 
 export function teardown({ userInfos, adminCredential, shareReceiverUserInfos }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
 
   shareReceiverUserInfos.forEach(({ login }) => {
-    return adminClient.user.delete(login)
+    return adminClient.user.delete(login);
   });
 }

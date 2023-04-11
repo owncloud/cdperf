@@ -19,19 +19,20 @@ export class Group {
   create(id: string): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-    case Version.ocis:
-      response = endpoints.graph.v1.groups.POST__create_group(this.#request, { groupName: id });
-      break;
-    case Version.occ:
-    case Version.nc:
-      response = endpoints.ocs.v2.apps.cloud.groups.POST__create_group(this.#request, { groupName: id });
-      break;
+      case Version.occ:
+      case Version.nc:
+        response = endpoints.ocs.v2.apps.cloud.groups.POST__create_group(this.#request, { groupName: id });
+        break;
+      case Version.ocis:
+      default:
+        response = endpoints.graph.v1.groups.POST__create_group(this.#request, { groupName: id });
+        break;
     }
 
     check(response, {
       'client -> group.create - status': ({ status }) => {
-        return status === 200
-      }
+        return status === 200;
+      },
     });
 
     return response;
@@ -42,21 +43,22 @@ export class Group {
     let statusSuccess: number;
 
     switch (this.#version) {
-    case Version.ocis:
-      response = endpoints.graph.v1.groups.DELETE__delete_group(this.#request, { groupName: id });
-      statusSuccess = 204;
-      break;
-    case Version.occ:
-    case Version.nc:
-      response = endpoints.ocs.v2.apps.cloud.groups.DELETE__delete_group(this.#request, { groupName: id });
-      statusSuccess = 200;
-      break;
+      case Version.occ:
+      case Version.nc:
+        response = endpoints.ocs.v2.apps.cloud.groups.DELETE__delete_group(this.#request, { groupName: id });
+        statusSuccess = 200;
+        break;
+      case Version.ocis:
+      default:
+        response = endpoints.graph.v1.groups.DELETE__delete_group(this.#request, { groupName: id });
+        statusSuccess = 204;
+        break;
     }
 
     check(response, {
       'client -> group.delete - status': ({ status }) => {
-        return status === statusSuccess
-      }
+        return status === statusSuccess;
+      },
     });
 
     return response;

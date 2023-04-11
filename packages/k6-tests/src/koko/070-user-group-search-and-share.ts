@@ -45,24 +45,24 @@ interface Settings {
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   shareReceivers: {
-    groupCount: parseInt(__ENV.SHARE_RECEIVERS_GROUP_COUNT) || 1,
-    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT) || 1
+    groupCount: parseInt(__ENV.SHARE_RECEIVERS_GROUP_COUNT, 10) || 1,
+    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT, 10) || 1,
   },
   assets: {
-    folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT) || 1,
-    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT) || 1
+    folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT, 10) || 1,
+    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT, 10) || 1,
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -83,7 +83,7 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
@@ -92,110 +92,112 @@ export function setup(): Data {
     adminClient.user.create(shareeCredential);
     adminClient.user.enable(shareeCredential.login);
 
-    return shareeCredential
-  })
+    return shareeCredential;
+  });
 
   const shareReceiverGroupInfos = times<Data['shareReceiverInfos']['groups'][0]>(settings.shareReceivers.groupCount, () => {
-    const groupName = randomString()
-    const groupCreateResponse = adminClient.group.create(groupName)
+    const groupName = randomString();
+    const groupCreateResponse = adminClient.group.create(groupName);
     const [groupId = groupName] = queryJson('$.id', groupCreateResponse?.body);
 
     return {
       id: groupId,
-      name: groupName
-    }
-  })
+      name: groupName,
+    };
+  });
 
   return {
     adminCredential,
     userInfos,
     shareReceiverInfos: {
       users: shareReceiverUserInfos,
-      groups: shareReceiverGroupInfos
-    }
+      groups: shareReceiverGroupInfos,
+    },
   };
 }
 
-export default function ({ userInfos, shareReceiverInfos }: Data): void {
+export default function run({ userInfos, shareReceiverInfos }: Data): void {
   const defer: (() => void)[] = [];
-  const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+  const { home: userHome, credential: userCredential } = userInfos[exec.vu.idInTest - 1];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   const shareFolders = times(settings.assets.folderCount, () => {
-    return randomString()
-  })
+    return randomString();
+  });
   const shareTextDocuments = times(settings.assets.textDocumentCount, () => {
-    return randomString()
-  })
+    return randomString();
+  });
 
   const shareWith = (sharee: string, folder: string, shareType: ShareType, itemType: ItemType) => {
-    const searchResponse = userClient.search.sharee(sharee, itemType)
-    const [foundSharee] = queryJson('$..shareWith', searchResponse?.body)
+    const searchResponse = userClient.search.sharee(sharee, itemType);
+    const [foundSharee] = queryJson('$..shareWith', searchResponse?.body);
 
-    const createShareResponse = userClient.share.create(folder,
+    const createShareResponse = userClient.share.create(
+      folder,
       foundSharee,
       shareType,
-      Permission.all);
+      Permission.all,
+    );
 
     const [foundShareRecipient] = queryXml('ocs.data.share_with', createShareResponse.body);
     const humanShareType = Object.keys(ShareType).find((key) => {
-      return ShareType[ key ] === shareType
-    })
-    
+      return ShareType[key] === shareType;
+    });
+
     check(undefined, {
-      [ `test -> sharee ( ${humanShareType} ) found` ]: () => {
-        return sharee === foundSharee
+      [`test -> sharee ( ${humanShareType} ) found`]: () => {
+        return sharee === foundSharee;
       },
-      [ `test -> share ( ${itemType} ) received` ]: () => {
-        return sharee === foundShareRecipient
-      }
-    })
-  }
+      [`test -> share ( ${itemType} ) received`]: () => {
+        return sharee === foundShareRecipient;
+      },
+    });
+  };
 
   shareFolders.forEach((shareFolder) => {
     userClient.resource.create(userHome, shareFolder);
 
     shareReceiverInfos.users.forEach(({ login }) => {
-      return shareWith(login, shareFolder, ShareType.user, ItemType.folder)
-    })
+      return shareWith(login, shareFolder, ShareType.user, ItemType.folder);
+    });
     shareReceiverInfos.groups.forEach(({ name }) => {
-      return shareWith(name, shareFolder, ShareType.group, ItemType.folder)
-    })
+      return shareWith(name, shareFolder, ShareType.group, ItemType.folder);
+    });
 
     defer.push(() => {
-      userClient.resource.delete(userHome, shareFolder)
+      userClient.resource.delete(userHome, shareFolder);
     });
-  })
+  });
 
   shareTextDocuments.forEach((shareTextDocument) => {
     userClient.resource.upload(userHome, shareTextDocument, randomString());
 
     shareReceiverInfos.users.forEach(({ login }) => {
-      return shareWith(login, shareTextDocument, ShareType.user, ItemType.file)
-    })
+      return shareWith(login, shareTextDocument, ShareType.user, ItemType.file);
+    });
     shareReceiverInfos.groups.forEach(({ name }) => {
-      return shareWith(name, shareTextDocument, ShareType.group, ItemType.file)
-    })
+      return shareWith(name, shareTextDocument, ShareType.group, ItemType.file);
+    });
 
     defer.push(() => {
-      userClient.resource.delete(userHome, shareTextDocument)
+      userClient.resource.delete(userHome, shareTextDocument);
     });
-  })
+  });
 
   defer.forEach((d) => {
-    return d()
-  })
+    return d();
+  });
 }
 
 export function teardown({ userInfos, adminCredential, shareReceiverInfos }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
   shareReceiverInfos.users.forEach(({ login }) => {
-    return adminClient.user.delete(login)
+    return adminClient.user.delete(login);
   });
   shareReceiverInfos.groups.forEach(({ id }) => {
-    return adminClient.group.delete(id)
+    return adminClient.group.delete(id);
   });
 }

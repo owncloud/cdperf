@@ -20,12 +20,12 @@ export class Drive {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
-    
+
     const response = endpoints.graph.v1.drives.POST__create_drive(this.#request, { driveName: name });
     check(response, {
       'client -> drive.create - status': ({ status }) => {
-        return status === 201
-      }
+        return status === 201;
+      },
     });
 
     return response;
@@ -39,8 +39,8 @@ export class Drive {
     const response = endpoints.graph.v1.drives.DELETE__delete_drive(this.#request, { driveId: id });
     check(response, {
       'client -> drive.delete - status': ({ status }) => {
-        return status === 204
-      }
+        return status === 204;
+      },
     });
 
     return response;

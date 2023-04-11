@@ -46,30 +46,30 @@ interface Settings {
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
     small: {
-      size: parseInt(__ENV.ASSET_SMALL_SIZE) || 10,
-      quantity: parseInt(__ENV.ASSET_SMALL_QUANTITY) || 1
+      size: parseInt(__ENV.ASSET_SMALL_SIZE, 10) || 10,
+      quantity: parseInt(__ENV.ASSET_SMALL_QUANTITY, 10) || 1,
     },
     medium: {
-      size: parseInt(__ENV.ASSET_MEDIUM_SIZE) || 10 * 10,
-      quantity: parseInt(__ENV.ASSET_MEDIUM_QUANTITY) || 1
+      size: parseInt(__ENV.ASSET_MEDIUM_SIZE, 10) || 10 * 10,
+      quantity: parseInt(__ENV.ASSET_MEDIUM_QUANTITY, 10) || 1,
     },
     large: {
-      size: parseInt(__ENV.ASSET_LARGE_SIZE) || 10 * 100,
-      quantity: parseInt(__ENV.ASSET_LARGE_QUANTITY) || 1
-    }
+      size: parseInt(__ENV.ASSET_LARGE_SIZE, 10) || 10 * 100,
+      quantity: parseInt(__ENV.ASSET_LARGE_QUANTITY, 10) || 1,
+    },
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -90,34 +90,35 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 
-export default function ({ userInfos }: Data): void {
+export default function run({ userInfos }: Data): void {
   const defer: (() => void)[] = [];
-  const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+  const { home: userHome, credential: userCredential } = userInfos[exec.vu.idInTest - 1];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 
-  for (const [k, v] of Object.entries(settings.assets)) {
-    times(v.quantity, (i) => {
+  Object.keys(settings.assets).forEach((k) => {
+    const { quantity, size } = settings.assets[k];
+    times(quantity, (i) => {
       const assetName = [exec.scenario.iterationInTest, k, i].join('-');
 
-      userClient.resource.upload(userHome, assetName, randomBytes(v.size * 1000));
+      userClient.resource.upload(userHome, assetName, randomBytes(size * 1000));
       defer.push(() => {
-        return userClient.resource.delete(userHome, assetName)
+        return userClient.resource.delete(userHome, assetName);
       });
     });
-  }
+  });
 
   defer.forEach((c) => {
-    return c()
+    return c();
   });
 }
 
@@ -125,6 +126,6 @@ export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
 }

@@ -36,20 +36,20 @@ interface Settings {
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   assets: {
-    folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT) || 2,
-    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT) || 2
+    folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT, 10) || 2,
+    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT, 10) || 2,
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -70,48 +70,48 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 
-export default function ({ userInfos, adminCredential }: Data): void {
+export default function run({ userInfos, adminCredential }: Data): void {
   const defer: (() => void)[] = [];
-  const checks: Checkers<unknown> = {}
-  const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
-  const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential)
-  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential)
+  const checks: Checkers<unknown> = {};
+  const { home: userHome, credential: userCredential } = userInfos[exec.vu.idInTest - 1];
+  const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const tagFolders = times(settings.assets.folderCount, () => {
-    return randomString()
-  })
+    return randomString();
+  });
   const tagTextDocuments = times(settings.assets.textDocumentCount, () => {
-    return [randomString(), '.txt'].join('')
-  })
+    return [randomString(), '.txt'].join('');
+  });
   const getOrCreateTag = (name) => {
-    if(settings.clientVersion === Version.ocis) {
-      return name
+    if (settings.clientVersion === Version.ocis) {
+      return name;
     }
 
-    const tagListResponse = userClient.tag.list()
-    const [{ 'oc:id': id } = { 'oc:id': '' }] = queryXml(`$..[?(@['oc:display-name'] === '${name}')]`, tagListResponse?.body)
+    const tagListResponse = userClient.tag.list();
+    const [{ 'oc:id': id } = { 'oc:id': '' }] = queryXml(`$..[?(@['oc:display-name'] === '${name}')]`, tagListResponse?.body);
 
-    if(id) {
-      return id
+    if (id) {
+      return id;
     }
 
-    const { headers: { 'Content-Location': contentLocation } } = userClient.tag.create(name) || { headers: { 'Content-Location': '' } }
+    const { headers: { 'Content-Location': contentLocation } } = userClient.tag.create(name) || { headers: { 'Content-Location': '' } };
 
-    return contentLocation.split('/').pop()
-  }
+    return contentLocation.split('/').pop();
+  };
 
   [...tagFolders, ...tagTextDocuments].forEach((resourceName) => {
-    const isFile = resourceName.match(/\.[0-9a-z]+$/i)
-    const resourceTag = getOrCreateTag(randomString())
+    const isFile = resourceName.match(/\.[0-9a-z]+$/i);
+    const resourceTag = getOrCreateTag(randomString());
 
     if (isFile) {
       userClient.resource.upload(userHome, resourceName, randomString());
@@ -120,48 +120,48 @@ export default function ({ userInfos, adminCredential }: Data): void {
     }
 
     defer.push(() => {
-      adminClient.tag.delete(resourceTag)
-      userClient.resource.delete(userHome, resourceName)
+      adminClient.tag.delete(resourceTag);
+      userClient.resource.delete(userHome, resourceName);
     });
 
     const propfindResponseInitial = userClient.resource.propfind(userHome, resourceName);
     const [resourceId] = queryXml("$..['oc:fileid']", propfindResponseInitial.body);
-    userClient.tag.assign(resourceId, resourceTag)
+    userClient.tag.assign(resourceId, resourceTag);
 
     const getTags = () => {
-      let tags = []
-      if(versionSupported(settings.clientVersion, Version.occ, Version.nc)) {
+      let tags = [];
+      if (versionSupported(settings.clientVersion, Version.occ, Version.nc)) {
         tags = queryXml(`$..[?(@['oc:id'] === '${resourceTag}')]['oc:id']`, userClient.tag.get(resourceId)?.body);
       } else {
         tags = queryXml("$..['oc:tags']", userClient.resource.propfind(userHome, resourceName).body);
       }
 
-      return tags[ 0 ]
-    }
+      return tags[0];
+    };
 
-    const resourceTagAfterAssign = getTags()
-    checks[ 'test -> tag - assign' ] = () => {
-      return resourceTagAfterAssign === resourceTag
-    }
+    const resourceTagAfterAssign = getTags();
+    checks['test -> tag - assign'] = () => {
+      return resourceTagAfterAssign === resourceTag;
+    };
 
-    userClient.tag.unassign(resourceId, resourceTag)
-    const resourceTagAfterUnassign = getTags()
-    checks[ 'test -> tag - unassign' ] = () => {
-      return resourceTagAfterUnassign === undefined
-    }
-  })
+    userClient.tag.unassign(resourceId, resourceTag);
+    const resourceTagAfterUnassign = getTags();
+    checks['test -> tag - unassign'] = () => {
+      return resourceTagAfterUnassign === undefined;
+    };
+  });
 
   defer.forEach((d) => {
-    return d()
-  })
+    return d();
+  });
 
-  check(undefined, checks)
+  check(undefined, checks);
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
 }

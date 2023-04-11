@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore
 import { URLSearchParams as _URLSearchParams } from 'https://jslib.k6.io/url/1.0.0/index.js';
 
@@ -21,7 +20,7 @@ export const cleanURL = (...parts: string[]): string => {
 export const objectToQueryString = (o: { [key: string]: string | number }): string => {
   return Object.keys(o)
     .map((key) => {
-      return encodeURIComponent(key) + '=' + encodeURIComponent(o[ key ] || '')
+      return `${encodeURIComponent(key)}=${encodeURIComponent(o[key] || '')}`;
     })
     .join('&');
 };

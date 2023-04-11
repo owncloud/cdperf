@@ -1,7 +1,9 @@
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
 import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
-import { backOff, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import {
+  backOff, queryJson, queryXml, randomString,
+} from '@ownclouders/k6-tdk/lib/utils';
 import { check, fail } from 'k6';
 import { randomBytes } from 'k6/crypto';
 import exec from 'k6/execution';
@@ -34,16 +36,16 @@ interface Settings {
 /**/
 const settings: Settings = {
   baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
+    password: __ENV.ADMIN_PASSWORD || 'admin',
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true
-  }
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
@@ -52,15 +54,15 @@ export const options: Options = settings.k6;
 export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
-  const roleListResponse = adminClient.role.list()
+  const roleListResponse = adminClient.role.list();
   const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", roleListResponse?.body);
-  const applicationListResponse = adminClient.application.list()
+  const applicationListResponse = adminClient.application.list();
   const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", applicationListResponse?.body);
 
-  const groupName = randomString()
-  const groupCreateResponse = adminClient.group.create(groupName)
+  const groupName = randomString();
+  const groupCreateResponse = adminClient.group.create(groupName);
   const [groupId = groupName] = queryJson('$.id', groupCreateResponse?.body);
-  adminClient.group.delete(groupId)
+  adminClient.group.delete(groupId);
 
   const userInfos = times<Info>(options.vus || 1, () => {
     const userCredential = { login: randomString(), password: randomString() };
@@ -68,7 +70,7 @@ export function setup(): Data {
     const [principalId] = queryJson('$.id', userCreateResponse.body);
 
     adminClient.user.enable(userCredential.login);
-    adminClient.user.assignRole(principalId, appRoleId, resourceId)
+    adminClient.user.assignRole(principalId, appRoleId, resourceId);
 
     const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
     const userDrivesResponse = userClient.user.drives();
@@ -76,19 +78,19 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome
+      home: userHome,
     };
   });
 
   return {
     adminCredential,
-    userInfos
+    userInfos,
   };
 }
 
-export default function ({ userInfos, adminCredential }: Data): void {
+export default function run({ userInfos, adminCredential }: Data): void {
   const defer: (() => void)[] = [];
-  const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+  const { home: userHome, credential: userCredential } = userInfos[exec.vu.idInTest - 1];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 
   const userMeResponse = userClient.user.me();
@@ -97,10 +99,10 @@ export default function ({ userInfos, adminCredential }: Data): void {
     fail('userDisplayName does not match');
   }
 
-  const driveCreateResponse = userClient.drive.create(randomString())
+  const driveCreateResponse = userClient.drive.create(randomString());
   const [spaceId] = queryJson('$.id', driveCreateResponse?.body);
   defer.push(() => {
-    userClient.drive.delete(spaceId)
+    userClient.drive.delete(spaceId);
   });
 
   const folderCreationName = randomString();
@@ -108,19 +110,21 @@ export default function ({ userInfos, adminCredential }: Data): void {
   const assetName = randomString();
   userClient.resource.create(userHome, folderCreationName);
   defer.push(() => {
-    return userClient.resource.delete(userHome, folderMovedName)
+    return userClient.resource.delete(userHome, folderMovedName);
   });
   userClient.resource.move(userHome, folderCreationName, folderMovedName);
   userClient.resource.upload(userHome, [folderMovedName, assetName].join('/'), randomBytes(1000));
   userClient.resource.download(userHome, [folderMovedName, assetName].join('/'));
 
-  const shareeSearchResponse = userClient.search.sharee(adminCredential.login, ItemType.folder)
-  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.body)
+  const shareeSearchResponse = userClient.search.sharee(adminCredential.login, ItemType.folder);
+  const [foundSharee] = queryJson('$..shareWith', shareeSearchResponse?.body);
 
-  const createdShareResponse = userClient.share.create(folderMovedName,
+  const createdShareResponse = userClient.share.create(
+    folderMovedName,
     foundSharee,
     ShareType.user,
-    Permission.all);
+    Permission.all,
+  );
   const [createdShareId] = queryXml('ocs.data.id', createdShareResponse.body);
   if (!createdShareId) {
     fail('createdShareId is empty');
@@ -130,12 +134,12 @@ export default function ({ userInfos, adminCredential }: Data): void {
   adminClient.share.accept(createdShareId);
 
   backOff(() => {
-    const searchResponse = userClient.search.resource(userCredential.login, { query: folderMovedName })
+    const searchResponse = userClient.search.resource(userCredential.login, { query: folderMovedName });
     const [searchFileID] = queryXml("$..['oc:fileid']", searchResponse?.body);
-    const found = !!searchFileID
+    const found = !!searchFileID;
 
-    if(!found) {
-      return Promise.reject()
+    if (!found) {
+      return Promise.reject();
     }
 
     const propfindResponse = userClient.resource.propfind(userHome, folderMovedName);
@@ -143,25 +147,24 @@ export default function ({ userInfos, adminCredential }: Data): void {
 
     check(undefined, {
       'test -> searchId and propfindId match': () => {
-        return searchFileID === expectedId
-      }
-    })
+        return searchFileID === expectedId;
+      },
+    });
 
-    return Promise.resolve()
+    return Promise.resolve();
   }, { delay: 500, delayMultiplier: 1 }).then(() => {
-
     userClient.share.delete(createdShareId);
 
     return defer.forEach((d) => {
-      return d()
-    })
-  })
+      return d();
+    });
+  });
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login)
+    return adminClient.user.delete(credential.login);
   });
 }

@@ -3,9 +3,18 @@
 	"extends": ["@ownclouders"],
   "overrides": [
     {
-      "files": [
-        "src/**/*"
-      ]
+      "files": ["src/client/**/*"],
+      "rules": {
+        // has to return different values because of ocis, nc and occ compatibility / incompatibility
+        "consistent-return": "off"
+      }
+    },
+    {
+      "files": ["src/endpoints/**/*"],
+      "rules": {
+        // has some `strange` naming conventions e.g. 'METHOD__description_what_it_does', 'POST_create_user'
+        "@typescript-eslint/naming-convention": "off"
+      }
     }
   ]
 }

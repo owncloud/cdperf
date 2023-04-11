@@ -24,13 +24,15 @@ export class Tag {
 
     const response = endpoints.dav.systemtags.POST__create_tag(this.#request, {
       tagName: name,
-      canAssignTag: canAssign, userAssignableTag: userAssignable, userVisibleTag: userVisible
-    })
+      canAssignTag: canAssign,
+      userAssignableTag: userAssignable,
+      userVisibleTag: userVisible,
+    });
 
     check(response, {
       'client -> tag.create - status': ({ status }) => {
-        return status === 201
-      }
+        return status === 201;
+      },
     });
 
     return response;
@@ -41,13 +43,13 @@ export class Tag {
       return;
     }
     const response = endpoints.dav.systemtags.DELETE__delete_tag(this.#request, {
-      tagId: id
-    })
+      tagId: id,
+    });
 
     check(response, {
       'client -> tag.delete - status': ({ status }) => {
-        return status === 204
-      }
+        return status === 204;
+      },
     });
 
     return response;
@@ -58,8 +60,8 @@ export class Tag {
       return;
     }
 
-    const oc = 'http://owncloud.org/ns'
-    const dav = 'DAV:'
+    const oc = 'http://owncloud.org/ns';
+    const dav = 'DAV:';
     const response = endpoints.dav.systemtags.PROPFIND__get_tags_with_properties(this.#request, {
       propfindXml: create({ version: '1.0', encoding: 'UTF-8' })
         .ele(dav, 'propfind')
@@ -72,76 +74,78 @@ export class Tag {
         .up()
         .ele(oc, 'id')
         .up()
-        .end()
+        .end(),
     });
 
     check(response, {
       'client -> tag.list - status': ({ status }) => {
-        return status === 207
-      }
+        return status === 207;
+      },
     });
 
     return response;
   }
 
   assign(resourceId: string, tag: string): RefinedResponse<'text'> {
-    let response
-    let statusSuccess
+    let response;
+    let statusSuccess;
 
     switch (this.#version) {
-    case Version.ocis:
-      response = endpoints.graph.v1.extensions.org_libre_graph.tags.PUT__add_tags_to_resource(this.#request, {
-        tagNames: [tag],
-        resourceId: resourceId
-      })
-      statusSuccess = 200;
-      break;
-    case Version.occ:
-    case Version.nc:
-      response = endpoints.dav.systemtags_relations.PUT__add_tag_to_resource(this.#request, {
-        tagId: tag,
-        resourceId: resourceId
-      })
+      case Version.occ:
+      case Version.nc:
+        response = endpoints.dav.systemtags_relations.PUT__add_tag_to_resource(this.#request, {
+          tagId: tag,
+          resourceId,
+        });
 
-      statusSuccess = 201;
-      break;
+        statusSuccess = 201;
+        break;
+      case Version.ocis:
+      default:
+        response = endpoints.graph.v1.extensions.org_libre_graph.tags.PUT__add_tags_to_resource(this.#request, {
+          tagNames: [tag],
+          resourceId,
+        });
+        statusSuccess = 200;
+        break;
     }
 
     check(response, {
       'client -> tag.assign - status': ({ status }) => {
-        return status === statusSuccess
-      }
+        return status === statusSuccess;
+      },
     });
 
     return response;
   }
 
   unassign(resourceId: string, tag: string): RefinedResponse<'text'> {
-    let response
-    let statusSuccess
+    let response;
+    let statusSuccess;
 
     switch (this.#version) {
-    case Version.ocis:
-      response = endpoints.graph.v1.extensions.org_libre_graph.tags.DELETE__remove_tags_from_resource(this.#request, {
-        tagNames: [tag],
-        resourceId: resourceId
-      })
-      statusSuccess = 200;
-      break;
-    case Version.occ:
-    case Version.nc:
-      response = endpoints.dav.systemtags_relations.DELETE__remove_tag_from_resource(this.#request, {
-        tagId: tag,
-        resourceId: resourceId
-      })
-      statusSuccess = 204;
-      break;
+      case Version.occ:
+      case Version.nc:
+        response = endpoints.dav.systemtags_relations.DELETE__remove_tag_from_resource(this.#request, {
+          tagId: tag,
+          resourceId,
+        });
+        statusSuccess = 204;
+        break;
+      case Version.ocis:
+      default:
+        response = endpoints.graph.v1.extensions.org_libre_graph.tags.DELETE__remove_tags_from_resource(this.#request, {
+          tagNames: [tag],
+          resourceId,
+        });
+        statusSuccess = 200;
+        break;
     }
 
     check(response, {
       'client -> tag.unassign - status': ({ status }) => {
-        return status === statusSuccess
-      }
+        return status === statusSuccess;
+      },
     });
 
     return response;
@@ -152,13 +156,13 @@ export class Tag {
       return;
     }
 
-    const oc = 'http://owncloud.org/ns'
-    const dav = 'DAV:'
+    const oc = 'http://owncloud.org/ns';
+    const dav = 'DAV:';
     const response = endpoints.dav.systemtags_relations.PROPFIND__get_tags_with_properties_for_resource(this.#request, {
-      resourceId: resourceId,
+      resourceId,
       propfindXml: create({
         version: '1.0',
-        encoding: 'UTF-8'
+        encoding: 'UTF-8',
       })
         .ele(dav, 'propfind')
         .ele(dav, 'prop')
@@ -170,12 +174,12 @@ export class Tag {
         .up()
         .ele(oc, 'id')
         .up()
-        .end()
+        .end(),
     });
     check(response, {
       'client -> tag.get - status': ({ status }) => {
-        return status === 207
-      }
+        return status === 207;
+      },
     });
 
     return response;

@@ -20,13 +20,13 @@ export class Role {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
-    
+
     const response = endpoints.api.v0.settings.POST__list_roles(this.#request, undefined);
 
     check(response, {
       'client -> role.list - status': ({ status }) => {
-        return status === 201
-      }
+        return status === 201;
+      },
     });
 
     return response;

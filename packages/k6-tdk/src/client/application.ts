@@ -25,8 +25,8 @@ export class Application {
 
     check(response, {
       'client -> application.list - status': ({ status }) => {
-        return status === 200
-      }
+        return status === 200;
+      },
     });
 
     return response;
