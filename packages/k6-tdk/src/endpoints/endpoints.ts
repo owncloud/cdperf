@@ -1,3 +1,9 @@
+import { RefinedResponse, ResponseType } from 'k6/http';
+
+import { Request } from '@/utils';
+
+export type Endpoint<P extends Record<string, unknown> | undefined, RT extends ResponseType | undefined> = (r: Request, p: P) => RefinedResponse<RT>
+
 export const ShareType = {
   user: 0,
   group: 1,

@@ -1,5 +1,4 @@
 import { CookieJar } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
 
 import { Account, Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
 import { requestFactory } from '@/utils/http';
@@ -50,16 +49,15 @@ export class Client {
     const request = requestFactory(url, authenticator, {
       jar: new CookieJar()
     });
-    const endpoints = new Endpoints(request);
 
-    this.application = new Application(version, endpoints);
-    this.drive = new Drive(version, endpoints);
-    this.group = new Group(version, endpoints);
-    this.resource = new Resource(version, endpoints);
-    this.role = new Role(version, endpoints);
-    this.search = new Search(version, endpoints);
-    this.share = new Share(endpoints);
-    this.tag = new Tag(version, endpoints);
-    this.user = new User(version, endpoints);
+    this.application = new Application(version, request);
+    this.drive = new Drive(version, request);
+    this.group = new Group(version, request);
+    this.resource = new Resource(version, request);
+    this.role = new Role(version, request);
+    this.search = new Search(version, request);
+    this.share = new Share(request);
+    this.tag = new Tag(version, request);
+    this.user = new User(version, request);
   }
 }

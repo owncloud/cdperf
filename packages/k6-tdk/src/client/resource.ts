@@ -1,29 +1,32 @@
 import { check } from 'k6';
 import { RefinedResponse, RequestBody } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
 import { create } from 'xmlbuilder2';
+
+import { endpoints } from '@/endpoints';
+import { Request } from '@/utils';
 
 import { Version } from './client';
 
 export class Resource {
-  #endpoints: Endpoints;
 
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  #request: Request;
+
+  constructor(version: Version, request: Request) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#request = request;
   }
 
   upload(id: string, path: string, body: RequestBody): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.upload(id, path, body);
+      response = endpoints.dav.spaces.PUT__upload_resource(this.#request, { resourcePath: path, spaceId: id, resourceBytes: body });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.upload(id, path, body);
+      response = endpoints.dav.files.PUT__upload_resource(this.#request, { resourcePath: path, userId: id, resourceBytes: body });
       break;
     }
 
@@ -40,11 +43,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.create(id, path);
+      response = endpoints.dav.spaces.MKCOL__create_resource(this.#request, { resourcePath: path, spaceId: id });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.create(id, path);
+      response = endpoints.dav.files.MKCOL__create_resource(this.#request, { resourcePath: path, userId: id });
       break;
     }
 
@@ -61,11 +64,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.download(id, path);
+      response = endpoints.dav.spaces.GET__download_resource(this.#request, { resourcePath: path, spaceId: id });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.download(id, path);
+      response = endpoints.dav.files.GET__download_resource(this.#request, { resourcePath: path, userId: id });
       break;
     }
 
@@ -90,11 +93,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.propfind(id, path);
+      response = endpoints.dav.spaces.PROPFIND__properties_for_resource(this.#request, { resourcePath: path, spaceId: id });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.propfind(id, path, body);
+      response = endpoints.dav.files.PROPFIND__properties_for_resource(this.#request, { resourcePath: path, userId: id, propfindXml: body });
       break;
     }
 
@@ -111,11 +114,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.delete(id, path);
+      response = endpoints.dav.spaces.DELETE__delete_resource(this.#request, { resourcePath: path, spaceId: id });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.delete(id, path);
+      response = endpoints.dav.files.DELETE__delete_resource(this.#request, { resourcePath: path, userId: id });
       break;
     }
 
@@ -132,11 +135,11 @@ export class Resource {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.dav.spaces.move(id, from, to);
+      response = endpoints.dav.spaces.MOVE__move_resource(this.#request, { spaceId: id, fromResourcePath:from, toResourcePath: to });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.dav.files.move(id, from, to);
+      response = endpoints.dav.files.MOVE__move_resource(this.#request, { userId: id, fromResourcePath: from, toResourcePath: to });
       break;
     }
 

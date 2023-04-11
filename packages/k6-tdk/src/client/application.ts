@@ -1,17 +1,19 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+
+import { endpoints } from '@/endpoints';
+import { Request } from '@/utils';
 
 import { Version, versionSupported } from './client';
 
 export class Application {
-  #endpoints: Endpoints;
-
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  #request: Request;
+
+  constructor(version: Version, request: Request) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#request = request;
   }
 
   list(): RefinedResponse<'text'> | undefined {
@@ -19,7 +21,7 @@ export class Application {
       return;
     }
 
-    const response = this.#endpoints.graph.v1.applications.list();
+    const response = endpoints.graph.v1.applications.GET__list_applications(this.#request, undefined);
 
     check(response, {
       'client -> application.list - status': ({ status }) => {

@@ -11,7 +11,7 @@ export const versionSupported = (currentVersion: Version, ...allowedVersions: Ve
 }
 
 export const versionGuard = (currentVersion: Version, ...allowedVersions: Version[]) => {
-  if(!versionSupported(currentVersion, ...allowedVersions)) {
+  if(versionSupported(currentVersion, ...allowedVersions)) {
     return
   }
 

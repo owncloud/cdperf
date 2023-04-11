@@ -1,27 +1,27 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
 
 import { Account } from '@/auth';
+import { endpoints } from '@/endpoints';
+import { Request } from '@/utils';
 
 import { Version, versionSupported } from './client';
 
 export class User {
-  #endpoints: Endpoints;
-
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  #request: Request;
+
+  constructor(version: Version, request: Request) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#request = request;
   }
 
   drives(): RefinedResponse<'text'> | undefined {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
-
-    const response = this.#endpoints.graph.v1.me.drives();
+    const response = endpoints.graph.v1.me.GET__list_current_user_drives(this.#request, undefined)
 
     check(response, {
       'client -> user.drives - status': ({ status }) => {
@@ -36,8 +36,7 @@ export class User {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
-
-    const response = this.#endpoints.graph.v1.me.me();
+    const response = endpoints.graph.v1.me.GET__current_user(this.#request, undefined)
 
     if (!response) {
       return;
@@ -56,8 +55,9 @@ export class User {
     if (!versionSupported(this.#version, Version.occ, Version.nc)) {
       return;
     }
-
-    const response = this.#endpoints.ocs.v2.cloud.users.enable(id);
+    const response = endpoints.ocs.v2.apps.cloud.users.PUT__enable_user(this.#request, {
+      userId: id
+    })
 
     check(response, {
       'client -> user.enable - status': ({ status }) => {
@@ -72,11 +72,17 @@ export class User {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.users.create(account);
+      response = endpoints.graph.v1.users.POST__create_user(this.#request, {
+        userLogin: account.login,
+        userPassword: account.password
+      })
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.users.create(account);
+      response = endpoints.ocs.v2.apps.cloud.users.POST__create_user(this.#request, {
+        userLogin: account.login,
+        userPassword: account.password
+      })
       break;
     }
 
@@ -95,12 +101,16 @@ export class User {
 
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.users.delete(id);
+      response = endpoints.graph.v1.users.DELETE__delete_user(this.#request, {
+        userId: id
+      })
       statusSuccess = 204;
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.users.delete(id);
+      response = endpoints.ocs.v2.apps.cloud.users.DELETE__delete_user(this.#request, {
+        userId: id
+      })
       statusSuccess = 200;
       break;
     }
@@ -118,8 +128,12 @@ export class User {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
-
-    const response = this.#endpoints.graph.v1.users.appRoleAssignments(principalId, appRoleId, resourceId);
+    
+    const response = endpoints.graph.v1.users.POST__add_app_role_to_user(this.#request, {
+      appRoleId: appRoleId,
+      resourceId: resourceId,
+      principalId: principalId
+    })
     check(response, {
       'client -> user.assignRole - status': ({ status }) => {
         return status === 201

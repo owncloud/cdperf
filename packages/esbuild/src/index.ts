@@ -7,7 +7,8 @@ export const build = async (config?: BuildOptions): Promise<BuildResult> => {
     treeShaking: true,
     outdir: 'dist',
     format: 'esm',
-    minify: true,
+    minify: false,
+    sourcemap:   false,
     platform: 'node',
     ...config
   })

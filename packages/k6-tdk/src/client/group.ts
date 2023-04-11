@@ -1,28 +1,30 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+
+import { endpoints } from '@/endpoints';
+import { Request } from '@/utils';
 
 import { Version } from './client';
 
 export class Group {
-  #endpoints: Endpoints;
-
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  #request: Request;
+
+  constructor(version: Version, request: Request) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#request = request;
   }
 
   create(id: string): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.groups.create(id);
+      response = endpoints.graph.v1.groups.POST__create_group(this.#request, { groupName: id });
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.groups.create(id);
+      response = endpoints.ocs.v2.apps.cloud.groups.POST__create_group(this.#request, { groupName: id });
       break;
     }
 
@@ -41,12 +43,12 @@ export class Group {
 
     switch (this.#version) {
     case Version.ocis:
-      response = this.#endpoints.graph.v1.groups.delete(id);
+      response = endpoints.graph.v1.groups.DELETE__delete_group(this.#request, { groupName: id });
       statusSuccess = 204;
       break;
     case Version.occ:
     case Version.nc:
-      response = this.#endpoints.ocs.v2.cloud.groups.delete(id);
+      response = endpoints.ocs.v2.apps.cloud.groups.DELETE__delete_group(this.#request, { groupName: id });
       statusSuccess = 200;
       break;
     }

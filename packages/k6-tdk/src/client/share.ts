@@ -1,16 +1,24 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints, Permission, ShareType } from 'src/endpoints';
+
+import { endpoints, Permission, ShareType  } from '@/endpoints';
+import { Request } from '@/utils';
 
 export class Share {
-  #endpoints: Endpoints;
 
-  constructor(endpoints: Endpoints) {
-    this.#endpoints = endpoints;
+  #request: Request;
+
+  constructor(request: Request) {
+    this.#request = request;
   }
 
   create(path: string, shareWith: string, shareType: ShareType, permissions: Permission): RefinedResponse<'text'> {
-    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.shares.create(path, shareWith, shareType, permissions);
+    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__create_share(this.#request, {
+      shareResourcePath: path,
+      shareType: shareType,
+      shareReceiverPermission: permissions,
+      shareReceiverId: shareWith
+    })
 
     check(response, {
       'client -> share.create - status': ({ status }) => {
@@ -22,8 +30,7 @@ export class Share {
   }
 
   delete(id: string): RefinedResponse<'text'> {
-    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.shares.delete(id);
-
+    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.DELETE__delete_share(this.#request, { shareId: id });
     check(response, {
       'client -> share.delete - status': ({ status }) => {
         return status === 200
@@ -34,8 +41,7 @@ export class Share {
   }
 
   accept(id: string): RefinedResponse<'text'> {
-    const response = this.#endpoints.ocs.v2.apps.filesSharing.v1.shares.accept(id);
-
+    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__accept_share(this.#request, { shareId: id });
     check(response, {
       'client -> share.accept - status': ({ status }) => {
         return status === 200

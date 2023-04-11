@@ -30,8 +30,8 @@ export const requestFactory = (base: string, authenticator?: Authenticator, fact
         }
       });
     }
-
-    return http.request<RT>(method, cleanURL(base, path), body, merge(params, requestParams));
+    const p = merge(params, requestParams)
+    return http.request<RT>(method, cleanURL(base, path), body, p);
   };
 };
 

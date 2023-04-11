@@ -1,26 +1,27 @@
 import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+
+import { endpoints } from '@/endpoints';
+import { Request } from '@/utils';
 
 import { Version, versionSupported } from './client';
 
 export class Drive {
-  #endpoints: Endpoints;
-
   #version: Version;
 
-  constructor(version: Version, endpoints: Endpoints) {
+  #request: Request;
+
+  constructor(version: Version, request: Request) {
     this.#version = version;
-    this.#endpoints = endpoints;
+    this.#request = request;
   }
 
   create(name: string): RefinedResponse<'text'> | undefined {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
-
-    const response = this.#endpoints.graph.v1.drives.create(name);
-
+    
+    const response = endpoints.graph.v1.drives.POST__create_drive(this.#request, { driveName: name });
     check(response, {
       'client -> drive.create - status': ({ status }) => {
         return status === 201
@@ -30,13 +31,12 @@ export class Drive {
     return response;
   }
 
-  delete(id: string): RefinedResponse<'text'> | undefined {
+  delete(id: string): RefinedResponse<'none'> | undefined {
     if (!versionSupported(this.#version, Version.ocis)) {
       return;
     }
 
-    const response = this.#endpoints.graph.v1.drives.delete(id);
-
+    const response = endpoints.graph.v1.drives.DELETE__delete_drive(this.#request, { driveId: id });
     check(response, {
       'client -> drive.delete - status': ({ status }) => {
         return status === 204
