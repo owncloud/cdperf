@@ -1,6 +1,6 @@
 export const Adapter = {
   openIDConnect: 'openIDConnect',
-  basicAuth: 'basicAuth',
+  basicAuth: 'basicAuth'
 } as const;
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare

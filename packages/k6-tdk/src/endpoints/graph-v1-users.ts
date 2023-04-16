@@ -8,12 +8,12 @@ export const POST__create_user: Endpoint<{ userLogin: string, userPassword: stri
     onPremisesSamAccountName: userLogin,
     displayName: userLogin,
     mail: `${userLogin}@cdperf.org`,
-    passwordProfile: { password: userPassword },
+    passwordProfile: { password: userPassword }
   }));
 };
 
-export const DELETE__delete_user: Endpoint<{ userId: string }, 'none'> = (r, { userId }) => {
-  return r('DELETE', `/graph/v1.0/users/${userId}`);
+export const DELETE__delete_user: Endpoint<{ userLogin: string }, 'none'> = (r, { userLogin }) => {
+  return r('DELETE', `/graph/v1.0/users/${userLogin}`);
 };
 
 export const POST__add_app_role_to_user: Endpoint<{
@@ -24,6 +24,6 @@ export const POST__add_app_role_to_user: Endpoint<{
   return r('POST', `/graph/v1.0/users/${principalId}/appRoleAssignments`, JSON.stringify({
     appRoleId,
     principalId,
-    resourceId,
+    resourceId
   }));
 };

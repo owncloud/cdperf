@@ -8,17 +8,17 @@ export const POST__create_tag: Endpoint<{
   userAssignableTag: boolean,
   userVisibleTag: boolean
 }, 'none'> = (r, {
-  tagName, userAssignableTag = true, canAssignTag = true, userVisibleTag = true,
+  tagName, userAssignableTag = true, canAssignTag = true, userVisibleTag = true
 }) => {
   return r('POST', '/remote.php/dav/systemtags', JSON.stringify({
     name: tagName,
     canAssign: canAssignTag,
     userAssignable: userAssignableTag,
-    userVisible: userVisibleTag,
+    userVisible: userVisibleTag
   }), {
     headers: {
-      'Content-Type': 'application/json',
-    },
+      'Content-Type': 'application/json'
+    }
   });
 };
 

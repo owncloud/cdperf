@@ -1,7 +1,14 @@
 {
 	"root": true,
 	"extends": ["@ownclouders"],
-	"rules": {
-		"import/no-default-export": "off"
-	}
+  "overrides": [
+    {
+      "files": ["src/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/naming-convention": "off",
+        // k6 uses the default export function as vu stage
+        "import/no-default-export": "off"
+      }
+    }
+  ]
 }

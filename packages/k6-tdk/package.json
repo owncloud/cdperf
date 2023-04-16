@@ -84,14 +84,14 @@
     "@ownclouders/tsconfig": "workspace:*",
     "@ownclouders/turbowatch": "workspace:*",
     "@types/jsonpath": "^0.2.0",
-    "@types/k6": "^0.43.2",
+    "@types/k6": "^0.43.3",
     "@types/lodash-es": "^4.17.7",
     "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",
-    "esbuild": "^0.17.14",
-    "eslint": "^8.37.0",
-    "turbowatch": "^2.20.0",
-    "typescript": "^5.0.3"
+    "esbuild": "^0.17.16",
+    "eslint": "^8.38.0",
+    "turbowatch": "^2.21.0",
+    "typescript": "^5.0.4"
   }
 }

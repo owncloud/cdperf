@@ -10,6 +10,6 @@ export const build = async (config?: BuildOptions): Promise<BuildResult> => {
     minify: true,
     sourcemap: false,
     platform: 'node',
-    ...config,
+    ...config
   });
 };

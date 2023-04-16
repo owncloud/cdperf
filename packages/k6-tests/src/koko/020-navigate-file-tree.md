@@ -1,5 +1,5 @@
 ## Description
-The `navigate file tree` test is intended to see how the instance behaves when many users move through a configurable deep folder hierarchy at the same time. Since k6 does not use a browser for the tests, a propfind for each folder to simulate the client behavior is used. 
+The `navigate file tree` test creates a configurable horizontal and vertical structure of folders which is then checked using a propfind at each level. 
 
 * `admin` creates `N` users.
   * `N` can be set by using the k6 `--vus` option.
@@ -21,11 +21,11 @@ The test runs `N` times for each user. For example, if you define `--vus 2` and 
   * default value: `openIDConnect`
   * `export AUTH_ADAPTER=openIDConnect`
   * `export AUTH_ADAPTER=basicAuth`
-* `CLIENT_VERSION`: specifies which client version should be used
-  * default value: `ocis`
-  * `export CLIENT_VERSION=ocis`
-  * `export CLIENT_VERSION=occ`
-  * `export CLIENT_VERSION=nc`
+* `PLATFORM`: specifies which client platform should be used
+  * default value: `ownCloudInfiniteScale`
+  * `export PLATFORM=ownCloudInfiniteScale`
+  * `export PLATFORM=ownCloudServer`
+  * `export PLATFORM=nextcloud`
 * `ADMIN_LOGIN`: the login name of an administrative user
   * default value: `admin`
   * `export ADMIN_LOGIN=main`
@@ -50,7 +50,7 @@ The test runs `N` times for each user. For example, if you define `--vus 2` and 
 ```shell
 # run the test on a host with an ownCloud classic server
 BASE_URL=https://cloud-domain.org:80 \
-CLIENT_VERSION=occ \
+PLATFORM=ownCloudServer \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
@@ -65,5 +65,5 @@ k6 run artifacts/koko-020-navigate-file-tree.js --vus 2 --iterations 5
 
 The same can be reached with docker:
 ```shell
-docker run -e BASE_URL=https://cloud-domain.org:80 -e CLIENT_VERSION=occ -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-020-navigate-file-tree.js
+docker run -e BASE_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-020-navigate-file-tree.js
 ```

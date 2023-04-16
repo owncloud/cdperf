@@ -3,49 +3,49 @@ import { RequestBody } from 'k6/http';
 import { Endpoint } from './endpoints';
 
 export const PUT__upload_resource: Endpoint<{
-  spaceId: string,
+  driveId: string,
   resourcePath: string,
   resourceBytes: RequestBody
-}, 'none'> = (r, { resourcePath, spaceId, resourceBytes }) => {
-  return r('PUT', `/remote.php/dav/spaces/${spaceId}/${resourcePath}`, resourceBytes);
+}, 'none'> = (r, { resourcePath, driveId, resourceBytes }) => {
+  return r('PUT', `/remote.php/dav/spaces/${driveId}/${resourcePath}`, resourceBytes);
 };
 
 export const GET__download_resource: Endpoint<{
-  spaceId: string,
+  driveId: string,
   resourcePath: string
-}, 'binary'> = (r, { resourcePath, spaceId }) => {
-  return r('GET', `/remote.php/dav/spaces/${spaceId}/${resourcePath}`);
+}, 'binary'> = (r, { resourcePath, driveId }) => {
+  return r('GET', `/remote.php/dav/spaces/${driveId}/${resourcePath}`);
 };
 
 export const MKCOL__create_resource: Endpoint<{
-  spaceId: string,
+  driveId: string,
   resourcePath: string
-}, 'none'> = (r, { resourcePath, spaceId }) => {
-  return r('MKCOL', `/remote.php/dav/spaces/${spaceId}/${resourcePath}`);
+}, 'none'> = (r, { resourcePath, driveId }) => {
+  return r('MKCOL', `/remote.php/dav/spaces/${driveId}/${resourcePath}`);
 };
 
 export const DELETE__delete_resource: Endpoint<{
-  spaceId: string,
+  driveId: string,
   resourcePath: string
-}, 'none'> = (r, { resourcePath, spaceId }) => {
-  return r('DELETE', `/remote.php/dav/spaces/${spaceId}/${resourcePath}`);
+}, 'none'> = (r, { resourcePath, driveId }) => {
+  return r('DELETE', `/remote.php/dav/spaces/${driveId}/${resourcePath}`);
 };
 export const MOVE__move_resource: Endpoint<{
-  spaceId: string,
+  driveId: string,
   fromResourcePath: string,
   toResourcePath: string
-}, 'none'> = (r, { toResourcePath, spaceId, fromResourcePath }) => {
-  return r('MOVE', `/remote.php/dav/spaces/${spaceId}/${fromResourcePath}`, undefined, {
+}, 'none'> = (r, { toResourcePath, driveId, fromResourcePath }) => {
+  return r('MOVE', `/remote.php/dav/spaces/${driveId}/${fromResourcePath}`, undefined, {
     headers: {
-      destination: `/remote.php/dav/spaces/${spaceId}/${toResourcePath}`,
-    },
+      destination: `/remote.php/dav/spaces/${driveId}/${toResourcePath}`
+    }
   });
 };
 
-export const PROPFIND__properties_for_resource: Endpoint<{
-  spaceId: string,
+export const PROPFIND__get_properties_for_resource: Endpoint<{
+  driveId: string,
   resourcePath: string,
   propfindXml?: RequestBody
-}, 'text'> = (r, { propfindXml, resourcePath, spaceId }) => {
-  return r('PROPFIND', `/remote.php/dav/spaces/${spaceId}/${resourcePath}`, propfindXml);
+}, 'text'> = (r, { propfindXml, resourcePath, driveId }) => {
+  return r('PROPFIND', `/remote.php/dav/spaces/${driveId}/${resourcePath}`, propfindXml);
 };

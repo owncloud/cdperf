@@ -21,7 +21,7 @@ export const backOff = <T>(fn: () => Promise<T>, o: BackOffOptions): Promise<T> 
           .then(() => {
             return backOff(fn, {
               ...o,
-              delay: o.delay * o.delayMultiplier,
+              delay: o.delay * o.delayMultiplier
             });
           })
           .then(resolve)
@@ -34,7 +34,7 @@ function sanitizeOptions(options?: Partial<BackOffOptions>): BackOffOptions {
   return {
     delay: 100,
     delayMultiplier: 2,
-    ...options,
+    ...options
   };
 }
 

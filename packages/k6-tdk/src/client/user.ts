@@ -1,145 +1,72 @@
-import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
 
-import { Account } from '@/auth';
 import { endpoints } from '@/endpoints';
-import { Request } from '@/utils';
+import { check } from '@/utils';
 
-import { Version, versionSupported } from './client';
+import { EndpointClient, Platform } from './client';
 
-export class User {
-  #version: Version;
-
-  #request: Request;
-
-  constructor(version: Version, request: Request) {
-    this.#version = version;
-    this.#request = request;
-  }
-
-  drives(): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
-      return;
-    }
-    const response = endpoints.graph.v1.me.GET__list_current_user_drives(this.#request, undefined);
-
-    check(response, {
-      'client -> user.drives - status': ({ status }) => {
-        return status === 200;
-      },
-    });
-
-    return response;
-  }
-
-  me(): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
-      return;
-    }
-    const response = endpoints.graph.v1.me.GET__current_user(this.#request, undefined);
-
-    if (!response) {
-      return;
-    }
-
-    check(response, {
-      'client -> user.me - status': ({ status }) => {
-        return status === 200;
-      },
-    });
-
-    return response;
-  }
-
-  enable(id: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.occ, Version.nc)) {
-      return;
-    }
-    const response = endpoints.ocs.v2.apps.cloud.users.PUT__enable_user(this.#request, {
-      userId: id,
-    });
-
-    check(response, {
-      'client -> user.enable - status': ({ status }) => {
-        return status === 200;
-      },
-    });
-
-    return response;
-  }
-
-  create(account: Account): RefinedResponse<'text'> {
-    let response;
-    switch (this.#version) {
-      case Version.ocis:
-        response = endpoints.graph.v1.users.POST__create_user(this.#request, {
-          userLogin: account.login,
-          userPassword: account.password,
-        });
-        break;
-      case Version.occ:
-      case Version.nc:
+export class User extends EndpointClient {
+  createUser(p: { userLogin: string, userPassword: string }): RefinedResponse<'text'> {
+    let response: RefinedResponse<'text'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.users.POST__create_user(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.ocs.v2.apps.cloud.users.POST__create_user(this.#request, {
-          userLogin: account.login,
-          userPassword: account.password,
-        });
-        break;
+        response = endpoints.graph.v1.users.POST__create_user(this.request, p);
     }
 
-    check(response, {
-      'client -> user.create - status': ({ status }) => {
+    check({ val: response }, {
+      'client -> user.createUser - status': ({ status }) => {
         return status === 200;
-      },
+      }
     });
 
     return response;
   }
 
-  delete(id: string): RefinedResponse<'text'> {
-    let response;
-    let statusSuccess: number;
-
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.ocs.v2.apps.cloud.users.DELETE__delete_user(this.#request, {
-          userId: id,
-        });
-        statusSuccess = 200;
-        break;
-      case Version.ocis:
+  deleteUser(p: { userLogin: string }): RefinedResponse<'text' | 'none'> {
+    let expectedStatus: number
+    let response: RefinedResponse<'text' | 'none'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.users.DELETE__delete_user(this.request, p);
+        expectedStatus = 200
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.users.DELETE__delete_user(this.#request, {
-          userId: id,
-        });
-        statusSuccess = 204;
-        break;
+        response = endpoints.graph.v1.users.DELETE__delete_user(this.request, p);
+        expectedStatus = 204
     }
 
-    check(response, {
-      'client -> user.delete - status': ({ status }) => {
-        return status === statusSuccess;
-      },
+    check({ val: response }, {
+      'client -> user.deleteUser - status': ({ status }) => {
+        return status === expectedStatus;
+      }
     });
 
     return response;
   }
 
-  assignRole(principalId: string, appRoleId: string, resourceId: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
-      return;
+  enableUser(p: { userLogin: string }): RefinedResponse<'text'> | undefined {
+    let response: RefinedResponse<'text'> | undefined
+
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.users.PUT__enable_user(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
     }
 
-    const response = endpoints.graph.v1.users.POST__add_app_role_to_user(this.#request, {
-      appRoleId,
-      resourceId,
-      principalId,
-    });
-    check(response, {
-      'client -> user.assignRole - status': ({ status }) => {
-        return status === 201;
-      },
+    check({ skip: !response, val: response }, {
+      'client -> user.enableUser - status': (r) => {
+        return r?.status === 200;
+      }
     });
 
     return response;

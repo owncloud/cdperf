@@ -1,14 +1,13 @@
 import { CookieJar } from 'k6/http';
 
-import {
-  Account, Adapter, Authenticator, BasicAuth, OpenIDConnect,
-} from '@/auth';
-import { requestFactory } from '@/utils/http';
+import { Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
+import { requestFactory } from '@/utils';
 
 import { Application } from './application';
-import { Version } from './client';
+import { Platform } from './client';
 import { Drive } from './drive';
 import { Group } from './group';
+import { Me } from './me';
 import { Resource } from './resource';
 import { Role } from './role';
 import { Search } from './search';
@@ -22,6 +21,8 @@ export class Client {
   application: Application;
 
   drive: Drive;
+
+  me: Me;
 
   group: Group;
 
@@ -37,30 +38,37 @@ export class Client {
 
   user: User;
 
-  constructor(url: string, version: Version, authAdapter: Adapter, account: Account) {
+  constructor(p: {
+    baseUrl: string,
+    platform: Platform,
+    authAdapter: Adapter,
+    userLogin: string,
+    userPassword: string
+  }) {
     let authenticator: Authenticator;
-    switch (authAdapter) {
+    switch (p.authAdapter) {
       case Adapter.basicAuth:
-        authenticator = new BasicAuth(account);
+        authenticator = new BasicAuth({ login: p.userLogin, password: p.userPassword });
         break;
       case Adapter.openIDConnect:
       default:
-        authenticator = new OpenIDConnect(account, url);
+        authenticator = new OpenIDConnect({ login: p.userLogin, password: p.userPassword }, p.baseUrl);
         break;
     }
 
-    const request = requestFactory(url, authenticator, {
-      jar: new CookieJar(),
+    const request = requestFactory(p.baseUrl, authenticator, {
+      jar: new CookieJar()
     });
 
-    this.application = new Application(version, request);
-    this.drive = new Drive(version, request);
-    this.group = new Group(version, request);
-    this.resource = new Resource(version, request);
-    this.role = new Role(version, request);
-    this.search = new Search(version, request);
-    this.share = new Share(request);
-    this.tag = new Tag(version, request);
-    this.user = new User(version, request);
+    this.application = new Application(p.platform, request);
+    this.drive = new Drive(p.platform, request);
+    this.group = new Group(p.platform, request);
+    this.me = new Me(p.platform, request);
+    this.resource = new Resource(p.platform, request);
+    this.role = new Role(p.platform, request);
+    this.search = new Search(p.platform, request);
+    this.share = new Share(p.platform, request);
+    this.tag = new Tag(p.platform, request);
+    this.user = new User(p.platform, request);
   }
 }

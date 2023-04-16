@@ -1,64 +1,51 @@
-import { check } from 'k6';
 import { RefinedResponse } from 'k6/http';
 
 import { endpoints } from '@/endpoints';
-import { Request } from '@/utils';
+import { check } from '@/utils';
 
-import { Version } from './client';
+import { EndpointClient, Platform } from './client';
 
-export class Group {
-  #version: Version;
-
-  #request: Request;
-
-  constructor(version: Version, request: Request) {
-    this.#version = version;
-    this.#request = request;
-  }
-
-  create(id: string): RefinedResponse<'text'> {
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.ocs.v2.apps.cloud.groups.POST__create_group(this.#request, { groupName: id });
-        break;
-      case Version.ocis:
+export class Group extends EndpointClient {
+  createGroup(p: { groupName: string }): RefinedResponse<'text'> {
+    let response: RefinedResponse<'text'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.groups.POST__create_group(this.request, p)
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.groups.POST__create_group(this.#request, { groupName: id });
-        break;
+        response = endpoints.graph.v1.groups.POST__create_group(this.request, p);
     }
 
-    check(response, {
-      'client -> group.create - status': ({ status }) => {
+    check({ val: response }, {
+      'client -> group.createGroup - status': ({ status }) => {
         return status === 200;
-      },
+      }
     });
 
     return response;
   }
 
-  delete(id: string): RefinedResponse<'text'> {
-    let response;
-    let statusSuccess: number;
-
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.ocs.v2.apps.cloud.groups.DELETE__delete_group(this.#request, { groupName: id });
-        statusSuccess = 200;
-        break;
-      case Version.ocis:
+  deleteGroup(p: { groupIdOrName: string }): RefinedResponse<'text' | 'none'> {
+    let response: RefinedResponse<'text' | 'none'>
+    let expectedStatus: number
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.groups.DELETE__delete_group(this.request, { groupName: p.groupIdOrName })
+        expectedStatus = 200
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.groups.DELETE__delete_group(this.#request, { groupName: id });
-        statusSuccess = 204;
-        break;
+        response = endpoints.graph.v1.groups.DELETE__delete_group(this.request, { groupId: p.groupIdOrName })
+        expectedStatus = 204
     }
 
-    check(response, {
-      'client -> group.delete - status': ({ status }) => {
-        return status === statusSuccess;
-      },
+    check({ val: response }, {
+      'client -> group.deleteGroup - status': ({ status }) => {
+        return status === expectedStatus;
+      }
     });
 
     return response;

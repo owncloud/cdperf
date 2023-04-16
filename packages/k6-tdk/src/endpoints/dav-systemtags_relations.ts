@@ -4,7 +4,7 @@ import { Endpoint } from './endpoints';
 
 export const PUT__add_tag_to_resource: Endpoint<{ resourceId: string, tagId: string }, 'none'> = (r, {
   tagId,
-  resourceId,
+  resourceId
 }) => {
   return r('PUT', `/remote.php/dav/systemtags-relations/files/${resourceId}/${tagId}`);
 };

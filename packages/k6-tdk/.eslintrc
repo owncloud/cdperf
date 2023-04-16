@@ -10,7 +10,7 @@
       }
     },
     {
-      "files": ["src/endpoints/**/*"],
+      "files": ["src/endpoints/**/*", "src/client/xml.ts"],
       "rules": {
         // has some `strange` naming conventions e.g. 'METHOD__description_what_it_does', 'POST_create_user'
         "@typescript-eslint/naming-convention": "off"

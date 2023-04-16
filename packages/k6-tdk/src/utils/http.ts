@@ -1,5 +1,5 @@
 import http, {
-  Params, RefinedParams, RefinedResponse, RequestBody, ResponseType,
+  Params, RefinedParams, RefinedResponse, RequestBody, ResponseType
 } from 'k6/http';
 import { merge } from 'lodash-es';
 
@@ -21,15 +21,15 @@ export const requestFactory = (base: string, authenticator?: Authenticator, fact
     method: RequestMethod,
     path: string,
     body?: RequestBody | null,
-    requestParams?: RefinedParams<RT> | null,
+    requestParams?: RefinedParams<RT> | null
   ) => {
     const params = factoryParams || {};
 
     if (authenticator) {
       merge(params, {
         headers: {
-          Authorization: authenticator.header,
-        },
+          Authorization: authenticator.header
+        }
       });
     }
     const p = merge(params, requestParams);

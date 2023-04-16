@@ -1,91 +1,78 @@
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
-import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import {
-  queryJson, queryXml, Queue, randomString,
-} from '@ownclouders/k6-tdk/lib/utils';
-import { check } from 'k6';
+import { Client, Platform } from '@ownclouders/k6-tdk/lib/client';
+import { check, queryJson, queryXml, Queue, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
 
-interface Credential {
-  login: string;
-  password: string;
-}
-
-interface Info {
-  credential: Credential;
-  home: string;
-}
-
-interface Data {
-  adminCredential: Credential;
-  userInfos: Info[];
-}
-
-interface Settings {
-  authAdapter: Adapter;
-  baseURL: string;
-  clientVersion: Version;
-  adminUser: Credential;
-  assets: {
-    folderCount: number;
-    textDocumentCount: number;
+interface Environment {
+  adminData: {
+    adminLogin: string;
+    adminPassword: string;
   };
-  k6: Options;
+  actorData: {
+    actorLogin: string;
+    actorPassword: string;
+    actorRoot: string;
+  }[];
 }
 
 /**/
-const settings: Settings = {
-  baseURL: __ENV.BASE_URL || 'https://localhost:9200',
+const settings = {
+  baseUrl: __ENV.BASE_URL || 'https://localhost:9200',
   authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-  clientVersion: Version[__ENV.CLIENT_VERSION] || Version.ocis,
-  adminUser: {
+  platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
+  admin: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin'
   },
   assets: {
     folderCount: parseInt(__ENV.ASSETS_FOLDER_COUNT, 10) || 2,
-    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT, 10) || 2,
+    textDocumentCount: parseInt(__ENV.ASSETS_TEXT_DOCUMENT_COUNT, 10) || 2
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true,
-  },
+    insecureSkipTLSVerify: true
+  }
 };
 
 /**/
 export const options: Options = settings.k6;
 
-export function setup(): Data {
-  const adminCredential = settings.adminUser;
-  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
+export function setup(): Environment {
+  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password });
 
-  const userInfos = times<Info>(options.vus || 1, () => {
-    const userCredential = { login: randomString(), password: randomString() };
-    adminClient.user.create(userCredential);
-    adminClient.user.enable(userCredential.login);
+  const actorData = times(options.vus || 1, () => {
+    const [actorLogin, actorPassword] = [randomString(), randomString()]
+    adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword });
+    adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
-    const userDrivesResponse = userClient.user.drives();
-    const [userHome = userCredential.login] = queryJson("$.value[?(@.driveType === 'personal')].id", userDrivesResponse?.body);
+    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
+    const getMyDrivesResponse = actorClient.me.getMyDrives();
+    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body);
 
     return {
-      home: userHome,
-      credential: userCredential,
-    };
+      actorLogin,
+      actorPassword,
+      actorRoot
+    }
   });
 
   return {
-    adminCredential,
-    userInfos,
-  };
+    adminData: {
+      adminLogin: settings.admin.login,
+      adminPassword: settings.admin.password
+    },
+    actorData
+  }
 }
 
-export default function run({ userInfos }: Data): void {
+export default function actor({ actorData }: Environment): void {
+  const { actorLogin, actorPassword, actorRoot } = actorData[exec.vu.idInTest - 1];
+  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
+
+
   const defer: (() => void)[] = [];
-  const { home: userHome, credential: userCredential } = userInfos[exec.vu.idInTest - 1];
-  const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
   const searchTasks = new Queue({ delay: 1000, delayMultiplier: 0 });
   const folderNames = times(settings.assets.folderCount, () => {
     return randomString();
@@ -95,41 +82,47 @@ export default function run({ userInfos }: Data): void {
   });
 
   const searchTask = (query: string, expectedId: string, description: string) => {
-    const searchResponse = userClient.search.resource(userCredential.login, { query });
-    const [searchFileID] = queryXml("$..['oc:fileid']", searchResponse?.body);
+    const searchForResourcesResponse = actorClient.search.searchForResources({ root: actorRoot, searchQuery: query });
+    const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body);
     const ready = !!searchFileID;
 
     if (!ready) {
       return Promise.reject();
     }
 
-    check(undefined, {
+    check({ val: undefined }, {
       [`test -> search.${description} - found`]: () => {
         return expectedId === searchFileID;
-      },
+      }
     });
 
     return Promise.resolve();
   };
 
   folderNames.forEach((folderName) => {
-    userClient.resource.create(userHome, folderName);
-    const propfindResponse = userClient.resource.propfind(userHome, folderName);
-    const [expectedId] = queryXml("$..['oc:fileid']", propfindResponse?.body);
+    actorClient.resource.createResource({ root: actorRoot, resourcePath: folderName })
+    const getResourcePropertiesRequest = actorClient.resource.getResourceProperties({
+      root: actorRoot,
+      resourcePath: folderName
+    })
+    const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body);
 
     searchTasks.add(() => {
       return searchTask(folderName, expectedId, 'folder-name');
     });
 
     defer.push(() => {
-      userClient.resource.delete(userHome, folderName);
+      actorClient.resource.deleteResource({ root: actorRoot, resourcePath: folderName });
     });
   });
 
   textDocuments.forEach(([documentName, documentContent]) => {
-    userClient.resource.upload(userHome, documentName, documentContent);
-    const propfindResponse = userClient.resource.propfind(userHome, documentName);
-    const [expectedId] = queryXml("$..['oc:fileid']", propfindResponse?.body);
+    actorClient.resource.uploadResource({ root: actorRoot, resourcePath: documentName, resourceBytes: documentContent })
+    const getResourcePropertiesRequest = actorClient.resource.getResourceProperties({
+      root: actorRoot,
+      resourcePath: documentName
+    })
+    const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body);
 
     searchTasks.add(() => {
       return searchTask(documentName, expectedId, 'file-name');
@@ -140,7 +133,7 @@ export default function run({ userInfos }: Data): void {
     // searchTasks.add(() => searchTask(documentContent, expectedId, 'file-content'))
 
     defer.push(() => {
-      userClient.resource.delete(userHome, documentName);
+      actorClient.resource.deleteResource({ root: actorRoot, resourcePath: documentName });
     });
   });
 
@@ -151,10 +144,10 @@ export default function run({ userInfos }: Data): void {
   });
 }
 
-export function teardown({ userInfos, adminCredential }: Data): void {
-  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
+export function teardown({ adminData, actorData }: Environment): void {
+  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword });
 
-  userInfos.forEach(({ credential }) => {
-    return adminClient.user.delete(credential.login);
+  actorData.forEach(({ actorLogin }) => {
+    adminClient.user.deleteUser({ userLogin: actorLogin });
   });
 }

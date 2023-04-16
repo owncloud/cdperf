@@ -4,6 +4,10 @@ module.exports = {
     'arrow-body-style': ['error', 'always'],
     'arrow-parens': ['error', 'always'],
     'brace-style': ['error', '1tbs', { allowSingleLine: false }],
-    'object-curly-spacing': ['error', 'always'],
+    'object-curly-spacing': [ 'error', 'always' ],
+    'quotes': ['error', 'single', { 'avoidEscape': true }],
+    'comma-spacing': ['error', { 'before': false, 'after': true }],
+    'comma-dangle': ['error', 'never'],
+    'no-console': 'off'
   }
 }

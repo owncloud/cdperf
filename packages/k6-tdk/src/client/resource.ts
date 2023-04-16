@@ -1,157 +1,138 @@
-import { check } from 'k6';
 import { RefinedResponse, RequestBody } from 'k6/http';
-import { create } from 'xmlbuilder2';
 
 import { endpoints } from '@/endpoints';
-import { Request } from '@/utils';
+import { check } from '@/utils';
 
-import { Version } from './client';
+import { EndpointClient, Platform } from './client';
+import { RESOURCE__get_resource_properties } from './xml';
 
-export class Resource {
-  #version: Version;
-
-  #request: Request;
-
-  constructor(version: Version, request: Request) {
-    this.#version = version;
-    this.#request = request;
-  }
-
-  upload(id: string, path: string, body: RequestBody): RefinedResponse<'text'> {
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.dav.files.PUT__upload_resource(this.#request, { resourcePath: path, userId: id, resourceBytes: body });
-        break;
-      case Version.ocis:
+export class Resource extends EndpointClient {
+  createResource(p: { root: string, resourcePath: string }): RefinedResponse<'none'> {
+    let response: RefinedResponse<'none'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.files.MKCOL__create_resource(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.dav.spaces.PUT__upload_resource(this.#request, { resourcePath: path, spaceId: id, resourceBytes: body });
-        break;
+        response = endpoints.dav.spaces.MKCOL__create_resource(this.request, { ...p, driveId: p.root });
     }
 
-    check(response, {
-      'client -> resource.upload - status': ({ status }) => {
+    check({ val: response }, {
+      'client -> resource.createResource - status': ({ status }) => {
         return status === 201;
-      },
+      }
     });
 
     return response;
   }
 
-  create(id: string, path: string): RefinedResponse<'text'> {
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.dav.files.MKCOL__create_resource(this.#request, { resourcePath: path, userId: id });
-        break;
-      case Version.ocis:
+  deleteResource(p: { resourcePath: string, root: string }): RefinedResponse<'none'> {
+    let response: RefinedResponse<'none'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.files.DELETE__delete_resource(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.dav.spaces.MKCOL__create_resource(this.#request, { resourcePath: path, spaceId: id });
-        break;
+        response = endpoints.dav.spaces.DELETE__delete_resource(this.request, { ...p, driveId: p.root });
     }
 
-    check(response, {
-      'client -> resource.create - status': ({ status }) => {
-        return status === 201;
-      },
-    });
-
-    return response;
-  }
-
-  download(id: string, path: string): RefinedResponse<'binary'> {
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.dav.files.GET__download_resource(this.#request, { resourcePath: path, userId: id });
-        break;
-      case Version.ocis:
-      default:
-        response = endpoints.dav.spaces.GET__download_resource(this.#request, { resourcePath: path, spaceId: id });
-        break;
-    }
-
-    check(response, {
-      'client -> resource.download - status': ({ status }) => {
-        return status === 200;
-      },
-    });
-
-    return response;
-  }
-
-  propfind(id: string, path: string): RefinedResponse<'text'> {
-    const oc = 'http://owncloud.org/ns';
-    const dav = 'DAV:';
-    const body = create({ version: '1.0', encoding: 'UTF-8' })
-      .ele(dav, 'propfind')
-      .ele(dav, 'prop')
-      .ele(oc, 'fileid')
-      .end();
-
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.dav.files.PROPFIND__properties_for_resource(this.#request, { resourcePath: path, userId: id, propfindXml: body });
-        break;
-      case Version.ocis:
-      default:
-        response = endpoints.dav.spaces.PROPFIND__properties_for_resource(this.#request, { resourcePath: path, spaceId: id });
-        break;
-    }
-
-    check(response, {
-      'client -> resource.propfind - status': ({ status }) => {
-        return status === 207;
-      },
-    });
-
-    return response;
-  }
-
-  delete(id: string, path: string): RefinedResponse<'text'> {
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.dav.files.DELETE__delete_resource(this.#request, { resourcePath: path, userId: id });
-        break;
-      case Version.ocis:
-      default:
-        response = endpoints.dav.spaces.DELETE__delete_resource(this.#request, { resourcePath: path, spaceId: id });
-        break;
-    }
-
-    check(response, {
-      'client -> resource.delete - status': ({ status }) => {
+    check({ val: response }, {
+      'client -> resource.deleteResource - status': ({ status }) => {
         return status === 204;
-      },
+      }
     });
 
     return response;
   }
 
-  move(id: string, from: string, to: string): RefinedResponse<'text'> {
-    let response;
-    switch (this.#version) {
-      case Version.occ:
-      case Version.nc:
-        response = endpoints.dav.files.MOVE__move_resource(this.#request, { userId: id, fromResourcePath: from, toResourcePath: to });
-        break;
-      case Version.ocis:
+  moveResource(p: { root: string, fromResourcePath: string, toResourcePath: string }): RefinedResponse<'none'> {
+    let response: RefinedResponse<'none'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.files.MOVE__move_resource(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.dav.spaces.MOVE__move_resource(this.#request, { spaceId: id, fromResourcePath: from, toResourcePath: to });
-        break;
+        response = endpoints.dav.spaces.MOVE__move_resource(this.request, { ...p, driveId: p.root });
     }
 
-    check(response, {
-      'client -> resource.move - status': ({ status }) => {
+    check({ val: response }, {
+      'client -> resource.moveResource - status': ({ status }) => {
         return status === 201;
-      },
+      }
+    });
+
+    return response;
+  }
+
+  getResourceProperties(p: { root: string, resourcePath: string }): RefinedResponse<'text'> {
+    const propfindXml = RESOURCE__get_resource_properties[this.platform]({})
+
+    let response: RefinedResponse<'text'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.files.PROPFIND__get_properties_for_resource(this.request,
+          { ...p, propfindXml });
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.dav.spaces.PROPFIND__get_properties_for_resource(this.request,
+          { ...p, driveId: p.root, propfindXml });
+    }
+
+    check({ val: response }, {
+      'client -> resource.getResourceProperties - status': ({ status }) => {
+        return status === 207;
+      }
+    });
+
+    return response;
+  }
+
+  uploadResource(p: { resourcePath: string, root: string, resourceBytes: RequestBody }): RefinedResponse<'none'> {
+    let response: RefinedResponse<'none'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.files.PUT__upload_resource(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.dav.spaces.PUT__upload_resource(this.request, { ...p, driveId: p.root });
+    }
+
+    check({ val: response }, {
+      'client -> resource.uploadResource - status': ({ status }) => {
+        return status === 201;
+      }
+    });
+
+    return response;
+  }
+
+  downloadResource(p: { resourcePath: string, root: string }): RefinedResponse<'binary'> {
+    let response: RefinedResponse<'binary'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.files.GET__download_resource(this.request, p);
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.dav.spaces.GET__download_resource(this.request,
+          { ...p, driveId: p.root });
+    }
+
+    check({ val: response }, {
+      'client -> resource.downloadResource - status': ({ status }) => {
+        return status === 200;
+      }
     });
 
     return response;
