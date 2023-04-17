@@ -11,6 +11,7 @@ module.exports = {
     require.resolve('./src/airbnb-base.js'),
     ...sharedExtends
   ],
+  ignorePatterns: ['build.mjs', 'turbowatch.ts', 'vitest.config.ts', '*.test.ts'],
   overrides: [
     {
       files: ['*.ts'],

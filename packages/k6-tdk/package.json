@@ -71,7 +71,8 @@
     "clean:vendor": "del-cli .turbo node_modules",
     "dev": "turbowatch",
     "lint": "eslint package.json 'src/**/*.ts'",
-    "lint:fix": "pnpm run lint --fix"
+    "lint:fix": "pnpm run lint --fix",
+    "test": "vitest run"
   },
   "dependencies": {
     "jsonpath": "^1.1.1",
@@ -92,6 +93,8 @@
     "esbuild": "^0.17.16",
     "eslint": "^8.38.0",
     "turbowatch": "^2.21.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vite-tsconfig-paths": "^4.2.0",
+    "vitest": "^0.30.1"
   }
 }

@@ -12,7 +12,8 @@
     "clean": "turbo run clean --no-daemon --parallel && del-cli .pnpm-store node_modules",
     "dev": "ROARR_LOG=true turbo run dev --parallel --concurrency 64 --no-daemon | roarr",
     "lint": "eslint package.json && syncpack list-mismatches && turbo run lint --no-daemon",
-    "lint:fix": "eslint package.json --fix && syncpack fix-mismatches && turbo run lint:fix --no-daemon"
+    "lint:fix": "eslint package.json --fix && syncpack fix-mismatches && turbo run lint:fix --no-daemon",
+    "test": "turbo run test --no-daemon"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
