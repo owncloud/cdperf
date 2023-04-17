@@ -81,8 +81,8 @@ export default function actor({ actorData }: Environment): void {
     });
   });
 
-  defer.forEach((c) => {
-    return c();
+  defer.forEach((d) => {
+    d();
   });
 }
 

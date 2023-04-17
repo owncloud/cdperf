@@ -1,8 +1,8 @@
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Platform } from '@ownclouders/k6-tdk/lib/client';
 import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
-import { check, platformGuard, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import { group as k6Group, sleep } from 'k6';
+import { check, group, platformGuard, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import { sleep } from 'k6';
 import { randomBytes } from 'k6/crypto';
 import { b64encode } from 'k6/encoding';
 import exec from 'k6/execution';
@@ -39,32 +39,6 @@ const settings = {
 
 /**/
 export const options: Options = settings.k6;
-
-const group = <RT>(name: string, fn: (name) => RT): RT => {
-  return k6Group<RT>(name, (): RT => {
-    return fn(name)
-  })
-}
-
-const searchForResources = (client: Client, p: {
-  root: string,
-  searchQuery: string,
-  sleep?: number
-}): ReturnType<typeof client.search.searchForResources> => {
-  const poll = () => {
-    const response = client.search.searchForResources(p);
-    const found = !!queryXml<string>("$..['oc:fileid']", response.body).length
-
-    if (!found) {
-      sleep(p.sleep || 0)
-      return poll()
-    }
-
-    return response
-  }
-
-  return poll()
-}
 
 const deferable = () => {
   const tasks: (() => void)[] = []
@@ -410,11 +384,20 @@ export default function actor({ adminData, actorData }: Environment): void {
       }
     })
 
-    const searchForResourcesResponse = searchForResources(actorClient, {
-      root: actorRoot,
-      searchQuery: clientResource.folderName
-    });
+    const searchForResourcesPoll = (client: Client, query: string): ReturnType<typeof actorClient.search.searchForResources> => {
+      const searchForResourcesResponse = client.search.searchForResources({ root: actorRoot, searchQuery: query });
+      const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body);
+      const found = !!searchFileID;
 
+      if (!found) {
+        sleep(1)
+        return searchForResourcesPoll(client, query)
+      }
+
+      return searchForResourcesResponse
+    }
+
+    const searchForResourcesResponse = searchForResourcesPoll(actorClient, clientResource.folderName);
     check({ val: searchForResourcesResponse }, {
       'test -> search.searchForResources - id - match': ({ body }) => {
         const [fileId] = queryXml("$..['oc:fileid']", body)

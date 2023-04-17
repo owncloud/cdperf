@@ -45,19 +45,23 @@ export class Client {
     userLogin: string,
     userPassword: string
   }) {
-    let authenticator: Authenticator;
+    let authn: Authenticator;
     switch (p.authAdapter) {
       case Adapter.basicAuth:
-        authenticator = new BasicAuth({ login: p.userLogin, password: p.userPassword });
+        authn = new BasicAuth({ login: p.userLogin, password: p.userPassword });
         break;
       case Adapter.openIDConnect:
       default:
-        authenticator = new OpenIDConnect({ login: p.userLogin, password: p.userPassword }, p.baseUrl);
+        authn = new OpenIDConnect({ login: p.userLogin, password: p.userPassword }, p.baseUrl);
         break;
     }
 
-    const request = requestFactory(p.baseUrl, authenticator, {
-      jar: new CookieJar()
+    const request = requestFactory({
+      authn,
+      baseUrl: p.baseUrl,
+      params: {
+        jar: new CookieJar()
+      }
     });
 
     this.application = new Application(p.platform, request);

@@ -145,7 +145,7 @@ export default function actor({ adminData, actorData }: Environment): void {
   });
 
   defer.forEach((d) => {
-    return d();
+    d();
   });
 
   check({ val: undefined }, checks);

@@ -1,6 +1,7 @@
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Platform } from '@ownclouders/k6-tdk/lib/client';
-import { check, queryJson, queryXml, Queue, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import { sleep } from 'k6';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
@@ -73,7 +74,6 @@ export default function actor({ actorData }: Environment): void {
 
 
   const defer: (() => void)[] = [];
-  const searchTasks = new Queue({ delay: 1000, delayMultiplier: 0 });
   const folderNames = times(settings.assets.folderCount, () => {
     return randomString();
   });
@@ -81,13 +81,15 @@ export default function actor({ actorData }: Environment): void {
     return [`${randomString()}.txt`, randomString()];
   });
 
-  const searchTask = (query: string, expectedId: string, description: string) => {
+  const doSearch = (query: string, expectedId: string, description: string) => {
     const searchForResourcesResponse = actorClient.search.searchForResources({ root: actorRoot, searchQuery: query });
     const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body);
-    const ready = !!searchFileID;
+    const found = !!searchFileID;
 
-    if (!ready) {
-      return Promise.reject();
+    if (!found) {
+      sleep(1)
+      doSearch(query, expectedId, description)
+      return
     }
 
     check({ val: undefined }, {
@@ -95,8 +97,6 @@ export default function actor({ actorData }: Environment): void {
         return expectedId === searchFileID;
       }
     });
-
-    return Promise.resolve();
   };
 
   folderNames.forEach((folderName) => {
@@ -107,9 +107,7 @@ export default function actor({ actorData }: Environment): void {
     })
     const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body);
 
-    searchTasks.add(() => {
-      return searchTask(folderName, expectedId, 'folder-name');
-    });
+    doSearch(folderName, expectedId, 'folder-name');
 
     defer.push(() => {
       actorClient.resource.deleteResource({ root: actorRoot, resourcePath: folderName });
@@ -124,23 +122,19 @@ export default function actor({ actorData }: Environment): void {
     })
     const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body);
 
-    searchTasks.add(() => {
-      return searchTask(documentName, expectedId, 'file-name');
-    });
+    doSearch(documentName, expectedId, 'file-name');
     // idea for later:
     // content search only works if ocis has content extraction enabled (SEARCH_EXTRACTOR_TYPE=tika),
     // needs further testing, therefore deactivated for the moment.
-    // searchTasks.add(() => searchTask(documentContent, expectedId, 'file-content'))
+    // doSearch(documentContent, expectedId, 'file-content')
 
     defer.push(() => {
       actorClient.resource.deleteResource({ root: actorRoot, resourcePath: documentName });
     });
   });
 
-  searchTasks.exec().then(() => {
-    return defer.forEach((d) => {
-      return d();
-    });
+  defer.forEach((d) => {
+    d();
   });
 }
 

@@ -1,38 +1,37 @@
-import http, {
-  Params, RefinedParams, RefinedResponse, RequestBody, ResponseType
-} from 'k6/http';
+import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http';
 import { merge } from 'lodash-es';
 
 import { Authenticator } from '@/auth';
 
 import { cleanURL } from './url';
 
-export type RequestMethod = 'GET' | 'MKCOL' | 'PROPFIND' | 'DELETE' | 'MOVE' | 'PUT' | 'POST' | 'REPORT' | 'SEARCH';
+export type Request = typeof request
 
-export type Request = <RT extends ResponseType | undefined>(
-  method: RequestMethod,
-  url: string,
-  body?: RequestBody | null,
-  params?: RefinedParams<RT> | null,
-) => RefinedResponse<RT>;
-
-export const requestFactory = (base: string, authenticator?: Authenticator, factoryParams?: Params): Request => {
-  return <RT extends ResponseType | undefined>(
-    method: RequestMethod,
-    path: string,
+export const requestFactory = (p: {
+  baseUrl: string,
+  authn?: Authenticator,
+  params?: Params
+}): Request => {
+  return (<RT extends ResponseType | undefined>(
+    method: string,
+    url: string,
     body?: RequestBody | null,
     requestParams?: RefinedParams<RT> | null
-  ) => {
-    const params = factoryParams || {};
+  ): RefinedResponse<RT> => {
+    const params = {}
 
-    if (authenticator) {
+    merge(params, p.params)
+
+    if (p.authn) {
       merge(params, {
         headers: {
-          Authorization: authenticator.header
+          Authorization: p.authn.header
         }
-      });
+      })
     }
-    const p = merge(params, requestParams);
-    return http.request<RT>(method, cleanURL(base, path), body, p);
-  };
-};
+
+    merge(params, requestParams)
+
+    return request<RT>(method, cleanURL(p.baseUrl, url), body, params)
+  }) as Request
+}

@@ -96,7 +96,7 @@ export default function actor({ actorData }: Environment): void {
   });
 
   defer.forEach((c) => {
-    return c();
+    c();
   });
 }
 
