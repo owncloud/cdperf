@@ -1,5 +1,5 @@
 import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http'
-import { merge } from 'lodash-es'
+import { merge, set } from 'lodash-es'
 
 import { Authenticator } from '@/auth'
 
@@ -18,20 +18,16 @@ export const requestFactory = (p: {
     body?: RequestBody | null,
     requestParams?: RefinedParams<RT> | null
   ): RefinedResponse<RT> => {
-    const params = {}
-
-    merge(params, p.params)
+    const params: Params = merge({}, p.params)
 
     if (p.authn) {
-      merge(params, {
-        headers: {
-          Authorization: p.authn.header
-        }
-      })
+      set(params, 'headers.Authorization', p.authn.header)
     }
 
-    merge(params, requestParams)
+    if (p.params?.jar) {
+      set(params, 'jar', p.params.jar)
+    }
 
-    return request<RT>(method, cleanURL(p.baseUrl, url), body, params)
+    return request<RT>(method, cleanURL(p.baseUrl, url), body, merge(params, requestParams))
   }) as Request
 }
