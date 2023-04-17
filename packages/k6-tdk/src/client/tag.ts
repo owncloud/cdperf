@@ -1,11 +1,11 @@
-import { RefinedResponse } from 'k6/http';
+import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const';
-import { endpoints } from '@/endpoints';
-import { check } from '@/utils';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-import { EndpointClient } from './client';
-import { TAG__get_tags, TAG__get_tags_for_resource } from './xml';
+import { EndpointClient } from './client'
+import { TAG__get_tags, TAG__get_tags_for_resource } from './xml'
 
 export class Tag extends EndpointClient {
   createTag(p: {
@@ -38,11 +38,11 @@ export class Tag extends EndpointClient {
 
     check({ skip: !response, val: response }, {
       'client -> tag.createTag - status': (r) => {
-        return r?.status === 201;
+        return r?.status === 201
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   deleteTag(p: { tag: string }): RefinedResponse<'none'> | undefined {
@@ -58,11 +58,11 @@ export class Tag extends EndpointClient {
 
     check({ skip: !response, val: response }, {
       'client -> tag.deleteTag - status': (r) => {
-        return r?.status === 204;
+        return r?.status === 204
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   getTags(): RefinedResponse<'text'> | undefined {
@@ -80,11 +80,11 @@ export class Tag extends EndpointClient {
 
     check({ skip: !response, val: response }, {
       'client -> tag.getTags - status': (r) => {
-        return r?.status === 207;
+        return r?.status === 207
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   addTagToResource(p: { resourceId: string, tag: string }): RefinedResponse<'none'> {
@@ -110,11 +110,11 @@ export class Tag extends EndpointClient {
 
     check({ val: response }, {
       'client -> tag.addTagToResource - status': ({ status }) => {
-        return status === expectedStatus;
+        return status === expectedStatus
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   removeTagFromResource(p: { resourceId: string, tag: string }): RefinedResponse<'none'> {
@@ -140,11 +140,11 @@ export class Tag extends EndpointClient {
 
     check({ val: response }, {
       'client -> tag.removeTagToResource - status': ({ status }) => {
-        return status === expectedStatus;
+        return status === expectedStatus
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   getTagsForResource(p: { root: string, resourceId: string, resourcePath: string }): RefinedResponse<'text'> {
@@ -160,15 +160,15 @@ export class Tag extends EndpointClient {
       case Platform.ownCloudInfiniteScale:
       default:
         response = endpoints.dav.spaces.PROPFIND__get_properties_for_resource(this.request,
-          { driveId: p.root, resourcePath: p.resourcePath, propfindXml });
+          { driveId: p.root, resourcePath: p.resourcePath, propfindXml })
     }
 
     check({ val: response }, {
       'client -> tag.getTagsForResource - status': ({ status }) => {
-        return status === 207;
+        return status === 207
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

@@ -1,4 +1,4 @@
-import { Endpoint } from './endpoints';
+import { Endpoint } from './endpoints'
 
 export const POST__create_user: Endpoint<{ userLogin: string, userPassword: string }, 'text'> = (r, {
   userLogin,
@@ -9,12 +9,12 @@ export const POST__create_user: Endpoint<{ userLogin: string, userPassword: stri
     displayName: userLogin,
     mail: `${userLogin}@cdperf.org`,
     passwordProfile: { password: userPassword }
-  }));
-};
+  }))
+}
 
 export const DELETE__delete_user: Endpoint<{ userLogin: string }, 'none'> = (r, { userLogin }) => {
-  return r('DELETE', `/graph/v1.0/users/${userLogin}`);
-};
+  return r('DELETE', `/graph/v1.0/users/${userLogin}`)
+}
 
 export const POST__add_app_role_to_user: Endpoint<{
   principalId: string,
@@ -25,5 +25,5 @@ export const POST__add_app_role_to_user: Endpoint<{
     appRoleId,
     principalId,
     resourceId
-  }));
-};
+  }))
+}

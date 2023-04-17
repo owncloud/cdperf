@@ -1,21 +1,21 @@
-import * as api_v0_settings from './api-v0-settings';
-import * as dav from './dav';
-import * as dav_files from './dav-files';
-import * as dav_spaces from './dav-spaces';
-import * as dav_systemtags from './dav-systemtags';
-import * as dav_systemtagsRelations from './dav-systemtags_relations';
-import * as graph_v1_applications from './graph-v1-applications';
-import * as graph_v1_drives from './graph-v1-drives';
-import * as graph_v1_extensions_orgLibreGraph_tags from './graph-v1-extensions-org_libre_graph-tags';
-import * as graph_v1_groups from './graph-v1-groups';
-import * as graph_v1_me from './graph-v1-me';
-import * as graph_v1_users from './graph-v1-users';
-import * as ocs_v2_apps_cloud_groups from './ocs-v2-apps-cloud-groups';
-import * as ocs_v2_apps_cloud_users from './ocs-v2-apps-cloud-users';
-import * as ocs_v2_apps_fileSharing_v1_sharees from './ocs-v2-apps-file_sharing-v1-sharees';
-import * as ocs_v2_apps_fileSharing_v1_shares from './ocs-v2-apps-file_sharing-v1-shares';
+import * as api_v0_settings from './api-v0-settings'
+import * as dav from './dav'
+import * as dav_files from './dav-files'
+import * as dav_spaces from './dav-spaces'
+import * as dav_systemtags from './dav-systemtags'
+import * as dav_systemtagsRelations from './dav-systemtags_relations'
+import * as graph_v1_applications from './graph-v1-applications'
+import * as graph_v1_drives from './graph-v1-drives'
+import * as graph_v1_extensions_orgLibreGraph_tags from './graph-v1-extensions-org_libre_graph-tags'
+import * as graph_v1_groups from './graph-v1-groups'
+import * as graph_v1_me from './graph-v1-me'
+import * as graph_v1_users from './graph-v1-users'
+import * as ocs_v2_apps_cloud_groups from './ocs-v2-apps-cloud-groups'
+import * as ocs_v2_apps_cloud_users from './ocs-v2-apps-cloud-users'
+import * as ocs_v2_apps_fileSharing_v1_sharees from './ocs-v2-apps-file_sharing-v1-sharees'
+import * as ocs_v2_apps_fileSharing_v1_shares from './ocs-v2-apps-file_sharing-v1-shares'
 
-export * from './endpoints';
+export * from './endpoints'
 export const endpoints = {
   api: {
     v0: {
@@ -59,4 +59,4 @@ export const endpoints = {
       }
     }
   }
-};
+}

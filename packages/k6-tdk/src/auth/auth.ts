@@ -1,7 +1,7 @@
 export const Adapter = {
   kopano: 'kopano',
   basicAuth: 'basicAuth'
-} as const;
+} as const
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type Adapter = (typeof Adapter)[keyof typeof Adapter];

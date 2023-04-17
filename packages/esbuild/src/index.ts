@@ -1,4 +1,4 @@
-import { build as _build, BuildOptions, BuildResult } from 'esbuild';
+import { build as _build, BuildOptions, BuildResult } from 'esbuild'
 
 export const build = async (config?: BuildOptions): Promise<BuildResult> => {
   return _build({
@@ -11,5 +11,5 @@ export const build = async (config?: BuildOptions): Promise<BuildResult> => {
     sourcemap: false,
     platform: 'node',
     ...config
-  });
-};
+  })
+}

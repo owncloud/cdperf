@@ -1,11 +1,11 @@
-import { create } from 'xmlbuilder2';
+import { create } from 'xmlbuilder2'
 
-import { Platform } from '@/const';
+import { Platform } from '@/const'
 
 const namespace: Readonly<Record<string, string>> = {
   oc: 'http://owncloud.org/ns',
   dav: 'DAV:'
-};
+}
 
 const createProlog = () => {
   return create({ version: '1.0', encoding: 'UTF-8' })
@@ -31,7 +31,7 @@ export const RESOURCE__get_resource_properties: PlatformXml = {
       .ele(namespace.dav, 'prop')
       .ele(namespace.oc, 'fileid').up()
       .ele(namespace.oc, 'tags').up()
-      .end();
+      .end()
   },
   [Platform.ownCloudServer]() {
     return this[Platform.ownCloudInfiniteScale]({})
@@ -181,7 +181,7 @@ export const TAG__get_tags_for_resource: PlatformXml = {
       .ele(namespace.dav, 'prop')
       .ele(namespace.oc, 'fileid').up()
       .ele(namespace.oc, 'tags').up()
-      .end();
+      .end()
   },
   [Platform.ownCloudServer]() {
     return TAG__get_tags[Platform.ownCloudServer]({})

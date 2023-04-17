@@ -1,14 +1,14 @@
-import { Platform } from '@ownclouders/k6-tdk';
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
-import { Client } from '@ownclouders/k6-tdk/lib/client';
-import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
-import { check, group, platformGuard, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import { sleep } from 'k6';
-import { randomBytes } from 'k6/crypto';
-import { b64encode } from 'k6/encoding';
-import exec from 'k6/execution';
-import { Options } from 'k6/options';
-import { times } from 'lodash';
+import { Platform } from '@ownclouders/k6-tdk'
+import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
+import { Client } from '@ownclouders/k6-tdk/lib/client'
+import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints'
+import { check, group, platformGuard, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
+import { sleep } from 'k6'
+import { randomBytes } from 'k6/crypto'
+import { b64encode } from 'k6/encoding'
+import exec from 'k6/execution'
+import { Options } from 'k6/options'
+import { times } from 'lodash'
 
 interface Environment {
   adminData: {
@@ -36,10 +36,10 @@ const settings = {
     vus: 1,
     insecureSkipTLSVerify: true
   }
-};
+}
 
 /**/
-export const options: Options = settings.k6;
+export const options: Options = settings.k6
 
 const deferable = () => {
   const tasks: (() => void)[] = []
@@ -50,24 +50,24 @@ const deferable = () => {
     },
     exec: () => {
       tasks.forEach((d) => {
-        return d();
+        return d()
       })
     }
   }
 }
 
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password });
+  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
 
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
-    const createUserResponse = adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword });
+    const createUserResponse = adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     const [actorId] = queryJson('$.id', createUserResponse.body)
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
-    const getMyDrivesResponse = actorClient.me.getMyDrives();
-    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body);
+    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const getMyDrivesResponse = actorClient.me.getMyDrives()
+    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
     return {
       actorLogin,
@@ -88,15 +88,15 @@ export function setup(): Environment {
 
 export default function actor({ adminData, actorData }: Environment): void {
   const guards = { ...platformGuard(settings.platform) }
-  const { actorLogin, actorPassword, actorId, actorRoot } = actorData[exec.vu.idInTest - 1];
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
+  const { actorLogin, actorPassword, actorId, actorRoot } = actorData[exec.vu.idInTest - 1]
+  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
 
   /**
    * ✓ client.me.getMyProfile
    * ✓ client.me.getMyDrives
    */
   group('client.me.*', () => {
-    const getMyProfileResponse = actorClient.me.getMyProfile();
+    const getMyProfileResponse = actorClient.me.getMyProfile()
     check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: getMyProfileResponse }, {
       'test -> me.getMyProfile - displayName - match': (response) => {
         const [displayName] = queryJson('displayName', response?.body)
@@ -104,7 +104,7 @@ export default function actor({ adminData, actorData }: Environment): void {
       }
     })
 
-    const getMyDrivesResponse = actorClient.me.getMyDrives();
+    const getMyDrivesResponse = actorClient.me.getMyDrives()
     check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: getMyDrivesResponse }, {
       'test -> me.getMyDrives - personal - match': (response) => {
         const [personalDrive] = queryJson("$.value[?(@.driveType === 'personal')].id", response?.body)
@@ -113,7 +113,7 @@ export default function actor({ adminData, actorData }: Environment): void {
     })
   })
 
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword });
+  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
 
   /**
    * ✓ client.group.createGroup
@@ -132,12 +132,12 @@ export default function actor({ adminData, actorData }: Environment): void {
     const [groupId] = queryJson('id', createGroupResponse.body)
     const groupIdOrName = groupId || groupName
 
-    const defer = deferable();
+    const defer = deferable()
     defer.add(() => {
       group(grouping, () => {
         adminClient.group.deleteGroup({ groupIdOrName })
       })
-    });
+    })
 
     return {
       defer
@@ -149,7 +149,7 @@ export default function actor({ adminData, actorData }: Environment): void {
    */
   const clientApplication = group('client.application.*', () => {
     const listApplicationsResponse = adminClient.application.listApplications()
-    const [applicationId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", listApplicationsResponse?.body);
+    const [applicationId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", listApplicationsResponse?.body)
 
     return {
       applicationId
@@ -162,7 +162,7 @@ export default function actor({ adminData, actorData }: Environment): void {
    */
   group('client.role.*', () => {
     const getRolesResponse = adminClient.role.getRoles()
-    const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", getRolesResponse?.body);
+    const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", getRolesResponse?.body)
 
     const addRoleToUserParameters = {
       principalId: actorId,
@@ -197,12 +197,12 @@ export default function actor({ adminData, actorData }: Environment): void {
     })
     const [driveId] = queryJson('id', createDriveResponse?.body)
 
-    const defer = deferable();
+    const defer = deferable()
     defer.add(() => {
       group(grouping, () => {
         actorClient.drive.deleteDrive({ driveId })
       })
-    });
+    })
 
     return {
       defer
@@ -218,22 +218,22 @@ export default function actor({ adminData, actorData }: Environment): void {
    * ✓ client.resource.getResourceProperties
    */
   const clientResource = group('client.resource.*', (grouping) => {
-    const folderCreationName = randomString();
+    const folderCreationName = randomString()
     actorClient.resource.createResource({ root: actorRoot, resourcePath: folderCreationName })
 
-    const folderMovedName = randomString();
+    const folderMovedName = randomString()
     actorClient.resource.moveResource({
       root: actorRoot,
       fromResourcePath: folderCreationName,
       toResourcePath: folderMovedName
     })
 
-    const defer = deferable();
+    const defer = deferable()
     defer.add(() => {
       group(grouping, () => {
-        actorClient.resource.deleteResource({ root: actorRoot, resourcePath: folderMovedName });
+        actorClient.resource.deleteResource({ root: actorRoot, resourcePath: folderMovedName })
       })
-    });
+    })
 
     const getResourcePropertiesRequest = actorClient.resource.getResourceProperties({
       root: actorRoot,
@@ -248,9 +248,9 @@ export default function actor({ adminData, actorData }: Environment): void {
 
     const resourcePath = [folderMovedName, `${randomString()}.txt`].join('/')
     const resourceBytes = randomBytes(100)
-    actorClient.resource.uploadResource({ root: actorRoot, resourceBytes, resourcePath });
+    actorClient.resource.uploadResource({ root: actorRoot, resourceBytes, resourcePath })
 
-    const downloadResourceRequest = actorClient.resource.downloadResource({ root: actorRoot, resourcePath });
+    const downloadResourceRequest = actorClient.resource.downloadResource({ root: actorRoot, resourcePath })
     check({ val: downloadResourceRequest }, {
       'test -> resource.uploadResource and resource.downloadResource - bytes - match': ({ body }) => {
         return b64encode(body.toString()) === b64encode(resourceBytes)
@@ -277,7 +277,7 @@ export default function actor({ adminData, actorData }: Environment): void {
     const tagName = randomString()
 
     const getTagsResponse = actorClient.tag.getTags()
-    const [{ 'oc:id': existingTagId } = { 'oc:id': '' }] = queryXml(`$..[?(@['oc:display-name'] === '${tagName}')]`, getTagsResponse?.body);
+    const [{ 'oc:id': existingTagId } = { 'oc:id': '' }] = queryXml(`$..[?(@['oc:display-name'] === '${tagName}')]`, getTagsResponse?.body)
     check({ skip: !existingTagId, val: undefined }, {
       'test -> tag.getTagsResponse - exists': () => {
         return !!existingTagId
@@ -317,7 +317,7 @@ export default function actor({ adminData, actorData }: Environment): void {
       }
     })
 
-    const defer = deferable();
+    const defer = deferable()
     defer.add(() => {
       group(grouping, () => {
         actorClient.tag.removeTagFromResource({ resourceId: clientResource.folderId, tag: tagNameOrId })
@@ -331,9 +331,9 @@ export default function actor({ adminData, actorData }: Environment): void {
           }
         })
 
-        adminClient.tag.deleteTag({ tag: tagNameOrId });
+        adminClient.tag.deleteTag({ tag: tagNameOrId })
       })
-    });
+    })
 
     return {
       defer,
@@ -350,16 +350,16 @@ export default function actor({ adminData, actorData }: Environment): void {
     const [userLogin, userPassword] = [randomString(), randomString()]
     adminClient.user.createUser({ userLogin, userPassword })
 
-    const defer = deferable();
+    const defer = deferable()
     defer.add(() => {
       group(grouping, () => {
         adminClient.user.deleteUser({ userLogin })
       })
-    });
+    })
 
     adminClient.user.enableUser({ userLogin })
 
-    const userClient = new Client({ ...settings, userLogin, userPassword });
+    const userClient = new Client({ ...settings, userLogin, userPassword })
 
     return {
       userLogin,
@@ -377,7 +377,7 @@ export default function actor({ adminData, actorData }: Environment): void {
     const searchForShareesResponse = actorClient.search.searchForSharees({
       searchQuery: clientUser.userLogin,
       searchItemType: ItemType.folder
-    });
+    })
     const [sharee] = queryXml('$..shareWith', searchForShareesResponse.body)
     check({ val: undefined }, {
       'test -> search.searchForSharees - name - match': () => {
@@ -386,9 +386,9 @@ export default function actor({ adminData, actorData }: Environment): void {
     })
 
     const searchForResourcesPoll = (client: Client, query: string): ReturnType<typeof actorClient.search.searchForResources> => {
-      const searchForResourcesResponse = client.search.searchForResources({ root: actorRoot, searchQuery: query });
-      const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body);
-      const found = !!searchFileID;
+      const searchForResourcesResponse = client.search.searchForResources({ root: actorRoot, searchQuery: query })
+      const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body)
+      const found = !!searchFileID
 
       if (!found) {
         sleep(1)
@@ -398,7 +398,7 @@ export default function actor({ adminData, actorData }: Environment): void {
       return searchForResourcesResponse
     }
 
-    const searchForResourcesResponse = searchForResourcesPoll(actorClient, clientResource.folderName);
+    const searchForResourcesResponse = searchForResourcesPoll(actorClient, clientResource.folderName)
     check({ val: searchForResourcesResponse }, {
       'test -> search.searchForResources - id - match': ({ body }) => {
         const [fileId] = queryXml("$..['oc:fileid']", body)
@@ -409,7 +409,7 @@ export default function actor({ adminData, actorData }: Environment): void {
     const searchForResourcesByTag = actorClient.search.searchForResourcesByTag({
       tag: clientTag.tagNameOrId,
       root: actorRoot
-    });
+    })
     check({ val: searchForResourcesByTag }, {
       'test -> search.searchForResourcesByTag - id - match': ({ body }) => {
         const [fileId] = queryXml("$..['oc:fileid']", body)
@@ -436,7 +436,7 @@ export default function actor({ adminData, actorData }: Environment): void {
           shareType: ShareType.user
         })
 
-      const [shareId] = queryXml('ocs.data.id', createShareResponse.body);
+      const [shareId] = queryXml('ocs.data.id', createShareResponse.body)
       const acceptShareResponse = clientUser.userClient.share.acceptShare({ shareId })
       check({ skip: guards.isNextcloud, val: acceptShareResponse }, {
         'test -> share.acceptShare - displayname_file_owner - match': ({ body }) => {
@@ -449,12 +449,12 @@ export default function actor({ adminData, actorData }: Environment): void {
         }
       })
 
-      const defer = deferable();
+      const defer = deferable()
       defer.add(() => {
         group(grouping, () => {
-          actorClient.share.deleteShare({ shareId });
+          actorClient.share.deleteShare({ shareId })
         })
-      });
+      })
 
       return {
         defer
@@ -474,9 +474,9 @@ export default function actor({ adminData, actorData }: Environment): void {
 }
 
 export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword });
+  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
 
   actorData.forEach(({ actorLogin }) => {
-    adminClient.user.deleteUser({ userLogin: actorLogin });
-  });
+    adminClient.user.deleteUser({ userLogin: actorLogin })
+  })
 }

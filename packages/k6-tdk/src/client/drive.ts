@@ -1,10 +1,10 @@
-import { RefinedResponse } from 'k6/http';
+import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const';
-import { endpoints } from '@/endpoints';
-import { check } from '@/utils';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-import { EndpointClient } from './client';
+import { EndpointClient } from './client'
 
 export class Drive extends EndpointClient {
   createDrive(p: { driveName: string }): RefinedResponse<'text'> | undefined {
@@ -15,16 +15,16 @@ export class Drive extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.drives.POST__create_drive(this.request, p);
+        response = endpoints.graph.v1.drives.POST__create_drive(this.request, p)
     }
 
     check({ skip: !response, val: response }, {
       'client -> application.createDrive - status': (r) => {
-        return r?.status === 201;
+        return r?.status === 201
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   deleteDrive(p: { driveId: string }): RefinedResponse<'none'> | undefined {
@@ -35,15 +35,15 @@ export class Drive extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.drives.DELETE__delete_drive(this.request, p);
+        response = endpoints.graph.v1.drives.DELETE__delete_drive(this.request, p)
     }
 
     check({ skip: !response, val: response }, {
       'client -> drive.deleteDrive - status': (r) => {
-        return r?.status === 204;
+        return r?.status === 204
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

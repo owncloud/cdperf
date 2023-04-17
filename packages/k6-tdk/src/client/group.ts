@@ -1,10 +1,10 @@
-import { RefinedResponse } from 'k6/http';
+import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const';
-import { endpoints } from '@/endpoints';
-import { check } from '@/utils';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-import { EndpointClient } from './client';
+import { EndpointClient } from './client'
 
 export class Group extends EndpointClient {
   createGroup(p: { groupName: string }): RefinedResponse<'text'> {
@@ -16,16 +16,16 @@ export class Group extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.groups.POST__create_group(this.request, p);
+        response = endpoints.graph.v1.groups.POST__create_group(this.request, p)
     }
 
     check({ val: response }, {
       'client -> group.createGroup - status': ({ status }) => {
-        return status === 200;
+        return status === 200
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   deleteGroup(p: { groupIdOrName: string }): RefinedResponse<'text' | 'none'> {
@@ -45,10 +45,10 @@ export class Group extends EndpointClient {
 
     check({ val: response }, {
       'client -> group.deleteGroup - status': ({ status }) => {
-        return status === expectedStatus;
+        return status === expectedStatus
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

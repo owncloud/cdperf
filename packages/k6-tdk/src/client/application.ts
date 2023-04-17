@@ -1,10 +1,10 @@
-import { RefinedResponse } from 'k6/http';
+import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const';
-import { endpoints } from '@/endpoints';
-import { check } from '@/utils';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-import { EndpointClient } from './client';
+import { EndpointClient } from './client'
 
 export class Application extends EndpointClient {
   listApplications(): RefinedResponse<'text'> | undefined {
@@ -12,7 +12,7 @@ export class Application extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        break;
+        break
       case Platform.ownCloudInfiniteScale:
       default:
         response = endpoints.graph.v1.applications.GET__get_applications(this.request, {})
@@ -20,10 +20,10 @@ export class Application extends EndpointClient {
 
     check({ skip:!response, val: response }, {
       'client -> application.listApplications - status': (r) => {
-        return r?.status === 200;
+        return r?.status === 200
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

@@ -1,9 +1,9 @@
-import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http';
-import { merge } from 'lodash-es';
+import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http'
+import { merge } from 'lodash-es'
 
-import { Authenticator } from '@/auth';
+import { Authenticator } from '@/auth'
 
-import { cleanURL } from './url';
+import { cleanURL } from './url'
 
 export type Request = typeof request
 

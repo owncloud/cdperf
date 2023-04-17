@@ -1,10 +1,10 @@
-import { RefinedResponse } from 'k6/http';
+import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const';
-import { endpoints } from '@/endpoints';
-import { check } from '@/utils';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-import { EndpointClient } from './client';
+import { EndpointClient } from './client'
 
 export class Me extends EndpointClient {
   getMyProfile(): RefinedResponse<'text'> | undefined {
@@ -20,11 +20,11 @@ export class Me extends EndpointClient {
 
     check({ skip: !response, val: response }, {
       'client -> role.getMyProfile - status': (r) => {
-        return r?.status === 200;
+        return r?.status === 200
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   getMyDrives(): RefinedResponse<'text'> | undefined {
@@ -40,10 +40,10 @@ export class Me extends EndpointClient {
 
     check({ skip: !response, val: response }, {
       'client -> role.getMyDrives - status': (r) => {
-        return r?.status === 200;
+        return r?.status === 200
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

@@ -1,6 +1,6 @@
-import { RequestBody } from 'k6/http';
+import { RequestBody } from 'k6/http'
 
-import { Endpoint } from './endpoints';
+import { Endpoint } from './endpoints'
 
 export const POST__create_tag: Endpoint<{
   tagName: string,
@@ -19,15 +19,15 @@ export const POST__create_tag: Endpoint<{
     headers: {
       'Content-Type': 'application/json'
     }
-  });
-};
+  })
+}
 
 export const DELETE__delete_tag: Endpoint<{ tagId: string }, 'none'> = (r, { tagId }) => {
-  return r('DELETE', `/remote.php/dav/systemtags/${tagId}`);
-};
+  return r('DELETE', `/remote.php/dav/systemtags/${tagId}`)
+}
 
 export const PROPFIND__get_tags_with_properties: Endpoint<{
   propfindXml?: RequestBody
 }, 'text'> = (r, { propfindXml }) => {
-  return r('PROPFIND', '/remote.php/dav/systemtags', propfindXml);
-};
+  return r('PROPFIND', '/remote.php/dav/systemtags', propfindXml)
+}

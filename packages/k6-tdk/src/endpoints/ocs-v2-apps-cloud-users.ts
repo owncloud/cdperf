@@ -1,4 +1,4 @@
-import { Endpoint } from './endpoints';
+import { Endpoint } from './endpoints'
 
 export const POST__create_user: Endpoint<{
   userLogin: string,
@@ -12,21 +12,21 @@ export const POST__create_user: Endpoint<{
     headers: {
       'OCS-APIRequest': 'true'
     }
-  });
-};
+  })
+}
 
 export const PUT__enable_user: Endpoint<{ userLogin: string }, 'text'> = (r, { userLogin }) => {
   return r('PUT', `/ocs/v2.php/cloud/users/${userLogin}/enable`, undefined, {
     headers: {
       'OCS-APIRequest': 'true'
     }
-  });
-};
+  })
+}
 
 export const DELETE__delete_user: Endpoint<{ userLogin: string }, 'text'> = (r, { userLogin }) => {
   return r('DELETE', `/ocs/v2.php/cloud/users/${userLogin}`, undefined, {
     headers: {
       'OCS-APIRequest': 'true'
     }
-  });
-};
+  })
+}

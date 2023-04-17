@@ -1,4 +1,4 @@
-import { Platform } from '@/const';
+import { Platform } from '@/const'
 
 export const platformGuard = (platform: Platform) => {
   return {

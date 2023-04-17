@@ -1,8 +1,8 @@
-import { RequestBody } from 'k6/http';
+import { RequestBody } from 'k6/http'
 
-import { Platform } from '@/const';
+import { Platform } from '@/const'
 
-import { Endpoint, Permission, ShareType } from './endpoints';
+import { Endpoint, Permission, ShareType } from './endpoints'
 
 export const POST__create_share: Endpoint<{
   shareResourcePath: string,
@@ -28,21 +28,21 @@ export const POST__create_share: Endpoint<{
     headers['Content-Type'] = 'application/json'
   }
 
-  return r('POST', '/ocs/v2.php/apps/files_sharing/api/v1/shares', body, { headers });
-};
+  return r('POST', '/ocs/v2.php/apps/files_sharing/api/v1/shares', body, { headers })
+}
 
 export const POST__accept_share: Endpoint<{ shareId: string }, 'text'> = (r, { shareId }) => {
   return r('POST', `/ocs/v2.php/apps/files_sharing/api/v1/shares/pending/${shareId}`, undefined, {
     headers: {
       'OCS-APIRequest': 'true'
     }
-  });
-};
+  })
+}
 
 export const DELETE__delete_share: Endpoint<{ shareId: string }, 'text'> = (r, { shareId }) => {
   return r('DELETE', `/ocs/v2.php/apps/files_sharing/api/v1/shares/${shareId}`, undefined, {
     headers: {
       'OCS-APIRequest': 'true'
     }
-  });
-};
+  })
+}

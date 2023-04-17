@@ -1,11 +1,11 @@
-import { RefinedResponse } from 'k6/http';
+import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const';
-import { endpoints, ItemType } from '@/endpoints';
-import { check } from '@/utils';
+import { Platform } from '@/const'
+import { endpoints, ItemType } from '@/endpoints'
+import { check } from '@/utils'
 
-import { EndpointClient } from './client';
-import { SEARCH__search_for_resources, SEARCH__search_for_resources_by_tag } from './xml';
+import { EndpointClient } from './client'
+import { SEARCH__search_for_resources, SEARCH__search_for_resources_by_tag } from './xml'
 
 export class Search extends EndpointClient {
   searchForSharees(p: { searchQuery: string, searchItemType: ItemType }): RefinedResponse<'text'> {
@@ -13,11 +13,11 @@ export class Search extends EndpointClient {
 
     check({ val: response }, {
       'client -> search.searchForSharees - status': ({ status }) => {
-        return status === 200;
+        return status === 200
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
   searchForResources(p: { root: string, searchQuery: string, searchLimit?: number }): RefinedResponse<'text'> {
@@ -39,9 +39,9 @@ export class Search extends EndpointClient {
 
     check({ val: response }, {
       'client -> search.searchForResources - status': ({ status }) => {
-        return status === 207;
+        return status === 207
       }
-    });
+    })
 
     return response
   }
@@ -54,9 +54,9 @@ export class Search extends EndpointClient {
 
     check({ val: response }, {
       'client -> search.searchForResourcesByTag - status': ({ status }) => {
-        return status === 207;
+        return status === 207
       }
-    });
+    })
 
     return response
   }

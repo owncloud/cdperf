@@ -1,4 +1,4 @@
-import { check as k6Check, Checkers, group as k6Group } from 'k6';
+import { check as k6Check, Checkers, group as k6Group } from 'k6'
 
 export const group = <RT>(name: string, fn: (name) => RT): RT => {
   return k6Group<RT>(name, (): RT => {

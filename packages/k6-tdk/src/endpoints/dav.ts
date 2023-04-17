@@ -1,6 +1,6 @@
-import { RequestBody } from 'k6/http';
+import { RequestBody } from 'k6/http'
 
-import { Endpoint } from './endpoints';
+import { Endpoint } from './endpoints'
 
 export const SEARCH__search_for_resources: Endpoint<{
   searchXml?: RequestBody
@@ -9,5 +9,5 @@ export const SEARCH__search_for_resources: Endpoint<{
     headers: {
       'Content-Type': 'application/xml'
     }
-  });
-};
+  })
+}

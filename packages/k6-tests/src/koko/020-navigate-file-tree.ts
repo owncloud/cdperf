@@ -1,10 +1,10 @@
-import { Platform } from '@ownclouders/k6-tdk';
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
-import { Client } from '@ownclouders/k6-tdk/lib/client';
-import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import exec from 'k6/execution';
-import { Options } from 'k6/options';
-import { times } from 'lodash';
+import { Platform } from '@ownclouders/k6-tdk'
+import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
+import { Client } from '@ownclouders/k6-tdk/lib/client'
+import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
+import exec from 'k6/execution'
+import { Options } from 'k6/options'
+import { times } from 'lodash'
 
 interface Environment {
   adminData: {
@@ -36,35 +36,35 @@ const settings = {
     vus: 1,
     insecureSkipTLSVerify: true
   }
-};
+}
 
 /**/
-export const options: Options = settings.k6;
+export const options: Options = settings.k6
 
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password });
+  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
 
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
-    adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword });
+    adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
-    const getMyDrivesResponse = actorClient.me.getMyDrives();
-    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body);
+    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const getMyDrivesResponse = actorClient.me.getMyDrives()
+    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
     const folders = times(settings.folder.rootCount, () => {
       const tree = times(settings.folder.childCount, () => {
-        return randomString();
-      });
+        return randomString()
+      })
 
       return tree.reduce((acc: string[], name) => {
-        acc.push(name);
+        acc.push(name)
         actorClient.resource.createResource({ root: actorRoot, resourcePath: acc.join('/') })
 
-        return acc;
-      }, []);
-    });
+        return acc
+      }, [])
+    })
 
     return {
       actorLogin,
@@ -72,7 +72,7 @@ export function setup(): Environment {
       actorRoot,
       folders
     }
-  });
+  })
 
   return {
     adminData: {
@@ -83,8 +83,8 @@ export function setup(): Environment {
   }
 }
 export default function actor({ actorData }: Environment): void {
-  const { actorLogin, actorPassword, actorRoot, folders } = actorData[exec.vu.idInTest - 1];
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
+  const { actorLogin, actorPassword, actorRoot, folders } = actorData[exec.vu.idInTest - 1]
+  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
 
   folders.forEach((paths) => {
     for (let i = 1; i <= paths.length; i += 1) {
@@ -101,12 +101,12 @@ export default function actor({ actorData }: Environment): void {
         }
       })
     }
-  });
+  })
 }
 export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword });
+  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
 
   actorData.forEach(({ actorLogin }) => {
-    adminClient.user.deleteUser({ userLogin: actorLogin });
-  });
+    adminClient.user.deleteUser({ userLogin: actorLogin })
+  })
 }

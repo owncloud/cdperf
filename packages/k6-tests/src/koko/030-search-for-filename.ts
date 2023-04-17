@@ -1,11 +1,11 @@
-import { Platform } from '@ownclouders/k6-tdk';
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
-import { Client } from '@ownclouders/k6-tdk/lib/client';
-import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import { sleep } from 'k6';
-import exec from 'k6/execution';
-import { Options } from 'k6/options';
-import { times } from 'lodash';
+import { Platform } from '@ownclouders/k6-tdk'
+import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
+import { Client } from '@ownclouders/k6-tdk/lib/client'
+import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
+import { sleep } from 'k6'
+import exec from 'k6/execution'
+import { Options } from 'k6/options'
+import { times } from 'lodash'
 
 interface Environment {
   adminData: {
@@ -36,29 +36,29 @@ const settings = {
     vus: 1,
     insecureSkipTLSVerify: true
   }
-};
+}
 
 /**/
-export const options: Options = settings.k6;
+export const options: Options = settings.k6
 
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password });
+  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
 
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
-    adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword });
+    adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
-    const getMyDrivesResponse = actorClient.me.getMyDrives();
-    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body);
+    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const getMyDrivesResponse = actorClient.me.getMyDrives()
+    const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
     return {
       actorLogin,
       actorPassword,
       actorRoot
     }
-  });
+  })
 
   return {
     adminData: {
@@ -70,22 +70,22 @@ export function setup(): Environment {
 }
 
 export default function actor({ actorData }: Environment): void {
-  const { actorLogin, actorPassword, actorRoot } = actorData[exec.vu.idInTest - 1];
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword });
+  const { actorLogin, actorPassword, actorRoot } = actorData[exec.vu.idInTest - 1]
+  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
 
 
-  const defer: (() => void)[] = [];
+  const defer: (() => void)[] = []
   const folderNames = times(settings.assets.folderCount, () => {
-    return randomString();
-  });
+    return randomString()
+  })
   const textDocuments = times(settings.assets.textDocumentCount, () => {
-    return [`${randomString()}.txt`, randomString()];
-  });
+    return [`${randomString()}.txt`, randomString()]
+  })
 
   const doSearch = (query: string, expectedId: string, description: string) => {
-    const searchForResourcesResponse = actorClient.search.searchForResources({ root: actorRoot, searchQuery: query });
-    const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body);
-    const found = !!searchFileID;
+    const searchForResourcesResponse = actorClient.search.searchForResources({ root: actorRoot, searchQuery: query })
+    const [searchFileID] = queryXml("$..['oc:fileid']", searchForResourcesResponse?.body)
+    const found = !!searchFileID
 
     if (!found) {
       sleep(1)
@@ -95,10 +95,10 @@ export default function actor({ actorData }: Environment): void {
 
     check({ val: undefined }, {
       [`test -> search.${description} - found`]: () => {
-        return expectedId === searchFileID;
+        return expectedId === searchFileID
       }
-    });
-  };
+    })
+  }
 
   folderNames.forEach((folderName) => {
     actorClient.resource.createResource({ root: actorRoot, resourcePath: folderName })
@@ -106,14 +106,14 @@ export default function actor({ actorData }: Environment): void {
       root: actorRoot,
       resourcePath: folderName
     })
-    const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body);
+    const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body)
 
-    doSearch(folderName, expectedId, 'folder-name');
+    doSearch(folderName, expectedId, 'folder-name')
 
     defer.push(() => {
-      actorClient.resource.deleteResource({ root: actorRoot, resourcePath: folderName });
-    });
-  });
+      actorClient.resource.deleteResource({ root: actorRoot, resourcePath: folderName })
+    })
+  })
 
   textDocuments.forEach(([documentName, documentContent]) => {
     actorClient.resource.uploadResource({ root: actorRoot, resourcePath: documentName, resourceBytes: documentContent })
@@ -121,28 +121,28 @@ export default function actor({ actorData }: Environment): void {
       root: actorRoot,
       resourcePath: documentName
     })
-    const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body);
+    const [expectedId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest?.body)
 
-    doSearch(documentName, expectedId, 'file-name');
+    doSearch(documentName, expectedId, 'file-name')
     // idea for later:
     // content search only works if ocis has content extraction enabled (SEARCH_EXTRACTOR_TYPE=tika),
     // needs further testing, therefore deactivated for the moment.
     // doSearch(documentContent, expectedId, 'file-content')
 
     defer.push(() => {
-      actorClient.resource.deleteResource({ root: actorRoot, resourcePath: documentName });
-    });
-  });
+      actorClient.resource.deleteResource({ root: actorRoot, resourcePath: documentName })
+    })
+  })
 
   defer.forEach((d) => {
-    d();
-  });
+    d()
+  })
 }
 
 export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword });
+  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
 
   actorData.forEach(({ actorLogin }) => {
-    adminClient.user.deleteUser({ userLogin: actorLogin });
-  });
+    adminClient.user.deleteUser({ userLogin: actorLogin })
+  })
 }

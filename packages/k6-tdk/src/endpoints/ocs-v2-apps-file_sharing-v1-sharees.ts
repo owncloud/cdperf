@@ -1,6 +1,6 @@
-import { objectToQueryString } from '@/utils';
+import { objectToQueryString } from '@/utils'
 
-import { Endpoint, ItemType } from './endpoints';
+import { Endpoint, ItemType } from './endpoints'
 
 export const GET__search_for_sharees: Endpoint<{ searchQuery: string, searchItemType: ItemType }, 'text'> = (r, { searchQuery, searchItemType }) => {
   return r('GET', `/ocs/v2.php/apps/files_sharing/api/v1/sharees?${objectToQueryString({
@@ -13,5 +13,5 @@ export const GET__search_for_sharees: Endpoint<{ searchQuery: string, searchItem
     headers: {
       'OCS-APIRequest': 'true'
     }
-  });
-};
+  })
+}
