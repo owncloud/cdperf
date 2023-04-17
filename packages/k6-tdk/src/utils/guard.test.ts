@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest';
 
-import { Platform } from '@/client';
-
+import { Platform } from '@/const';
 import { platformGuard } from './guard';
 
 test.each([

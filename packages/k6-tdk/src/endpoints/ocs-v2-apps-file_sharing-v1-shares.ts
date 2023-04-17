@@ -1,6 +1,6 @@
 import { RequestBody } from 'k6/http';
 
-import { Platform } from '@/client';
+import { Platform } from '@/const';
 
 import { Endpoint, Permission, ShareType } from './endpoints';
 

@@ -1,9 +1,10 @@
 import { RefinedResponse } from 'k6/http';
 
+import { Platform } from '@/const';
 import { endpoints } from '@/endpoints';
 import { check } from '@/utils';
 
-import { EndpointClient, Platform } from './client';
+import { EndpointClient } from './client';
 import { TAG__get_tags, TAG__get_tags_for_resource } from './xml';
 
 export class Tag extends EndpointClient {

@@ -1,9 +1,10 @@
 import { RefinedResponse } from 'k6/http';
 
+import { Platform } from '@/const';
 import { endpoints, ItemType } from '@/endpoints';
 import { check } from '@/utils';
 
-import { EndpointClient, Platform } from './client';
+import { EndpointClient } from './client';
 import { SEARCH__search_for_resources, SEARCH__search_for_resources_by_tag } from './xml';
 
 export class Search extends EndpointClient {

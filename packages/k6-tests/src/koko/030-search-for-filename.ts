@@ -1,5 +1,6 @@
+import { Platform } from '@ownclouders/k6-tdk';
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
-import { Client, Platform } from '@ownclouders/k6-tdk/lib/client';
+import { Client } from '@ownclouders/k6-tdk/lib/client';
 import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
 import { sleep } from 'k6';
 import exec from 'k6/execution';

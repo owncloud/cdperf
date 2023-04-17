@@ -1,10 +1,10 @@
 import { CookieJar } from 'k6/http';
 
 import { Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
+import { Platform } from '@/const';
 import { requestFactory } from '@/utils';
 
 import { Application } from './application';
-import { Platform } from './client';
 import { Drive } from './drive';
 import { Group } from './group';
 import { Me } from './me';
