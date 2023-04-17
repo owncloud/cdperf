@@ -1,6 +1,6 @@
 import { CookieJar } from 'k6/http';
 
-import { Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
+import { Adapter, Authenticator, BasicAuth, Kopano } from '@/auth';
 import { Platform } from '@/const';
 import { requestFactory } from '@/utils';
 
@@ -48,11 +48,11 @@ export class Client {
     let authn: Authenticator;
     switch (p.authAdapter) {
       case Adapter.basicAuth:
-        authn = new BasicAuth({ login: p.userLogin, password: p.userPassword });
+        authn = new BasicAuth(p);
         break;
-      case Adapter.openIDConnect:
+      case Adapter.kopano:
       default:
-        authn = new OpenIDConnect({ login: p.userLogin, password: p.userPassword }, p.baseUrl);
+        authn = new Kopano(p);
         break;
     }
 

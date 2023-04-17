@@ -23,7 +23,7 @@ interface Environment {
 /**/
 const settings = {
   baseUrl: __ENV.BASE_URL || 'https://localhost:9200',
-  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  authAdapter: __ENV.AUTH_ADAPTER === Adapter.basicAuth ? Adapter.basicAuth : Adapter.kopano,
   platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
   admin: {
     login: __ENV.ADMIN_LOGIN || 'admin',

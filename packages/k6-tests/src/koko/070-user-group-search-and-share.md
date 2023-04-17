@@ -34,8 +34,8 @@ the testing steps as a whole will run 10 times (5 times per user).
   * default value: `https://localhost:9200`
   * `export BASE_URL=https://cloud-domain.org:80`
 * `AUTH_ADAPTER`: the authentication method to use
-  * default value: `openIDConnect`
-  * `export AUTH_ADAPTER=openIDConnect`
+  * default value: `kopano`
+  * `export AUTH_ADAPTER=kopano`
   * `export AUTH_ADAPTER=basicAuth`
 * `PLATFORM`: specifies which client platform should be used
   * default value: `ownCloudInfiniteScale`

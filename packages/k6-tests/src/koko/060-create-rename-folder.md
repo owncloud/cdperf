@@ -19,8 +19,8 @@ The test runs `N` times for each user. For example, if you define `--vus 2` and 
   * default value: `https://localhost:9200`
   * `export BASE_URL=https://cloud-domain.org:80`
 * `AUTH_ADAPTER`: the authentication method to use
-  * default value: `openIDConnect`
-  * `export AUTH_ADAPTER=openIDConnect`
+  * default value: `kopano`
+  * `export AUTH_ADAPTER=kopano`
   * `export AUTH_ADAPTER=basicAuth`
 * `PLATFORM`: specifies which client platform should be used
   * default value: `ownCloudInfiniteScale`
