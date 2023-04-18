@@ -6,8 +6,6 @@ import { objectToQueryString, queryStringToObject, randomString } from '@/utils'
 
 import { Account, Authenticator, Token } from './auth';
 
-
-
 export class OpenIDConnect implements Authenticator {
   #account: Account;
   #baseURL: string;
@@ -52,8 +50,7 @@ export class OpenIDConnect implements Authenticator {
   }
 
   private getContinueURI(): string {
-    const logonResponse = http.post(
-      this.#logonURL,
+    const logonResponse = http.post(this.#logonURL,
       JSON.stringify({
         params: [ this.#account.login, this.#account.password, '1' ],
         hello: {
@@ -70,8 +67,7 @@ export class OpenIDConnect implements Authenticator {
           Referer: this.#baseURL,
           'Content-Type': 'application/json',
         },
-      },
-    );
+      },);
     const continueURI = get(logonResponse.json(), 'hello.continue_uri');
     if (logonResponse.status !== 200 || !continueURI) {
       fail(this.#logonURL);

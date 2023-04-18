@@ -1,9 +1,7 @@
-
 import { Request } from '@/utils/http';
 
 import { Apps } from './apps';
 import { Cloud } from './cloud';
-
 
 export class V2 {
   readonly cloud: Cloud;

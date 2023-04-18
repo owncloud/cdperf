@@ -5,7 +5,6 @@ import { JSONPath } from 'jsonpath-plus';
 import { JSONValue } from 'k6';
 import { create } from 'xmlbuilder2';
 
-
 export const randomString = (length = 10, charset?: string): string => {
   return _randomString(length, charset);
 };
@@ -13,6 +12,14 @@ export const randomString = (length = 10, charset?: string): string => {
 export const queryJson = <V extends string>(pathExpression: string, obj?: JSONValue): V[] => {
   if (!pathExpression || !obj) {
     return [];
+  }
+
+  if(typeof obj == 'string') {
+    try {
+      obj = JSON.parse(obj)
+    } catch (_) {
+      return []
+    }
   }
 
   /* eslint-disable @typescript-eslint/ban-ts-comment */

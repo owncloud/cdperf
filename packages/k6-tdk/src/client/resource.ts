@@ -6,7 +6,6 @@ import { Api } from '@/api';
 
 import { Version } from './client';
 
-
 export class Resource {
   #api: Api;
   #version: Version;
@@ -19,17 +18,19 @@ export class Resource {
   upload(id: string, path: string, body: RequestBody): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.dav.spaces.upload(id, path, body);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.dav.files.upload(id, path, body);
-        break;
+    case Version.ocis:
+      response = this.#api.dav.spaces.upload(id, path, body);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.dav.files.upload(id, path, body);
+      break;
     }
 
     check(response, {
-      'client -> resource.upload - status': ({ status }) => status === 201,
+      'client -> resource.upload - status': ({ status }) => {
+        return status === 201
+      },
     });
 
     return response;
@@ -38,17 +39,19 @@ export class Resource {
   create(id: string, path: string): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.dav.spaces.create(id, path);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.dav.files.create(id, path);
-        break;
+    case Version.ocis:
+      response = this.#api.dav.spaces.create(id, path);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.dav.files.create(id, path);
+      break;
     }
 
     check(response, {
-      'client -> resource.create - status': ({ status }) => status === 201,
+      'client -> resource.create - status': ({ status }) => {
+        return status === 201
+      },
     });
 
     return response;
@@ -57,17 +60,19 @@ export class Resource {
   download(id: string, path: string): RefinedResponse<'binary'> {
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.dav.spaces.download(id, path);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.dav.files.download(id, path);
-        break;
+    case Version.ocis:
+      response = this.#api.dav.spaces.download(id, path);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.dav.files.download(id, path);
+      break;
     }
 
     check(response, {
-      'client -> resource.download - status': ({ status }) => status === 200,
+      'client -> resource.download - status': ({ status }) => {
+        return status === 200
+      },
     });
 
     return response;
@@ -84,17 +89,19 @@ export class Resource {
 
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.dav.spaces.propfind(id, path);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.dav.files.propfind(id, path, body);
-        break;
+    case Version.ocis:
+      response = this.#api.dav.spaces.propfind(id, path);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.dav.files.propfind(id, path, body);
+      break;
     }
 
     check(response, {
-      'client -> resource.propfind - status': ({ status }) => status === 207,
+      'client -> resource.propfind - status': ({ status }) => {
+        return status === 207
+      },
     });
 
     return response;
@@ -103,17 +110,19 @@ export class Resource {
   delete(id: string, path: string): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.dav.spaces.delete(id, path);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.dav.files.delete(id, path);
-        break;
+    case Version.ocis:
+      response = this.#api.dav.spaces.delete(id, path);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.dav.files.delete(id, path);
+      break;
     }
 
     check(response, {
-      'client -> resource.delete - status': ({ status }) => status === 204,
+      'client -> resource.delete - status': ({ status }) => {
+        return status === 204
+      },
     });
 
     return response;
@@ -122,17 +131,19 @@ export class Resource {
   move(id: string, from: string, to: string): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.dav.spaces.move(id, from, to);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.dav.files.move(id, from, to);
-        break;
+    case Version.ocis:
+      response = this.#api.dav.spaces.move(id, from, to);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.dav.files.move(id, from, to);
+      break;
     }
 
     check(response, {
-      'client -> resource.move - status': ({ status }) => status === 201,
+      'client -> resource.move - status': ({ status }) => {
+        return status === 201
+      },
     });
 
     return response;

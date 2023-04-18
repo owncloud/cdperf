@@ -30,55 +30,59 @@ interface Settings {
 
 /**/
 const settings: Settings = {
-	baseURL: __ENV.BASE_URL || 'https://localhost:9200',
-	authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
-	clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
-	adminUser: {
-		login: __ENV.ADMIN_LOGIN || 'admin',
-		password: __ENV.ADMIN_PASSWORD || 'admin',
-	},
-	k6: {
-		vus: 1,
-		insecureSkipTLSVerify: true,
-	},
+  baseURL: __ENV.BASE_URL || 'https://localhost:9200',
+  authAdapter: __ENV.AUTH_ADAPTER == Adapter.basicAuth ? Adapter.basicAuth : Adapter.openIDConnect,
+  clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
+  adminUser: {
+    login: __ENV.ADMIN_LOGIN || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin',
+  },
+  k6: {
+    vus: 1,
+    insecureSkipTLSVerify: true,
+  },
 };
 
 /**/
 export const options: Options = settings.k6;
 
 export function setup(): Data {
-	const adminCredential = settings.adminUser;
-	const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
+  const adminCredential = settings.adminUser;
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
-	const userInfos = times<Info>(options.vus || 1, () => {
-		const userCredential = { login: randomString(), password: randomString() };
-		adminClient.user.create(userCredential);
-		adminClient.user.enable(userCredential.login);
+  const userInfos = times<Info>(options.vus || 1, () => {
+    const userCredential = { login: randomString(), password: randomString() };
+    adminClient.user.create(userCredential);
+    adminClient.user.enable(userCredential.login);
 
-		return {
-			credential: userCredential,
-		};
-	});
+    return {
+      credential: userCredential,
+    };
+  });
 
-	return {
-		adminCredential,
-		userInfos,
-	};
+  return {
+    adminCredential,
+    userInfos,
+  };
 }
 
 export default function ({ userInfos }: Data): void {
-	const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
-	const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
-	const userMeResponse = userClient.user.me();
-	const [ userDisplayName = userCredential.login ] = queryJson('displayNamed', userMeResponse?.json());
+  const { credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+  const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
+  const userMeResponse = userClient.user.me();
+  const [ userDisplayName = userCredential.login ] = queryJson('displayNamed', userMeResponse?.json());
 
-	check(userDisplayName, {
-		'user displayName': (displayName) => displayName === userCredential.login,
-	});
+  check(userDisplayName, {
+    'user displayName': (displayName) => {
+      return displayName === userCredential.login
+    },
+  });
 }
 
 export function teardown({ userInfos, adminCredential }: Data): void {
-	const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
+  const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
-	userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
+  userInfos.forEach(({ credential }) => {
+    return adminClient.user.delete(credential.login)
+  });
 }

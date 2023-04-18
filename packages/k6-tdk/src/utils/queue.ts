@@ -1,6 +1,6 @@
 import { setTimeout } from 'k6/experimental/timers';
 
-const wait = ms => {
+const wait = (ms) => {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
@@ -49,6 +49,8 @@ export class Queue<T = void> {
   }
 
   exec(): Promise<T[]> {
-    return Promise.all(this.#tasks.map((fn) => backOff(fn, this.#backOffOptions)))
+    return Promise.all(this.#tasks.map((fn) => {
+      return backOff(fn, this.#backOffOptions)
+    }))
   }
 }

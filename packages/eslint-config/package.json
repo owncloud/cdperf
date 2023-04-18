@@ -27,6 +27,8 @@
     "eslint-plugin-disable": "^2.0.3",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-json-files": "^2.1.0",
+    "eslint-plugin-no-relative-import-paths": "^1.5.2",
+    "eslint-plugin-relative-imports-when-same-folder": "^0.0.4",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "eslint-plugin-unicorn": "^46.0.0"
   },

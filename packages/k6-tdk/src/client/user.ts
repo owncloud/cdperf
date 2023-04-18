@@ -6,7 +6,6 @@ import { Account } from '@/auth';
 
 import { Version } from './client';
 
-
 export class User {
   #api: Api;
   #version: Version;
@@ -23,7 +22,9 @@ export class User {
     const response = this.#api.graph.v1.me.drives();
 
     check(response, {
-      'client -> user.drives - status': ({ status }) => status === 200,
+      'client -> user.drives - status': ({ status }) => {
+        return status === 200
+      },
     });
 
     return response;
@@ -41,7 +42,9 @@ export class User {
     }
 
     check(response, {
-      'client -> user.me - status': ({ status }) => status === 200,
+      'client -> user.me - status': ({ status }) => {
+        return status === 200
+      },
     });
 
     return response;
@@ -55,7 +58,9 @@ export class User {
     const response = this.#api.ocs.v2.cloud.users.enable(id);
 
     check(response, {
-      'client -> user.enable - status': ({ status }) => status === 200,
+      'client -> user.enable - status': ({ status }) => {
+        return status === 200
+      },
     });
 
     return response;
@@ -64,17 +69,19 @@ export class User {
   create(account: Account): RefinedResponse<'text'> {
     let response;
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.graph.v1.users.create(account);
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.ocs.v2.cloud.users.create(account);
-        break;
+    case Version.ocis:
+      response = this.#api.graph.v1.users.create(account);
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.ocs.v2.cloud.users.create(account);
+      break;
     }
 
     check(response, {
-      'client -> user.create - status': ({ status }) => status === 200,
+      'client -> user.create - status': ({ status }) => {
+        return status === 200
+      },
     });
 
     return response;
@@ -85,19 +92,21 @@ export class User {
     let statusSuccess: number;
 
     switch (this.#version) {
-      case Version.ocis:
-        response = this.#api.graph.v1.users.delete(id);
-        statusSuccess = 204;
-        break;
-      case Version.occ:
-      case Version.nc:
-        response = this.#api.ocs.v2.cloud.users.delete(id);
-        statusSuccess = 200;
-        break;
+    case Version.ocis:
+      response = this.#api.graph.v1.users.delete(id);
+      statusSuccess = 204;
+      break;
+    case Version.occ:
+    case Version.nc:
+      response = this.#api.ocs.v2.cloud.users.delete(id);
+      statusSuccess = 200;
+      break;
     }
 
     check(response, {
-      'client -> user.delete - status': ({ status }) => status === statusSuccess,
+      'client -> user.delete - status': ({ status }) => {
+        return status === statusSuccess
+      },
     });
 
     return response;

@@ -67,7 +67,9 @@ export function setup(): Data {
     const [ userHome = userCredential.login ] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.json());
 
     const userFolders = times(settings.folder.rootCount, () => {
-      const tree = times(settings.folder.childCount, () => randomString());
+      const tree = times(settings.folder.childCount, () => {
+        return randomString()
+      });
 
       return tree.reduce((acc: string[], name) => {
         acc.push(name);
@@ -102,5 +104,7 @@ export default function ({ userInfos }: Data): void {
 export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
-  userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
+  userInfos.forEach(({ credential }) => {
+    return adminClient.user.delete(credential.login)
+  });
 }

@@ -84,7 +84,9 @@ export default function ({ userInfos }: Data): void {
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
 
   times(settings.folder.rootCount, () => {
-    const tree = times(settings.folder.childCount, () => randomString());
+    const tree = times(settings.folder.childCount, () => {
+      return randomString()
+    });
 
     tree.reduce((acc: string[], name) => {
       const createPath = [ ...acc, name ].join('/');
@@ -101,5 +103,7 @@ export default function ({ userInfos }: Data): void {
 export function teardown({ userInfos, adminCredential }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
-  userInfos.forEach(({ credential }) => adminClient.user.delete(credential.login));
+  userInfos.forEach(({ credential }) => {
+    return adminClient.user.delete(credential.login)
+  });
 }

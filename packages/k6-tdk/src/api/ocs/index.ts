@@ -2,8 +2,6 @@ import { Request } from '@/utils/http';
 
 import { V2 } from './v2';
 
-
-
 export class Ocs {
   readonly v2: V2;
 

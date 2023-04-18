@@ -51,6 +51,8 @@ importers:
       eslint-plugin-disable: ^2.0.3
       eslint-plugin-import: ^2.27.5
       eslint-plugin-json-files: ^2.1.0
+      eslint-plugin-no-relative-import-paths: ^1.5.2
+      eslint-plugin-relative-imports-when-same-folder: ^0.0.4
       eslint-plugin-simple-import-sort: ^10.0.0
       eslint-plugin-unicorn: ^46.0.0
       typescript: ^5.0.3
@@ -63,6 +65,8 @@ importers:
       eslint-plugin-disable: 2.0.3_eslint@8.37.0
       eslint-plugin-import: 2.27.5_f66okp2kqrdiymeqhgaog6g5pu
       eslint-plugin-json-files: 2.1.0_eslint@8.37.0
+      eslint-plugin-no-relative-import-paths: 1.5.2
+      eslint-plugin-relative-imports-when-same-folder: 0.0.4
       eslint-plugin-simple-import-sort: 10.0.0_eslint@8.37.0
       eslint-plugin-unicorn: 46.0.0_eslint@8.37.0
     devDependencies:
@@ -108,18 +112,6 @@ importers:
       eslint: 8.37.0
       turbowatch: 2.20.0
       typescript: 5.0.3
-
-  packages/k6-tdk/lib/api:
-    specifiers: {}
-
-  packages/k6-tdk/lib/auth:
-    specifiers: {}
-
-  packages/k6-tdk/lib/client:
-    specifiers: {}
-
-  packages/k6-tdk/lib/utils:
-    specifiers: {}
 
   packages/k6-tests:
     specifiers:
@@ -1771,6 +1763,17 @@ packages:
       sort-package-json: 1.57.0
     dev: false
 
+  /eslint-plugin-no-relative-import-paths/1.5.2:
+    resolution: {integrity: sha512-wMlL+TVuDhKk1plP+w3L4Hc7+u89vUkrOYq6/0ARjcYqwc9/YaS9uEXNzaqAk+WLoEgakzNL5JgJJw6m4qd5zw==}
+    dev: false
+
+  /eslint-plugin-relative-imports-when-same-folder/0.0.4:
+    resolution: {integrity: sha512-S0KgdeLXgN1xDWvSB+/2KdJDloWPw128VPAuUESzixNz6APJ6O/eXD7mKy6H3ZgfpfEs8zP2QLekftoLYaWU7A==}
+    dependencies:
+      enhanced-resolve: 5.12.0
+      ramda: 0.28.0
+    dev: false
+
   /eslint-plugin-simple-import-sort/10.0.0_eslint@8.37.0:
     resolution: {integrity: sha512-AeTvO9UCMSNzIHRkg8S6c3RPy5YEwKWSQPx3DYghLedo2ZQxowPFLGDN1AZ2evfg6r6mjBSZSLxLFsWSu3acsw==}
     peerDependencies:
@@ -3128,6 +3131,10 @@ packages:
   /railroad-diagrams/1.0.0:
     resolution: {integrity: sha512-cz93DjNeLY0idrCNOH6PviZGRN9GJhsdm9hpn1YCS879fj4W+x5IFJhhkRZcwVgMmFF7R82UA/7Oh+R8lLZg6A==}
     dev: true
+
+  /ramda/0.28.0:
+    resolution: {integrity: sha512-9QnLuG/kPVgWvMQ4aODhsBUFKOUmnbUnsSXACv+NCQZcHbeb+v8Lodp8OVxtRULN1/xOyYLLaL6npE6dMq5QTA==}
+    dev: false
 
   /randexp/0.4.6:
     resolution: {integrity: sha512-80WNmd9DA0tmZrw9qQa62GPPWfuXJknrmVmLcxvq4uZBdYqb1wYoKTmnlGUchvVWe0XiLupYkBoXVOxz3C8DYQ==}

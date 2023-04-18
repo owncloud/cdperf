@@ -17,11 +17,11 @@ export const cleanURL = (...parts: string[]): string => {
   return parts.join('/').replace(/(?<!:)\/+/gm, '/');
 };
 
-
-
 export const objectToQueryString = (o: { [key: string]: string | number }): string => {
   return Object.keys(o)
-    .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(o[ key ] || ''))
+    .map((key) => {
+      return encodeURIComponent(key) + '=' + encodeURIComponent(o[ key ] || '')
+    })
     .join('&');
 };
 
