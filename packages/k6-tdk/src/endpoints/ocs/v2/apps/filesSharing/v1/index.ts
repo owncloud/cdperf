@@ -10,6 +10,8 @@ export class V1 {
 
   readonly sharees: Sharees;
 
+  readonly sharees: Sharees;
+
   constructor(request: Request) {
     this.shares = new Shares(request);
     this.sharees = new Sharees(request);

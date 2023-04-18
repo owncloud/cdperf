@@ -54,9 +54,9 @@ export function setup(): Data {
   const adminCredential = settings.adminUser;
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
   const roleListResponse = adminClient.role.list()
-  const [appRoleId] = queryJson('$.bundles[?(@.name === \'spaceadmin\')].id', roleListResponse?.body);
+  const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", roleListResponse?.body);
   const applicationListResponse = adminClient.application.list()
-  const [resourceId] = queryJson('$.value[?(@.displayName === \'ownCloud Infinite Scale\')].id', applicationListResponse?.body);
+  const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", applicationListResponse?.body);
 
   const userInfos = times<Info>(options.vus || 1, () => {
     const userCredential = { login: randomString(), password: randomString() };
