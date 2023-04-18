@@ -15,9 +15,9 @@ export class Groups {
       { groupid },
       {
         headers: {
-          'OCS-APIRequest': 'true',
-        },
-      },);
+          'OCS-APIRequest': 'true'
+        }
+      });
   }
 
   delete(name: string): RefinedResponse<'text'> {
@@ -26,8 +26,8 @@ export class Groups {
       undefined,
       {
         headers: {
-          'OCS-APIRequest': 'true',
-        },
+          'OCS-APIRequest': 'true'
+        }
       });
   }
 }

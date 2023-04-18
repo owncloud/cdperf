@@ -35,12 +35,12 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin'
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true,
-  },
+    insecureSkipTLSVerify: true
+  }
 };
 
 /**/
@@ -56,13 +56,13 @@ export function setup(): Data {
     adminClient.user.enable(userCredential.login);
 
     return {
-      credential: userCredential,
+      credential: userCredential
     };
   });
 
   return {
     adminCredential,
-    userInfos,
+    userInfos
   };
 }
 
@@ -75,7 +75,7 @@ export default function ({ userInfos }: Data): void {
   check(userDisplayName, {
     'user displayName': (displayName) => {
       return displayName === userCredential.login
-    },
+    }
   });
 }
 

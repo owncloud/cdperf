@@ -28,8 +28,8 @@ export class Spaces {
   move(id: string, from: string, to: string): RefinedResponse<'text'> {
     return this.request('MOVE', `/remote.php/dav/spaces/${id}/${from}`, undefined, {
       headers: {
-        destination: `/remote.php/dav/spaces/${id}/${to}`,
-      },
+        destination: `/remote.php/dav/spaces/${id}/${to}`
+      }
     });
   }
 

@@ -1,7 +1,8 @@
 import { Adapter } from '@ownclouders/k6-tdk/lib/auth';
 import { Client, Version } from '@ownclouders/k6-tdk/lib/client';
-import { queryJson, randomString } from '@ownclouders/k6-tdk/lib/utils';
-import { randomBytes } from 'k6/crypto';
+import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints';
+import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils';
+import { check } from 'k6';
 import exec from 'k6/execution';
 import { Options } from 'k6/options';
 import { times } from 'lodash';
@@ -13,12 +14,13 @@ interface Credential {
 
 interface Info {
   credential: Credential;
-  home: string;
+  shareFolder: string;
 }
 
 interface Data {
   adminCredential: Credential;
   userInfos: Info[];
+  shareReceiverUserInfos: Credential[];
 }
 
 interface Settings {
@@ -26,19 +28,8 @@ interface Settings {
   baseURL: string;
   clientVersion: Version;
   adminUser: Credential;
-  assets: {
-    small: {
-      quantity: number;
-      size: number;
-    };
-    medium: {
-      quantity: number;
-      size: number;
-    };
-    large: {
-      quantity: number;
-      size: number;
-    };
+  shareReceivers: {
+    userCount: number;
   };
   k6: Options;
 }
@@ -52,19 +43,8 @@ const settings: Settings = {
     login: __ENV.ADMIN_LOGIN || 'admin',
     password: __ENV.ADMIN_PASSWORD || 'admin'
   },
-  assets: {
-    small: {
-      size: parseInt(__ENV.ASSET_SMALL_SIZE) || 10,
-      quantity: parseInt(__ENV.ASSET_SMALL_QUANTITY) || 1
-    },
-    medium: {
-      size: parseInt(__ENV.ASSET_MEDIUM_SIZE) || 10 * 20,
-      quantity: parseInt(__ENV.ASSET_MEDIUM_QUANTITY) || 1
-    },
-    large: {
-      size: parseInt(__ENV.ASSET_LARGE_SIZE) || 10 * 100,
-      quantity: parseInt(__ENV.ASSET_LARGE_QUANTITY) || 1
-    }
+  shareReceivers: {
+    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT) || 35
   },
   k6: {
     vus: 1,
@@ -88,43 +68,63 @@ export function setup(): Data {
     const userDrivesResponse = userClient.user.drives();
     const [userHome = userCredential.login] = queryJson('$.value[?(@.driveType === \'personal\')].id', userDrivesResponse?.body);
 
+    const userShareFolder = randomString()
+    userClient.resource.create(userHome, userShareFolder);
+
     return {
       credential: userCredential,
-      home: userHome
+      shareFolder: userShareFolder
     };
   });
 
+  const shareReceiverUserInfos = times<Credential>(settings.shareReceivers.userCount, () => {
+    const shareeCredential = { login: randomString(), password: randomString() };
+    adminClient.user.create(shareeCredential);
+    adminClient.user.enable(shareeCredential.login);
+
+    return shareeCredential
+  })
+
   return {
     adminCredential,
-    userInfos
+    userInfos,
+    shareReceiverUserInfos
   };
 }
 
-export default function ({ userInfos }: Data): void {
+export default function ({ userInfos, shareReceiverUserInfos }: Data): void {
   const defer: (() => void)[] = [];
-  const { home: userHome, credential: userCredential } = userInfos[ exec.vu.idInTest - 1 ];
+  const { credential: userCredential, shareFolder: userShareFolder } = userInfos[ exec.vu.idInTest - 1 ];
   const userClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, userCredential);
+  shareReceiverUserInfos.forEach(({ login }) => {
+    const createShareResponse = userClient.share.create(userShareFolder, login, ShareType.user, Permission.all);
+    const [foundShareRecipient] = queryXml('ocs.data.share_with', createShareResponse.body);
 
-  for (const [k, v] of Object.entries(settings.assets)) {
-    times(v.quantity, (i) => {
-      const assetName = [exec.scenario.iterationInTest, k, i].join('-');
+    check(undefined, {
+      [ 'test -> share received - match' ]: () => {
+        return foundShareRecipient === login
+      }
+    })
 
-      userClient.resource.upload(userHome, assetName, randomBytes(v.size * 1000));
-      defer.push(() => {
-        return userClient.resource.download(userHome, assetName)
-      });
+    defer.push(() => {
+      const [shareId] = queryXml('ocs.data.id', createShareResponse.body);
+      userClient.share.delete(shareId);
     });
-  }
+  })
 
-  defer.forEach((c) => {
-    return c()
-  });
+  defer.forEach((d) => {
+    return d()
+  })
 }
 
-export function teardown({ userInfos, adminCredential }: Data): void {
+export function teardown({ userInfos, adminCredential, shareReceiverUserInfos }: Data): void {
   const adminClient = new Client(settings.baseURL, settings.clientVersion, settings.authAdapter, adminCredential);
 
   userInfos.forEach(({ credential }) => {
     return adminClient.user.delete(credential.login)
+  });
+
+  shareReceiverUserInfos.forEach(({ login }) => {
+    return adminClient.user.delete(login)
   });
 }

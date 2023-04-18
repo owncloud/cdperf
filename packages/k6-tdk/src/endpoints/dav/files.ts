@@ -28,8 +28,8 @@ export class Files {
   move(id: string, from: string, to: string): RefinedResponse<'text'> {
     return this.request('MOVE', `/remote.php/dav/files/${id}/${from}`, undefined, {
       headers: {
-        destination: `/remote.php/dav/files/${id}/${to}`,
-      },
+        destination: `/remote.php/dav/files/${id}/${to}`
+      }
     });
   }
 

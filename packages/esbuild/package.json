@@ -21,7 +21,7 @@
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli dist",
     "clean:vendor": "del-cli .turbo node_modules",
-    "lint": "eslint package.json src/**/*.ts",
+    "lint": "eslint package.json 'src/**/*.ts'",
     "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {

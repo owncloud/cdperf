@@ -39,16 +39,16 @@ const settings: Settings = {
   clientVersion: Version[ __ENV.CLIENT_VERSION ] || Version.ocis,
   adminUser: {
     login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin',
+    password: __ENV.ADMIN_PASSWORD || 'admin'
   },
   folder: {
     rootCount: parseInt(__ENV.FOLDER_ROOT_COUNT) || 5,
-    childCount: parseInt(__ENV.FOLDER_CHILD_COUNT) || 5,
+    childCount: parseInt(__ENV.FOLDER_CHILD_COUNT) || 5
   },
   k6: {
     vus: 1,
-    insecureSkipTLSVerify: true,
-  },
+    insecureSkipTLSVerify: true
+  }
 };
 
 /**/
@@ -69,13 +69,13 @@ export function setup(): Data {
 
     return {
       credential: userCredential,
-      home: userHome,
+      home: userHome
     };
   });
 
   return {
     adminCredential,
-    userInfos,
+    userInfos
   };
 }
 

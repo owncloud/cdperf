@@ -29,7 +29,7 @@ export class Group {
     check(response, {
       'client -> group.create - status': ({ status }) => {
         return status === 200
-      },
+      }
     });
 
     return response;
@@ -54,7 +54,7 @@ export class Group {
     check(response, {
       'client -> group.delete - status': ({ status }) => {
         return status === statusSuccess
-      },
+      }
     });
 
     return response;
