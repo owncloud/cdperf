@@ -117,18 +117,6 @@ importers:
       vite-tsconfig-paths: 4.2.0_typescript@5.0.4
       vitest: 0.30.1
 
-  packages/k6-tdk/lib/auth:
-    specifiers: {}
-
-  packages/k6-tdk/lib/client:
-    specifiers: {}
-
-  packages/k6-tdk/lib/endpoints:
-    specifiers: {}
-
-  packages/k6-tdk/lib/utils:
-    specifiers: {}
-
   packages/k6-tests:
     specifiers:
       '@ownclouders/esbuild': workspace:*
