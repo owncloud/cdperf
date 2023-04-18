@@ -1,32 +1,29 @@
-import { check } from 'k6';
-import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+import { RefinedResponse } from 'k6/http'
 
-import { Version, versionSupported } from './client';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-export class Application {
-  #endpoints: Endpoints;
+import { EndpointClient } from './client'
 
-  #version: Version;
-
-  constructor(version: Version, endpoints: Endpoints) {
-    this.#version = version;
-    this.#endpoints = endpoints;
-  }
-
-  list(): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
-      return;
+export class Application extends EndpointClient {
+  listApplications(): RefinedResponse<'text'> | undefined {
+    let response: RefinedResponse<'text'> | undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.applications.GET__get_applications(this.request, {})
     }
 
-    const response = this.#endpoints.graph.v1.applications.list();
-
-    check(response, {
-      'client -> application.list - status': ({ status }) => {
-        return status === 200
+    check({ skip:!response, val: response }, {
+      'client -> application.listApplications - status': (r) => {
+        return r?.status === 200
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

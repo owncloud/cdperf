@@ -1,4 +1,4 @@
-import { build as _build, BuildOptions, BuildResult } from 'esbuild';
+import { build as _build, BuildOptions, BuildResult } from 'esbuild'
 
 export const build = async (config?: BuildOptions): Promise<BuildResult> => {
   return _build({
@@ -8,7 +8,8 @@ export const build = async (config?: BuildOptions): Promise<BuildResult> => {
     outdir: 'dist',
     format: 'esm',
     minify: true,
+    sourcemap: false,
     platform: 'node',
     ...config
   })
-};
+}

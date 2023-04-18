@@ -1,19 +1,14 @@
-export const Version = {
-  ocis: 'ocis',
-  occ: 'occ',
-  nc: 'nc'
-} as const;
+import { Platform } from '@/const'
+import { Request } from '@/utils'
 
-export type Version = (typeof Version)[keyof typeof Version];
 
-export const versionSupported = (currentVersion: Version, ...allowedVersions: Version[]) => {
-  return allowedVersions.includes(currentVersion)
-}
+export abstract class EndpointClient {
+  protected readonly platform: Platform
 
-export const versionGuard = (currentVersion: Version, ...allowedVersions: Version[]) => {
-  if(!versionSupported(currentVersion, ...allowedVersions)) {
-    return
+  protected readonly request: Request
+
+  constructor(platform: Platform, request: Request) {
+    this.platform = platform
+    this.request = request
   }
-
-  throw new Error(`you are using the client version [${currentVersion}] which is not compatible with the test, the following versions are compatible: [${allowedVersions.join(', ')}]`)
 }

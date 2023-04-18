@@ -27,6 +27,7 @@
     },
     "clean": {
       "cache": false
-    }
-	}
+    },
+    "test": {}
+  }
 }

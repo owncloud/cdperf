@@ -1,48 +1,49 @@
-import { check } from 'k6';
-import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+import { RefinedResponse } from 'k6/http'
 
-import { Version, versionSupported } from './client';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-export class Drive {
-  #endpoints: Endpoints;
+import { EndpointClient } from './client'
 
-  #version: Version;
-
-  constructor(version: Version, endpoints: Endpoints) {
-    this.#version = version;
-    this.#endpoints = endpoints;
-  }
-
-  create(name: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
-      return;
+export class Drive extends EndpointClient {
+  createDrive(p: { driveName: string }): RefinedResponse<'text'> | undefined {
+    let response: RefinedResponse<'text'> | undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.drives.POST__create_drive(this.request, p)
     }
 
-    const response = this.#endpoints.graph.v1.drives.create(name);
-
-    check(response, {
-      'client -> drive.create - status': ({ status }) => {
-        return status === 201
+    check({ skip: !response, val: response }, {
+      'client -> application.createDrive - status': (r) => {
+        return r?.status === 201
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
-  delete(id: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.ocis)) {
-      return;
+  deleteDrive(p: { driveId: string }): RefinedResponse<'none'> | undefined {
+    let response: RefinedResponse<'none'> | undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.drives.DELETE__delete_drive(this.request, p)
     }
 
-    const response = this.#endpoints.graph.v1.drives.delete(id);
-
-    check(response, {
-      'client -> drive.delete - status': ({ status }) => {
-        return status === 204
+    check({ skip: !response, val: response }, {
+      'client -> drive.deleteDrive - status': (r) => {
+        return r?.status === 204
       }
-    });
+    })
 
-    return response;
+    return response
   }
 }

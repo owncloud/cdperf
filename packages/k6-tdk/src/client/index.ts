@@ -1,65 +1,78 @@
-import { CookieJar } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
+import { CookieJar } from 'k6/http'
 
-import { Account, Adapter, Authenticator, BasicAuth, OpenIDConnect } from '@/auth';
-import { requestFactory } from '@/utils/http';
+import { Adapter, Authenticator, BasicAuth, Kopano } from '@/auth'
+import { Platform } from '@/const'
+import { requestFactory } from '@/utils'
 
-import { Application } from './application';
-import { Version } from './client';
-import { Drive } from './drive';
-import { Group } from './group';
-import { Resource } from './resource';
-import { Role } from './role';
-import { Search } from './search';
-import { Share } from './share';
-import { Tag } from './tag';
-import { User } from './user';
+import { Application } from './application'
+import { Drive } from './drive'
+import { Group } from './group'
+import { Me } from './me'
+import { Resource } from './resource'
+import { Role } from './role'
+import { Search } from './search'
+import { Share } from './share'
+import { Tag } from './tag'
+import { User } from './user'
 
-export * from './client';
+export * from './client'
 
 export class Client {
-  application: Application;
+  application: Application
 
-  drive: Drive;
+  drive: Drive
 
-  group: Group;
+  me: Me
 
-  resource: Resource;
+  group: Group
 
-  role: Role;
+  resource: Resource
 
-  search: Search;
+  role: Role
 
-  share: Share;
+  search: Search
 
-  tag: Tag;
+  share: Share
 
-  user: User;
+  tag: Tag
 
-  constructor(url: string, version: Version, authAdapter: Adapter, account: Account) {
-    let authenticator: Authenticator;
-    switch (authAdapter) {
-    case Adapter.openIDConnect:
-      authenticator = new OpenIDConnect(account, url);
-      break;
-    case Adapter.basicAuth:
-      authenticator = new BasicAuth(account);
-      break;
+  user: User
+
+  constructor(p: {
+    baseUrl: string,
+    platform: Platform,
+    authAdapter: Adapter,
+    userLogin: string,
+    userPassword: string
+  }) {
+    let authn: Authenticator
+    switch (p.authAdapter) {
+      case Adapter.basicAuth:
+        authn = new BasicAuth(p)
+        break
+      case Adapter.kopano:
+      default:
+        authn = new Kopano(p)
+        break
     }
 
-    const request = requestFactory(url, authenticator, {
-      jar: new CookieJar()
-    });
-    const endpoints = new Endpoints(request);
+    const request = requestFactory({
+      authn,
+      baseUrl: p.baseUrl,
+      params: {
+        jar: new CookieJar()
+      }
+    })
 
-    this.application = new Application(version, endpoints);
-    this.drive = new Drive(version, endpoints);
-    this.group = new Group(version, endpoints);
-    this.resource = new Resource(version, endpoints);
-    this.role = new Role(version, endpoints);
-    this.search = new Search(version, endpoints);
-    this.share = new Share(endpoints);
-    this.tag = new Tag(version, endpoints);
-    this.user = new User(version, endpoints);
+    this.application = new Application(p.platform, request)
+    this.drive = new Drive(p.platform, request)
+    this.group = new Group(p.platform, request)
+    this.me = new Me(p.platform, request)
+    this.resource = new Resource(p.platform, request)
+    this.role = new Role(p.platform, request)
+    this.search = new Search(p.platform, request)
+    this.share = new Share(p.platform, request)
+    this.tag = new Tag(p.platform, request)
+    this.user = new User(p.platform, request)
   }
 }

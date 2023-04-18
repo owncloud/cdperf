@@ -1,156 +1,174 @@
-import { check } from 'k6';
-import { RefinedResponse } from 'k6/http';
-import { Endpoints } from 'src/endpoints';
-import { create } from 'xmlbuilder2';
+import { RefinedResponse } from 'k6/http'
 
-import { Version, versionSupported } from './client';
+import { Platform } from '@/const'
+import { endpoints } from '@/endpoints'
+import { check } from '@/utils'
 
-export class Tag {
-  #endpoints: Endpoints;
+import { EndpointClient } from './client'
+import { TAG__get_tags, TAG__get_tags_for_resource } from './xml'
 
-  #version: Version;
+export class Tag extends EndpointClient {
+  createTag(p: {
+    tagName: string,
+    canAssignTag?: boolean,
+    userAssignableTag?: boolean,
+    userVisibleTag?: boolean
+  }): RefinedResponse<'none'> | undefined {
+    const {
+      tagName,
+      userAssignableTag = true,
+      userVisibleTag = true,
+      canAssignTag = true
+    } = p
 
-  constructor(version: Version, endpoints: Endpoints) {
-    this.#version = version;
-    this.#endpoints = endpoints;
-  }
-
-  create(name: string, canAssign = true, userAssignable = true, userVisible = true): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.occ, Version.nc)) {
-      return;
+    let response: RefinedResponse<'none'> | undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.systemtags.POST__create_tag(this.request, {
+          tagName,
+          userAssignableTag,
+          userVisibleTag,
+          canAssignTag
+        })
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
     }
 
-    const response = this.#endpoints.dav.systemtags.create(name, canAssign, userAssignable, userVisible);
-
-    check(response, {
-      'client -> tag.create - status': ({ status }) => {
-        return status === 201
+    check({ skip: !response, val: response }, {
+      'client -> tag.createTag - status': (r) => {
+        return r?.status === 201
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
-  delete(id: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.occ, Version.nc)) {
-      return;
+  deleteTag(p: { tag: string }): RefinedResponse<'none'> | undefined {
+    let response: RefinedResponse<'none'>| undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.systemtags.DELETE__delete_tag(this.request, { tagId: p.tag })
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
     }
 
-    const response = this.#endpoints.dav.systemtags.delete(id);
-
-    check(response, {
-      'client -> tag.delete - status': ({ status }) => {
-        return status === 204
+    check({ skip: !response, val: response }, {
+      'client -> tag.deleteTag - status': (r) => {
+        return r?.status === 204
       }
-    });
+    })
 
-    return response;
+    return response
   }
 
-  list(): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.occ, Version.nc)) {
-      return;
+  getTags(): RefinedResponse<'text'> | undefined {
+    let response: RefinedResponse<'text'>| undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.systemtags.PROPFIND__get_tags_with_properties(this.request, {
+          propfindXml: TAG__get_tags[this.platform]({})
+        })
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
     }
 
-    const oc = 'http://owncloud.org/ns'
-    const dav = 'DAV:'
-    const response = this.#endpoints.dav.systemtags.list(create({ version: '1.0', encoding: 'UTF-8' })
-      .ele(dav, 'propfind')
-      .ele(dav, 'prop')
-      .ele(oc, 'display-name')
-      .up()
-      .ele(oc, 'user-visible')
-      .up()
-      .ele(oc, 'user-assignable')
-      .up()
-      .ele(oc, 'id')
-      .up()
-      .end());
+    check({ skip: !response, val: response }, {
+      'client -> tag.getTags - status': (r) => {
+        return r?.status === 207
+      }
+    })
 
-    check(response, {
-      'client -> tag.list - status': ({ status }) => {
+    return response
+  }
+
+  addTagToResource(p: { resourceId: string, tag: string }): RefinedResponse<'none'> {
+    let response: RefinedResponse<'none'>
+    let expectedStatus: number
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        expectedStatus = 201
+        response = endpoints.dav.systemtags_relations.PUT__add_tag_to_resource(this.request, {
+          resourceId: p.resourceId,
+          tagId: p.tag
+        })
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        expectedStatus = 200
+        response = endpoints.graph.v1.extensions.org_libre_graph.tags.PUT__add_tags_to_resource(this.request, {
+          resourceId: p.resourceId,
+          tagNames: [p.tag]
+        })
+    }
+
+    check({ val: response }, {
+      'client -> tag.addTagToResource - status': ({ status }) => {
+        return status === expectedStatus
+      }
+    })
+
+    return response
+  }
+
+  removeTagFromResource(p: { resourceId: string, tag: string }): RefinedResponse<'none'> {
+    let response: RefinedResponse<'none'>
+    let expectedStatus: number
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        expectedStatus = 204
+        response = endpoints.dav.systemtags_relations.DELETE__remove_tag_from_resource(this.request, {
+          resourceId: p.resourceId,
+          tagId: p.tag
+        })
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        expectedStatus = 200
+        response = endpoints.graph.v1.extensions.org_libre_graph.tags.DELETE__remove_tags_from_resource(this.request, {
+          resourceId: p.resourceId,
+          tagNames: [p.tag]
+        })
+    }
+
+    check({ val: response }, {
+      'client -> tag.removeTagToResource - status': ({ status }) => {
+        return status === expectedStatus
+      }
+    })
+
+    return response
+  }
+
+  getTagsForResource(p: { root: string, resourceId: string, resourcePath: string }): RefinedResponse<'text'> {
+    const propfindXml = TAG__get_tags_for_resource[this.platform]({})
+
+    let response: RefinedResponse<'text'>
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.dav.systemtags_relations.PROPFIND__get_tags_with_properties_for_resource(this.request,
+          { resourceId: p.resourceId, propfindXml })
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.dav.spaces.PROPFIND__get_properties_for_resource(this.request,
+          { driveId: p.root, resourcePath: p.resourcePath, propfindXml })
+    }
+
+    check({ val: response }, {
+      'client -> tag.getTagsForResource - status': ({ status }) => {
         return status === 207
       }
-    });
+    })
 
-    return response;
-  }
-
-  assign(resourceId: string, tag: string): RefinedResponse<'text'> {
-    let response
-    let statusSuccess
-
-    switch (this.#version) {
-    case Version.ocis:
-      response = this.#endpoints.graph.v1.extensions.orgLibreGraph.tags.assign(resourceId, tag);
-      statusSuccess = 200;
-      break;
-    case Version.occ:
-    case Version.nc:
-      response = this.#endpoints.dav.systemtagsRelations.assign(resourceId, tag);
-      statusSuccess = 201;
-      break;
-    }
-
-    check(response, {
-      'client -> tag.assign - status': ({ status }) => {
-        return status === statusSuccess
-      }
-    });
-
-    return response;
-  }
-
-  unassign(resourceId: string, tag: string): RefinedResponse<'text'> {
-    let response
-    let statusSuccess
-
-    switch (this.#version) {
-    case Version.ocis:
-      response = this.#endpoints.graph.v1.extensions.orgLibreGraph.tags.unassign(resourceId, tag);
-      statusSuccess = 200;
-      break;
-    case Version.occ:
-    case Version.nc:
-      response = this.#endpoints.dav.systemtagsRelations.unassign(resourceId, tag);
-      statusSuccess = 204;
-      break;
-    }
-
-    check(response, {
-      'client -> tag.unassign - status': ({ status }) => {
-        return status === statusSuccess
-      }
-    });
-
-    return response;
-  }
-
-  get(resourceId: string): RefinedResponse<'text'> | undefined {
-    if (!versionSupported(this.#version, Version.occ, Version.nc)) {
-      return;
-    }
-
-    const oc = 'http://owncloud.org/ns'
-    const dav = 'DAV:'
-    const response = this.#endpoints.dav.systemtagsRelations.propfind(resourceId, create({ version: '1.0', encoding: 'UTF-8' })
-      .ele(dav, 'propfind')
-      .ele(dav, 'prop')
-      .ele(oc, 'display-name')
-      .up()
-      .ele(oc, 'user-visible')
-      .up()
-      .ele(oc, 'user-assignable')
-      .up()
-      .ele(oc, 'id')
-      .up()
-      .end());
-    check(response, {
-      'client -> tag.get - status': ({ status }) => {
-        return status === 207
-      }
-    });
-
-    return response;
+    return response
   }
 }

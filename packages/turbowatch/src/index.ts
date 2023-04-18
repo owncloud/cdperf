@@ -1,11 +1,11 @@
-import { ChangeEvent, watch as _watch } from 'turbowatch';
+import { ChangeEvent, watch as _watch } from 'turbowatch'
 
 export interface ConfigurationInput {
   project: string;
   onChange: (event: ChangeEvent) => Promise<any>;
 }
 
-export const watch = ({ project, onChange }: ConfigurationInput) =>{
+export const watch = ({ project, onChange }: ConfigurationInput) => {
   return _watch({
     project,
     debounce: {
@@ -34,5 +34,4 @@ export const watch = ({ project, onChange }: ConfigurationInput) =>{
       }
     ]
   })
-};
-
+}

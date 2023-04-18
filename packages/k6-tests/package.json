@@ -30,14 +30,14 @@
     "@ownclouders/eslint-config": "workspace:*",
     "@ownclouders/tsconfig": "workspace:*",
     "@ownclouders/turbowatch": "workspace:*",
-    "@types/k6": "^0.43.2",
-    "@types/lodash": "^4.14.192",
+    "@types/k6": "^0.43.3",
+    "@types/lodash": "^4.14.194",
     "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",
-    "esbuild": "^0.17.14",
+    "esbuild": "^0.17.16",
     "fast-glob": "^3.2.12",
-    "turbowatch": "^2.20.0",
-    "typescript": "^5.0.3"
+    "turbowatch": "^2.21.0",
+    "typescript": "^5.0.4"
   }
 }
