@@ -7,7 +7,7 @@ const instructions = {
   outdir: 'dist',
   entryPoints: [
     'index.ts',
-    'api/index.ts',
+    'endpoints/index.ts',
     'auth/index.ts',
     'client/index.ts',
     'utils/index.ts',
@@ -26,7 +26,7 @@ await Promise.all(instructions.formats.map(format => {
   })
 }))
 
-instructions.entryPoints.forEach((entryPoint, i) => {
+instructions.entryPoints.forEach((entryPoint) => {
   const entryPointInfo = path.parse(entryPoint)
   const isVirtualPackage = !!entryPointInfo.dir
 

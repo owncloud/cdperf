@@ -7,7 +7,9 @@ import { Spaces } from './spaces';
 
 export class Dav {
   protected request: Request;
+
   readonly files: Files;
+
   readonly spaces: Spaces;
 
   constructor(request: Request) {

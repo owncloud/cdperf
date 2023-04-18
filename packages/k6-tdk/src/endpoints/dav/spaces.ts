@@ -4,12 +4,15 @@ import { Request } from '@/utils/http';
 
 export class Spaces {
   protected request: Request;
+
   constructor(request: Request) {
     this.request = request;
   }
+
   upload(id: string, path: string, body: RequestBody): RefinedResponse<'text'> {
     return this.request('PUT', `/remote.php/dav/spaces/${id}/${path}`, body);
   }
+
   download(id: string, path: string): RefinedResponse<'binary'> {
     return this.request('GET', `/remote.php/dav/spaces/${id}/${path}`);
   }

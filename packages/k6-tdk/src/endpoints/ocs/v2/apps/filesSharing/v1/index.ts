@@ -5,6 +5,7 @@ import { Shares } from './shares';
 
 export class V1 {
   readonly shares: Shares;
+
   readonly sharees: Sharees;
 
   constructor(request: Request) {

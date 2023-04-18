@@ -37,6 +37,7 @@ function sanitizeOptions(options?: Partial<BackOffOptions>): BackOffOptions {
 
 export class Queue<T = void> {
   #tasks: (() => Promise<T>)[]
+
   #backOffOptions: BackOffOptions
 
   constructor(o?: Partial<BackOffOptions>) {

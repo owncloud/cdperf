@@ -4,6 +4,7 @@ import { Request } from '@/utils/http';
 
 export class Me {
   protected request: Request;
+
   constructor(request: Request) {
     this.request = request;
   }
