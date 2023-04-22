@@ -39,7 +39,7 @@ export class Client {
   user: User
 
   constructor(p: {
-    baseUrl: string,
+    platformUrl: string,
     platform: Platform,
     authAdapter: Adapter,
     userLogin: string,
@@ -52,13 +52,13 @@ export class Client {
         break
       case Adapter.kopano:
       default:
-        authn = new Kopano(p)
+        authn = new Kopano({ ...p, baseUrl: p.platformUrl })
         break
     }
 
     const request = requestFactory({
       authn,
-      baseUrl: p.baseUrl,
+      baseUrl: p.platformUrl,
       params: {
         jar: new CookieJar()
       }

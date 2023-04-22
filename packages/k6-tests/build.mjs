@@ -2,12 +2,12 @@ import {build} from "@ownclouders/esbuild";
 import fg from "fast-glob";
 import path from 'path'
 
-const sources = await fg('./src/**/*.ts')
+const sources = await fg('./src/**/*.test.ts')
 const entryPoints = sources.reduce((acc, source) => {
 	const sourceInfo = path.parse(source)
 	const [,, ...namespace] = sourceInfo.dir.split('/');
 
-	acc[[...namespace, sourceInfo.name].join('-')] = source
+	acc[[...namespace, sourceInfo.name].join('-').replace(/[._]/g, '-')] = source
 
 	return acc
 }, {})

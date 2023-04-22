@@ -41,20 +41,6 @@ We collect those metrics over time to get indicators of how the performance chan
 for a more detailed instruction how to read the results you should consider reading the k6 manual,
 specially the [end of test](https://k6.io/docs/results-output/end-of-test/) section.
 
-## Test Suits
-* koko
-  * [010-login](packages/k6-tests/src/koko/010-login.md)
-  * [020-navigate-file-tree](packages/k6-tests/src/koko/020-navigate-file-tree.md)
-  * [040-upload-delete](packages/k6-tests/src/koko/040-upload-delete.md)
-  * [050-upload-download](packages/k6-tests/src/koko/050-upload-download.md)
-  * [060-create-rename-folder](packages/k6-tests/src/koko/060-create-rename-folder.md)
-* oc
-  * [share-upload-rename](packages/k6-tests/src/oc/share-upload-rename.md)
-* sample
-  * [kitchen-sink](packages/k6-tests/src/sample/kitchen-sink.md)
-* surf
-  * [upload](packages/k6-tests/src/surf/upload.md)
-
 ## Details
 Read more about [considerations](docs/considerations.md) of performance measurement.
 A precise description of what a test does and what the requirements are can be found in the respective test folder.
