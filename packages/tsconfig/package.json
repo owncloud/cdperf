@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "description": "common tsconfig used withing @ownclouders namespace.",
-  "homepage": "https://github.com/owncloud/web/tree/master/packages/tsconfig",
+  "homepage": "https://github.com/owncloud/cdperf/tree/master/packages/tsconfig",
   "repository": {
     "type": "git",
     "url": "https://github.com/owncloud/cdperf",

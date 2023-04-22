@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": false,
   "description": "ownCloud k6 test development kit",
-  "homepage": "https://github.com/owncloud/web/tree/master/packages/k6-tdk",
+  "homepage": "https://github.com/owncloud/cdperf/tree/master/packages/k6-tdk",
   "repository": {
     "type": "git",
     "url": "https://github.com/owncloud/cdperf",
