@@ -1,4 +1,4 @@
-## Description
+# Description
 The `share upload rename` test mimics a typical end user resource sharing scenario.
 
 The admin user shares a parent folder with each of his colleagues, who in turn create a folder
@@ -64,16 +64,16 @@ PLATFORM=ownCloudServer \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/oc-share-upload-rename-base-test.js --vus 2 --iterations 5
+k6 run artifacts/oc-share-upload-rename-default-test.js --vus 2 --iterations 5
 
 # run the test on a host with an ocis server
 PLATFORM_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/oc-share-upload-rename-base-test.js --vus 2 --iterations 5
+k6 run artifacts/oc-share-upload-rename-default-test.js --vus 2 --iterations 5
 ```
 
 The same can be reached with docker:
 ```shell
-docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/oc-share-upload-rename-base-test.js
+docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/oc-share-upload-rename-default-test.js
 ```

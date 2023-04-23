@@ -1,4 +1,4 @@
-## Description
+# Description
 The `create space` test creates a configurable amount of spaces (per user) and deletes each at the end.
 
 * `admin` creates `N` users.
@@ -55,10 +55,10 @@ the testing steps as a whole will run 10 times (5 times per user).
 PLATFORM_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/080-create-space-base-test.js --vus 2 --iterations 5
+k6 run artifacts/080-create-space-default-test.js --vus 2 --iterations 5
 ```
 
 The same can be reached with docker:
 ```shell
-docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/080-create-space-base-test.js
+docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/080-create-space-default-test.js
 ```

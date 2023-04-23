@@ -1,4 +1,4 @@
-## Description
+# Description
 The `navigate file tree` test creates a configurable horizontal and vertical structure of folders which is then checked using a propfind at each level. 
 
 * `admin` creates `N` users.
@@ -54,16 +54,16 @@ PLATFORM=ownCloudServer \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-020-navigate-file-tree-base-test.js --vus 2 --iterations 5
+k6 run artifacts/koko-020-navigate-file-tree-default-test.js --vus 2 --iterations 5
 
 # run the test on a host with an ocis server
 PLATFORM_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-020-navigate-file-tree-base-test.js --vus 2 --iterations 5
+k6 run artifacts/koko-020-navigate-file-tree-default-test.js --vus 2 --iterations 5
 ```
 
 The same can be reached with docker:
 ```shell
-docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-020-navigate-file-tree-base-test.js
+docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-020-navigate-file-tree-default-test.js
 ```

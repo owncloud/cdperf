@@ -8,7 +8,7 @@ import exec from 'k6/execution'
 import { Options } from 'k6/options'
 import { times } from 'lodash'
 
-interface Environment {
+export interface Environment {
   adminData: {
     adminLogin: string;
     adminPassword: string;
@@ -22,15 +22,15 @@ interface Environment {
 }
 
 /**/
-const settings = {
+export const settings = {
   platformUrl: __ENV.PLATFORM_URL || 'https://localhost:9200',
   authAdapter: Adapter[__ENV.AUTH_ADAPTER] || Adapter.kopano,
   platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
+  testFolder: __ENV.TEST_FOLDER || 'oc-share-upload-rename-base',
   admin: {
     login: __ENV.ADMIN_LOGIN || 'admin',
     password: __ENV.ADMIN_PASSWORD || 'admin'
   },
-  testFolder: __ENV.TEST_FOLDER || 'oc-share-upload-rename',
   assets: {
     size: parseInt(__ENV.ASSET_SIZE, 10) || 1000,
     quantity: parseInt(__ENV.ASSET_QUANTITY, 10) || 10

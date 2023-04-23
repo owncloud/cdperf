@@ -1,4 +1,4 @@
-## Description
+# Description
 The `upload` test mimics a typical end user resource uploading scenario.
 
 The test idea originally came from [surf](https://www.surf.nl/), where the process was used to compare the individual cloud platforms.
@@ -56,16 +56,16 @@ PLATFORM=ownCloudServer \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/surf-upload-base-test.js --vus 2 --iterations 5
+k6 run artifacts/surf-upload-default-test.js --vus 2 --iterations 5
 
 # run the test on a host with an ocis server
 PLATFORM_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/surf-upload-base-test.js --vus 2 --iterations 5
+k6 run artifacts/surf-upload-default-test.js --vus 2 --iterations 5
 ```
 
 The same can be reached with docker:
 ```shell
-docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/surf-upload-base-test.js
+docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/surf-upload-default-test.js
 ```

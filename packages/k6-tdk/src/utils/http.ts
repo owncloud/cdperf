@@ -1,5 +1,5 @@
 import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http'
-import { merge, set } from 'lodash-es'
+import { merge, set } from 'lodash'
 
 import { Authenticator } from '@/auth'
 

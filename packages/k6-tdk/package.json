@@ -76,7 +76,7 @@
   },
   "dependencies": {
     "jsonpath": "^1.1.1",
-    "lodash-es": "^4.17.21",
+    "lodash": "^4.17.21",
     "xmlbuilder2": "^3.0.2"
   },
   "devDependencies": {
@@ -86,7 +86,7 @@
     "@ownclouders/turbowatch": "workspace:*",
     "@types/jsonpath": "^0.2.0",
     "@types/k6": "^0.43.3",
-    "@types/lodash-es": "^4.17.7",
+    "@types/lodash": "^4.14.194",
     "@types/node": "^18.15.11",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",

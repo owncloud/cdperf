@@ -1,4 +1,4 @@
-## Description
+# Description
 The `login` test logs a configurable number of users into the system and checks whether the process was successful.
 
 * `admin` creates `N` users.
@@ -45,16 +45,16 @@ PLATFORM=ownCloudServer \
 AUTH_ADAPTER=basicAuth \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-010-login-base-test.js --vus 2 --iterations 5
+k6 run artifacts/koko-010-login-default-test.js --vus 2 --iterations 5
 
 # run the test on a host with an ocis server
 PLATFORM_URL=https://cloud-domain.org:80 \
 ADMIN_LOGIN=main \
 ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-010-login-base-test.js --vus 2 --iterations 5
+k6 run artifacts/koko-010-login-default-test.js --vus 2 --iterations 5
 ```
 
 The same can be reached with docker:
 ```shell
-docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-010-login-base-test.js
+docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-010-login-default-test.js
 ```

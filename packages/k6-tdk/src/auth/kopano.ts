@@ -1,6 +1,6 @@
 import { fail } from 'k6'
 import http from 'k6/http'
-import { get } from 'lodash-es'
+import { get } from 'lodash'
 
 import { cleanURL, objectToQueryString, queryStringToObject, randomString } from '@/utils'
 
