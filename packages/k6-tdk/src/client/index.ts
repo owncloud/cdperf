@@ -1,7 +1,6 @@
-import { CookieJar } from 'k6/http'
-
-import { Adapter, Authenticator, BasicAuth, Kopano } from '@/auth'
+import { AuthNHTTPProvider } from '@/auth'
 import { Platform } from '@/const'
+import { authNProviderForUser, defaultAuthNProvider, defaultPlatform } from '@/snippets'
 import { requestFactory } from '@/utils'
 
 import { Application } from './application'
@@ -39,40 +38,39 @@ export class Client {
   user: User
 
   constructor(p: {
-    platformUrl: string,
-    platform: Platform,
-    authAdapter: Adapter,
-    userLogin: string,
-    userPassword: string
+    platformUrl?: string,
+    platform?: Platform,
+    userLogin?: string,
+    userPassword?: string
+    authNProvider?: AuthNHTTPProvider
   }) {
-    let authn: Authenticator
-    switch (p.authAdapter) {
-      case Adapter.basicAuth:
-        authn = new BasicAuth(p)
-        break
-      case Adapter.kopano:
-      default:
-        authn = new Kopano({ ...p, baseUrl: p.platformUrl })
-        break
+
+    if(!p.authNProvider && (!p.userLogin || !p.userPassword)){
+      throw new Error('Please provide an "authNProvider" or "userLogin" and "userPassword"')
     }
 
-    const request = requestFactory({
-      authn,
-      baseUrl: p.platformUrl,
-      params: {
-        jar: new CookieJar()
-      }
+    const platform = p.platform || defaultPlatform.type
+    const platformUrl = p.platformUrl || defaultPlatform.url
+    const authNProvider = p.authNProvider || authNProviderForUser({
+      userLogin: p.userLogin!,
+      userPassword: p.userPassword!,
+      defaultProvider: defaultAuthNProvider.type
     })
 
-    this.application = new Application(p.platform, request)
-    this.drive = new Drive(p.platform, request)
-    this.group = new Group(p.platform, request)
-    this.me = new Me(p.platform, request)
-    this.resource = new Resource(p.platform, request)
-    this.role = new Role(p.platform, request)
-    this.search = new Search(p.platform, request)
-    this.share = new Share(p.platform, request)
-    this.tag = new Tag(p.platform, request)
-    this.user = new User(p.platform, request)
+    const request = requestFactory({
+      authNProvider,
+      baseUrl: platformUrl
+    })
+
+    this.application = new Application(platform, request)
+    this.drive = new Drive(platform, request)
+    this.group = new Group(platform, request)
+    this.me = new Me(platform, request)
+    this.resource = new Resource(platform, request)
+    this.role = new Role(platform, request)
+    this.search = new Search(platform, request)
+    this.share = new Share(platform, request)
+    this.tag = new Tag(platform, request)
+    this.user = new User(platform, request)
   }
 }

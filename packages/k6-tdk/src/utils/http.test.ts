@@ -1,12 +1,14 @@
 import { describe, expect, it, test, vi } from 'vitest'
 
 import { requestFactory } from './http';
+import { CookieJar } from 'k6/http'
 
 vi.mock('k6/http', () => {
   return {
     request: (method, url, body, params) => {
       return { method, url, body, params }
-    }
+    },
+    CookieJar: vi.fn()
   }
 })
 
@@ -31,7 +33,7 @@ describe('requestFactory', async () => {
   })
 
   it('adds a authorization header to the request', async () => {
-    const request = requestFactory({ baseUrl: 'http://root.org', authn: { header: 'anyAuth' } })
+    const request = requestFactory({ baseUrl: 'http://root.org', authNProvider: { header: 'anyAuth', jar: new CookieJar()} })
     const response = request('POST', 'endpoint') as any
 
     expect(response.params.headers.Authorization).toBe('anyAuth')

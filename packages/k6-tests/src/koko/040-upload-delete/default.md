@@ -1,5 +1,9 @@
 # Description
+
 The `upload delete` test is intended to see how the instance behaves when many users upload N files of size S, M and L each, and then deletes them again.
+
+
+## Procedure
 
 * `admin` creates `N` users.
   * `N` can be set by using the k6 `--vus` option.
@@ -20,25 +24,10 @@ The `upload delete` test is intended to see how the instance behaves when many u
 the test runs `N` times for each user, for example if you define `--vus 2` and `--iterations 5`
 the testing steps as a whole will run 10 times (5 times per user).
 
-## Options
-* `PLATFORM_URL`: the host under which the respective cloud can be reached.
-  * default value: `https://localhost:9200`
-  * `export PLATFORM_URL=https://cloud-domain.org:80`
-* `AUTH_ADAPTER`: the authentication method to use
-  * default value: `kopano`
-  * `export AUTH_ADAPTER=kopano`
-  * `export AUTH_ADAPTER=basicAuth`
-* `PLATFORM`: specifies which client platform should be used
-  * default value: `ownCloudInfiniteScale`
-  * `export PLATFORM=ownCloudInfiniteScale`
-  * `export PLATFORM=ownCloudServer`
-  * `export PLATFORM=nextcloud`
-* `ADMIN_LOGIN`: the login name of an administrative user
-  * default value: `admin`
-  * `export ADMIN_LOGIN=main`
-* `ADMIN_PASSWORD`: the login password of that administrative user
-  * default value: `admin`
-  * `export ADMIN_PASSWORD=secret`
+
+## Available options
+
+* [Shared options](/k6-tests/options)
 * `FOLDER_ROOT_COUNT`: number of root folders to create
   * default value: `5`
   * `export FOLDER_ROOT_COUNT=10`
@@ -60,32 +49,8 @@ the testing steps as a whole will run 10 times (5 times per user).
 * `ASSET_LARGE_QUANTITY`: number uploads of that asset
   * default value: `1`
   * `export ASSET_LARGE_QUANTITY=2`
-* `--vus`: number of virtual users
-  * default value: `1`
-  * `k6 ... --vus 2`
-* `--duration`: test duration limit
-  * `k6 ... --duration 10s`
-* `--iterations`: script total iteration limit (among all VUs)
-  * `k6 ... --iterations 5`
 
-## Examples
-```shell
-# run the test on a host with an ownCloud classic server
-PLATFORM_URL=https://cloud-domain.org:80 \
-PLATFORM=ownCloudServer \
-AUTH_ADAPTER=basicAuth \
-ADMIN_LOGIN=main \
-ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-040-upload-delete-default-test.js --vus 2 --iterations 5
 
-# run the test on a host with an ocis server
-PLATFORM_URL=https://cloud-domain.org:80 \
-ADMIN_LOGIN=main \
-ADMIN_PASSWORD=secret \
-k6 run artifacts/koko-040-upload-delete-default-test.js --vus 2 --iterations 5
-```
+## How to run the test
 
-The same can be reached with docker:
-```shell
-docker run -e PLATFORM_URL=https://cloud-domain.org:80 -e PLATFORM=ownCloudServer -e AUTH_ADAPTER=basicAuth -e ADMIN_LOGIN=main -e ADMIN_PASSWORD=secret --rm -i grafana/k6 run --vus 2 - < artifacts/koko-040-upload-delete-default-test.js
-```
+please read [here](/k6-tests/run) how the test can be executed, only the script is different

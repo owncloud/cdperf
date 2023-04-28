@@ -18,11 +18,6 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/client/cjs/index.js"
     },
-    "./lib/endpoints": {
-      "types": "./dist/types/endpoints/index.d.ts",
-      "import": "./dist/esm/endpoints/index.js",
-      "require": "./dist/endpoints/cjs/index.js"
-    },
     "./lib/auth": {
       "types": "./dist/types/auth/index.d.ts",
       "import": "./dist/esm/auth/index.js",
@@ -32,6 +27,16 @@
       "types": "./dist/types/client/index.d.ts",
       "import": "./dist/esm/client/index.js",
       "require": "./dist/cjs/client/index.js"
+    },
+    "./lib/endpoints": {
+      "types": "./dist/types/endpoints/index.d.ts",
+      "import": "./dist/esm/endpoints/index.js",
+      "require": "./dist/endpoints/cjs/index.js"
+    },
+    "./lib/snippets": {
+      "types": "./dist/types/snippets/index.d.ts",
+      "import": "./dist/esm/snippets/index.js",
+      "require": "./dist/snippets/cjs/index.js"
     },
     "./lib/utils": {
       "types": "./dist/types/utils/index.d.ts",

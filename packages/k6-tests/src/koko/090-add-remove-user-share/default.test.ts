@@ -1,50 +1,36 @@
-import { Platform } from '@ownclouders/k6-tdk'
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
 import { Client } from '@ownclouders/k6-tdk/lib/client'
 import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints'
-import { check, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
+import { clientForAdmin } from '@ownclouders/k6-tdk/lib/snippets'
+import { check, ENV, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
 import { times } from 'lodash'
 
 interface Environment {
-  adminData: {
-    adminLogin: string;
-    adminPassword: string;
-  };
   actorData: {
     actorLogin: string;
     actorPassword: string;
     shareFolder: string;
-    shareReceivers: {
-      users: { userLogin: string; userPassword: string }[],
-    };
   }[];
+  shareReceivers: {
+    users: { userLogin: string; userPassword: string }[],
+  };
 }
 
 /**/
 const settings = {
-  platformUrl: __ENV.PLATFORM_URL || 'https://localhost:9200',
-  authAdapter: Adapter[__ENV.AUTH_ADAPTER] || Adapter.kopano,
-  platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
-  admin: {
-    login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
-  },
   shareReceivers: {
-    userCount: parseInt(__ENV.SHARE_RECEIVERS_USER_COUNT, 10) || 35
-  },
-  k6: {
-    vus: 1,
-    insecureSkipTLSVerify: true
+    userCount: parseInt(ENV('SHARE_RECEIVERS_USER_COUNT', '35'), 10)
   }
 }
 
 /**/
-export const options: Options = settings.k6
-
+export const options: Options = {
+  vus: 1,
+  insecureSkipTLSVerify: true
+}
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
+  const adminClient = clientForAdmin()
 
   const shareReceiverUsers = times(settings.shareReceivers.userCount, () => {
     const [userLogin, userPassword] = [randomString(), randomString()]
@@ -59,7 +45,7 @@ export function setup(): Environment {
     adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
     const getMyDrivesResponse = actorClient.me.getMyDrives()
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
@@ -70,25 +56,30 @@ export function setup(): Environment {
     return {
       actorLogin,
       actorPassword,
-      shareFolder,
-      shareReceivers:{
-        users: shareReceiverUsers
-      }
+      shareFolder
     }
   })
 
   return {
-    adminData: {
-      adminLogin: settings.admin.login,
-      adminPassword: settings.admin.password
-    },
-    actorData
+    actorData,
+    shareReceivers:{
+      users: shareReceiverUsers
+    }
   }
 }
 
-export default function actor({ actorData }: Environment): void {
-  const { actorLogin, actorPassword, shareReceivers, shareFolder } = actorData[exec.vu.idInTest - 1]
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+const iterationBucket: {
+  actorClient?: Client
+} = {}
+
+export default function actor({ actorData, shareReceivers }: Environment): void {
+  const { actorLogin, actorPassword, shareFolder } = actorData[exec.vu.idInTest - 1]
+
+  if (!iterationBucket.actorClient) {
+    iterationBucket.actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
+  }
+
+  const { actorClient } = iterationBucket
   const defer: (() => void)[] = []
   shareReceivers.users.forEach(({ userLogin }) => {
     const createShareResponse = actorClient.share.createShare({
@@ -116,15 +107,15 @@ export default function actor({ actorData }: Environment): void {
   })
 }
 
-export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
+export function teardown({ actorData, shareReceivers }: Environment): void {
+  const adminClient = clientForAdmin()
 
-  actorData.forEach(({ actorLogin, shareReceivers: { users } }) => {
+  shareReceivers.users.forEach((user) => {
+    return adminClient.user.deleteUser(user)
+  })
+
+  actorData.forEach(({ actorLogin }) => {
     adminClient.user.deleteUser({ userLogin: actorLogin })
-
-    users.forEach((user) => {
-      return adminClient.user.deleteUser(user)
-    })
   })
 }
 

@@ -1,7 +1,6 @@
-import { Platform } from '@ownclouders/k6-tdk'
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
 import { Client } from '@ownclouders/k6-tdk/lib/client'
 import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints'
+import { clientForAdmin, defaultPlatform } from '@ownclouders/k6-tdk/lib/snippets'
 import { check, group, platformGuard, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
 import { sleep } from 'k6'
 import { randomBytes } from 'k6/crypto'
@@ -11,10 +10,6 @@ import { Options } from 'k6/options'
 import { times } from 'lodash'
 
 interface Environment {
-  adminData: {
-    adminLogin: string;
-    adminPassword: string;
-  };
   actorData: {
     actorLogin: string;
     actorPassword: string;
@@ -24,23 +19,10 @@ interface Environment {
 }
 
 /**/
-const settings = {
-  platformUrl: __ENV.PLATFORM_URL || 'https://localhost:9200',
-  authAdapter: Adapter[__ENV.AUTH_ADAPTER] || Adapter.kopano,
-  platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
-  admin: {
-    login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
-  },
-  k6: {
-    vus: 1,
-    insecureSkipTLSVerify: true
-  }
+export const options: Options = {
+  vus: 1,
+  insecureSkipTLSVerify: true
 }
-
-/**/
-export const options: Options = settings.k6
-
 const deferable = () => {
   const tasks: (() => void)[] = []
 
@@ -57,7 +39,7 @@ const deferable = () => {
 }
 
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
+  const adminClient = clientForAdmin()
 
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
@@ -65,7 +47,7 @@ export function setup(): Environment {
     const [actorId] = queryJson('$.id', createUserResponse.body)
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
     const getMyDrivesResponse = actorClient.me.getMyDrives()
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
@@ -78,18 +60,26 @@ export function setup(): Environment {
   })
 
   return {
-    adminData: {
-      adminLogin: settings.admin.login,
-      adminPassword: settings.admin.password
-    },
     actorData
   }
 }
 
-export default function actor({ adminData, actorData }: Environment): void {
-  const guards = { ...platformGuard(settings.platform) }
+const iterationBucket: {
+  actorClient?: Client,
+  adminClient: Client,
+} = {
+  adminClient: clientForAdmin()
+}
+
+export default function actor({ actorData }: Environment): void {
+  const guards = { ...platformGuard(defaultPlatform.type) }
   const { actorLogin, actorPassword, actorId, actorRoot } = actorData[exec.vu.idInTest - 1]
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+
+  if (!iterationBucket.actorClient) {
+    iterationBucket.actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
+  }
+
+  const { actorClient } = iterationBucket
 
   /**
    * ✓ client.me.getMyProfile
@@ -113,7 +103,7 @@ export default function actor({ adminData, actorData }: Environment): void {
     })
   })
 
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
+  const { adminClient } = iterationBucket
 
   /**
    * ✓ client.group.createGroup
@@ -359,7 +349,7 @@ export default function actor({ adminData, actorData }: Environment): void {
 
     adminClient.user.enableUser({ userLogin })
 
-    const userClient = new Client({ ...settings, userLogin, userPassword })
+    const userClient = new Client({ userLogin, userPassword })
 
     return {
       userLogin,
@@ -473,8 +463,8 @@ export default function actor({ adminData, actorData }: Environment): void {
   })
 }
 
-export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
+export function teardown({ actorData }: Environment): void {
+  const adminClient = clientForAdmin()
 
   actorData.forEach(({ actorLogin }) => {
     adminClient.user.deleteUser({ userLogin: actorLogin })

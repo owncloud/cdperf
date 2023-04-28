@@ -1,7 +1,7 @@
 import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http'
 import { merge, set } from 'lodash'
 
-import { Authenticator } from '@/auth'
+import { AuthNHTTPProvider } from '@/auth'
 
 import { cleanURL } from './url'
 
@@ -9,7 +9,7 @@ export type Request = typeof request
 
 export const requestFactory = (p: {
   baseUrl: string,
-  authn?: Authenticator,
+  authNProvider?: AuthNHTTPProvider,
   params?: Params
 }): Request => {
   return (<RT extends ResponseType | undefined>(
@@ -20,8 +20,9 @@ export const requestFactory = (p: {
   ): RefinedResponse<RT> => {
     const params: Params = merge({}, p.params)
 
-    if (p.authn) {
-      set(params, 'headers.Authorization', p.authn.header)
+    if (p.authNProvider) {
+      set(params, 'headers.Authorization', p.authNProvider.header)
+      set(params, 'jar', p.authNProvider.jar)
     }
 
     if (p.params?.jar) {

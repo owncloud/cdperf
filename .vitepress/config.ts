@@ -36,6 +36,8 @@ const sidebarK6Tests = () => {
         items: [
           {text: 'Welcome', link: '/k6-tests/'},
           {text: 'Considerations', link: '/k6-tests/considerations'},
+          {text: 'Hot to run', link: '/k6-tests/run'},
+          {text: 'Available options', link: '/k6-tests/options'},
         ]
       },
       ...testItems,

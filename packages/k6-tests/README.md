@@ -1,17 +1,8 @@
 # ownCloud cloud testing toolbox
 This repository contains the tools we use to test and measure the performance of different cloud systems.
 
-Supported clouds are:
-* [ownCloud Core](https://github.com/owncloud/core)
-* [Infinite Scale](https://github.com/owncloud/ocis)
-* [Nextcloud](https://github.com/nextcloud/server/)
-
-## Requirements
-*  [K6](https://k6.io/) (if k6 should run on the host machine)
-
 ## Usage
-cdPerf is a collection of ready to use scripts which can used via k6 as described.
-[here](https://k6.io/docs/get-started/running-k6/).
+Please read the [how to run](https://owncloud.dev/cdperf/run/) section.
 
 ## How to test
 It's important to know how to compare the tests against each other and what those numbers mean.

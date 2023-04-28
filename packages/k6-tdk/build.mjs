@@ -7,9 +7,10 @@ const instructions = {
   outdir: 'dist',
   entryPoints: [
     'index.ts',
-    'endpoints/index.ts',
     'auth/index.ts',
     'client/index.ts',
+    'endpoints/index.ts',
+    'snippets/index.ts',
     'utils/index.ts',
   ],
   packageName: '@ownclouders/k6-tdk',

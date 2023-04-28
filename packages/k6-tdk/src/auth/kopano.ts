@@ -1,40 +1,44 @@
-import { fail } from 'k6'
-import http from 'k6/http'
+import http, { CookieJar } from 'k6/http'
 import { get } from 'lodash'
 
-import { cleanURL, objectToQueryString, queryStringToObject, randomString } from '@/utils'
+import { check, cleanURL, objectToQueryString, queryStringToObject, randomString } from '@/utils'
 
-import { Authenticator, Token } from './auth'
+import { AuthNHTTPProvider, Token } from './auth'
 
-export class Kopano implements Authenticator {
-  private userLogin: string
+export class Kopano implements AuthNHTTPProvider {
+  private readonly userLogin: string
 
-  private userPassword: string
+  private readonly userPassword: string
 
-  private baseUrl: string
+  private readonly baseUrl: string
 
-  private redirectURL: string
 
-  private logonURL: string
+  private readonly redirectUrl: string
 
-  private tokenURL: string
+  readonly jar: CookieJar
 
   private cache?: {
     validTo: Date
     token: Token
   }
 
-  constructor(p: {userLogin: string, userPassword: string, baseUrl: string}) {
+  constructor(p: { userLogin: string, userPassword: string, baseUrl: string, redirectUrl: string }) {
     this.userLogin = p.userLogin
     this.userPassword = p.userPassword
-    this.baseUrl = p.baseUrl
-    this.redirectURL = cleanURL(`${this.baseUrl}/oidc-callback.html`)
-    this.logonURL = cleanURL(`${this.baseUrl}/signin/v1/identifier/_/logon`)
-    this.tokenURL = cleanURL(`${this.baseUrl}/konnect/v1/token`)
+    this.baseUrl = cleanURL(p.baseUrl)
+    this.redirectUrl = cleanURL(p.redirectUrl)
+    this.jar = new CookieJar()
   }
 
   public get header(): string {
     return `${this.credential.tokenType} ${this.credential.accessToken}`
+  }
+
+  private get endpoints() {
+    return {
+      logon: cleanURL(`${this.baseUrl}/signin/v1/identifier/_/logon`),
+      token: cleanURL(`${this.baseUrl}/konnect/v1/token`)
+    }
   }
 
   private get credential(): Token {
@@ -60,13 +64,13 @@ export class Kopano implements Authenticator {
 
   private getContinueURI(): string {
     const logonResponse = http.post(
-      this.logonURL,
+      this.endpoints.logon,
       JSON.stringify({
         params: [this.userLogin, this.userPassword, '1'],
         hello: {
           scope: 'openid profile email',
           client_id: 'web',
-          redirect_uri: this.redirectURL,
+          redirect_uri: this.redirectUrl,
           flow: 'oidc'
         },
         state: randomString(16)
@@ -76,57 +80,70 @@ export class Kopano implements Authenticator {
           'Kopano-Konnect-XSRF': '1',
           Referer: this.baseUrl,
           'Content-Type': 'application/json'
-        }
+        },
+        jar: this.jar
       }
     )
-    const continueURI = get(logonResponse.json(), 'hello.continue_uri')
-    if (logonResponse.status !== 200 || !continueURI) {
-      fail(this.logonURL)
+    check({ val: logonResponse }, {
+      'authn -> logonResponse - status': ({ status }) => {
+        return status === 200
+      }
+    })
+    if (logonResponse.status !== 200) {
+      throw new Error(`logonResponse.status is ${logonResponse.status}, expected 200`)
     }
 
-    return continueURI
+    return get(logonResponse.json(), 'hello.continue_uri', '')
   }
 
-  private getCode(continueURI: string): string {
-    const authorizeUri = `${continueURI}?${objectToQueryString({
+  private getCode(continueUrl: string): string {
+    const authorizeResponse = http.get(`${continueUrl}?${objectToQueryString({
       client_id: 'web',
       prompt: 'none',
-      redirect_uri: this.redirectURL,
+      redirect_uri: this.redirectUrl,
       response_mode: 'query',
       response_type: 'code',
       scope: 'openid profile email'
-    })}`
-    const authorizeResponse = http.get(authorizeUri, {
-      redirects: 0
+    })}`, {
+      redirects: 0,
+      jar: this.jar
     })
-
-    const code = get(queryStringToObject(authorizeResponse.headers.Location), 'code')
-    if (authorizeResponse.status !== 302 || !code) {
-      fail(continueURI)
+    check({ val: authorizeResponse }, {
+      'authn ->authorizeResponse - status': ({ status }) => {
+        return status === 302
+      }
+    })
+    if (authorizeResponse.status !== 302) {
+      throw new Error(`authorizeResponse.status is ${authorizeResponse.status}, expected 302`)
     }
 
-    return code
+    return get(queryStringToObject(authorizeResponse.headers.Location), 'code', '')
   }
 
   private getToken(code: string): Token {
-    const tokenResponse = http.post(this.tokenURL, {
+    const accessTokenResponse = http.post(this.endpoints.token, {
       client_id: 'web',
       code,
-      redirect_uri: this.redirectURL,
+      redirect_uri: this.redirectUrl,
       grant_type: 'authorization_code'
+    }, {
+      jar: this.jar
     })
-
-    const token = {
-      accessToken: get(tokenResponse.json(), 'access_token', ''),
-      tokenType: get(tokenResponse.json(), 'token_type', ''),
-      idToken: get(tokenResponse.json(), 'id_token', ''),
-      expiresIn: get(tokenResponse.json(), 'expires_in', 0)
+    check({ val: accessTokenResponse }, {
+      'authn -> accessTokenResponse - status': ({ status }) => {
+        return status === 200
+      }
+    })
+    if (accessTokenResponse.status !== 200) {
+      throw new Error(`accessTokenResponse.status is ${accessTokenResponse.status}, expected 200`)
     }
 
-    if (tokenResponse.status !== 200 || !token.accessToken || !token.tokenType || !token.idToken || !token.expiresIn) {
-      fail(this.tokenURL)
-    }
 
-    return token
+    return {
+      accessToken: accessTokenResponse.json('access_token') as string,
+      tokenType: accessTokenResponse.json('token_type') as string,
+      idToken: accessTokenResponse.json('id_token') as string,
+      expiresIn: accessTokenResponse.json('expires_in') as number
+    }
   }
 }

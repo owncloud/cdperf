@@ -1,8 +1,7 @@
-import { Platform } from '@ownclouders/k6-tdk'
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
 import { Client } from '@ownclouders/k6-tdk/lib/client'
 import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/endpoints'
-import { queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
+import { clientForAdmin, defaultAdmin } from '@ownclouders/k6-tdk/lib/snippets'
+import { ENV, queryJson, queryXml, randomString } from '@ownclouders/k6-tdk/lib/utils'
 import { randomBytes } from 'k6/crypto'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
@@ -10,8 +9,6 @@ import { times } from 'lodash'
 
 export interface Environment {
   adminData: {
-    adminLogin: string;
-    adminPassword: string;
     adminRoot: string;
   };
   actorData: {
@@ -23,31 +20,23 @@ export interface Environment {
 
 /**/
 export const settings = {
-  platformUrl: __ENV.PLATFORM_URL || 'https://localhost:9200',
-  authAdapter: Adapter[__ENV.AUTH_ADAPTER] || Adapter.kopano,
-  platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
-  testFolder: __ENV.TEST_FOLDER || 'oc-share-upload-rename-base',
-  admin: {
-    login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
-  },
+  testFolder: ENV('TEST_FOLDER', 'oc-share-upload-rename-base'),
   assets: {
-    size: parseInt(__ENV.ASSET_SIZE, 10) || 1000,
-    quantity: parseInt(__ENV.ASSET_QUANTITY, 10) || 10
-  },
-  k6: {
-    vus: 1,
-    insecureSkipTLSVerify: true
+    size: parseInt(ENV('ASSET_SIZE', '1000'), 10),
+    quantity: parseInt(ENV('ASSET_QUANTITY', '10'), 10)
   }
 }
 
 /**/
-export const options: Options = settings.k6
+export const options: Options = {
+  vus: 1,
+  insecureSkipTLSVerify: true
+}
 
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
+  const adminClient = clientForAdmin()
   const getMyDrivesResponseAdmin = adminClient.me.getMyDrives()
-  const [adminRoot = settings.admin.login] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseAdmin?.body)
+  const [adminRoot = defaultAdmin.login] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseAdmin?.body)
 
   adminClient.resource.createResource({ root: adminRoot, resourcePath: settings.testFolder })
 
@@ -64,7 +53,7 @@ export function setup(): Environment {
     })
     const [createdShareId] = queryXml('ocs.data.id', createShareResponse.body)
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
     const getMyDrivesResponseActor = actorClient.me.getMyDrives()
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseActor?.body)
     actorClient.share.acceptShare({ shareId: createdShareId })
@@ -78,18 +67,25 @@ export function setup(): Environment {
 
   return {
     adminData: {
-      adminLogin: settings.admin.login,
-      adminPassword: settings.admin.password,
       adminRoot
     },
     actorData
   }
 }
 
+const iterationBucket: {
+  actorClient?: Client
+} = {}
+
+
 export default function actor({ actorData }: Environment): void {
   const { actorLogin, actorPassword, actorRoot } = actorData[exec.vu.idInTest - 1]
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
 
+  if (!iterationBucket.actorClient) {
+    iterationBucket.actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
+  }
+
+  const { actorClient } = iterationBucket
   const folderCreationName = [exec.scenario.iterationInTest, 'initial', actorLogin].join('-')
   actorClient.resource.createResource({ root: actorRoot, resourcePath: folderCreationName })
 
@@ -111,7 +107,7 @@ export default function actor({ actorData }: Environment): void {
 }
 
 export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
+  const adminClient = clientForAdmin()
 
   adminClient.resource.deleteResource({ root: adminData.adminRoot, resourcePath: settings.testFolder })
   actorData.forEach(({ actorLogin }) => {

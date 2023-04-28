@@ -1,5 +1,7 @@
 import { vi } from 'vitest'
 
+vi.stubGlobal('__ENV', {})
+
 vi.mock('k6/http', () => {
   return {
     CookieJar: vi.fn()

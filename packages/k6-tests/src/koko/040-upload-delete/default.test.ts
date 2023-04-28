@@ -1,17 +1,12 @@
-import { Platform } from '@ownclouders/k6-tdk'
-import { Adapter } from '@ownclouders/k6-tdk/lib/auth'
 import { Client } from '@ownclouders/k6-tdk/lib/client'
-import { queryJson, randomString } from '@ownclouders/k6-tdk/lib/utils'
+import { clientForAdmin } from '@ownclouders/k6-tdk/lib/snippets'
+import { ENV, queryJson, randomString } from '@ownclouders/k6-tdk/lib/utils'
 import { randomBytes } from 'k6/crypto'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
 import { times } from 'lodash'
 
 interface Environment {
-  adminData: {
-    adminLogin: string;
-    adminPassword: string;
-  };
   actorData: {
     actorLogin: string;
     actorPassword: string;
@@ -21,45 +16,36 @@ interface Environment {
 
 /**/
 const settings = {
-  platformUrl: __ENV.PLATFORM_URL || 'https://localhost:9200',
-  authAdapter: Adapter[__ENV.AUTH_ADAPTER] || Adapter.kopano,
-  platform: Platform[__ENV.PLATFORM] || Platform.ownCloudInfiniteScale,
-  admin: {
-    login: __ENV.ADMIN_LOGIN || 'admin',
-    password: __ENV.ADMIN_PASSWORD || 'admin'
-  },
   assets: {
     small: {
-      size: parseInt(__ENV.ASSET_SMALL_SIZE, 10) || 10,
-      quantity: parseInt(__ENV.ASSET_SMALL_QUANTITY, 10) || 1
+      size: parseInt(ENV('ASSET_SMALL_SIZE', '10'), 10),
+      quantity: parseInt(ENV('ASSET_SMALL_QUANTITY', '1'), 10)
     },
     medium: {
-      size: parseInt(__ENV.ASSET_MEDIUM_SIZE, 10) || 10 * 10,
-      quantity: parseInt(__ENV.ASSET_MEDIUM_QUANTITY, 10) || 1
+      size: parseInt(ENV('ASSET_MEDIUM_SIZE', String(10 * 10)), 10),
+      quantity: parseInt(ENV('ASSET_MEDIUM_QUANTITY', '1'), 10)
     },
     large: {
-      size: parseInt(__ENV.ASSET_LARGE_SIZE, 10) || 10 * 100,
-      quantity: parseInt(__ENV.ASSET_LARGE_QUANTITY, 10) || 1
+      size: parseInt(ENV('ASSET_LARGE_SIZE', String(10 * 100)), 10),
+      quantity: parseInt(ENV('ASSET_LARGE_QUANTITY', '1'), 10)
     }
-  },
-  k6: {
-    vus: 1,
-    insecureSkipTLSVerify: true
   }
 }
 
 /**/
-export const options: Options = settings.k6
-
+export const options: Options = {
+  vus: 1,
+  insecureSkipTLSVerify: true
+}
 export function setup(): Environment {
-  const adminClient = new Client({ ...settings, userLogin: settings.admin.login, userPassword: settings.admin.password })
+  const adminClient = clientForAdmin()
 
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
     adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+    const actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
     const getMyDrivesResponse = actorClient.me.getMyDrives()
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
@@ -71,17 +57,22 @@ export function setup(): Environment {
   })
 
   return {
-    adminData: {
-      adminLogin: settings.admin.login,
-      adminPassword: settings.admin.password
-    },
     actorData
   }
 }
 
+const iterationBucket: {
+  actorClient?: Client
+} = {}
+
 export default function actor({ actorData }: Environment): void {
   const { actorLogin, actorPassword, actorRoot } = actorData[exec.vu.idInTest - 1]
-  const actorClient = new Client({ ...settings, userLogin: actorLogin, userPassword: actorPassword })
+
+  if (!iterationBucket.actorClient) {
+    iterationBucket.actorClient = new Client({ userLogin: actorLogin, userPassword: actorPassword })
+  }
+
+  const { actorClient } = iterationBucket
   const defer: (() => void)[] = []
 
   Object.keys(settings.assets).forEach((k) => {
@@ -101,8 +92,8 @@ export default function actor({ actorData }: Environment): void {
   })
 }
 
-export function teardown({ adminData, actorData }: Environment): void {
-  const adminClient = new Client({ ...settings, userLogin: adminData.adminLogin, userPassword: adminData.adminPassword })
+export function teardown({ actorData }: Environment): void {
+  const adminClient = clientForAdmin()
 
   actorData.forEach(({ actorLogin }) => {
     adminClient.user.deleteUser({ userLogin: actorLogin })
