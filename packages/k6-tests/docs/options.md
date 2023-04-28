@@ -56,7 +56,7 @@ specifies the redirect url, only necessary if `AUTH_N_PROVIDER` is set to `keycl
 
 ## ENV `KOPANO_URL`
 
-indicates under which url kopano can be reached, only necessary if `AUTH_N_PROVIDER` is set to `keycloak`
+indicates under which url kopano can be reached, only necessary if `AUTH_N_PROVIDER` is set to `kopano`
 
 * default value: `https://localhost:9200`
 * `export KEYCLOAK_URL=https://keycloak.cloud-domain.org/auth/`
@@ -66,7 +66,7 @@ indicates under which url kopano can be reached, only necessary if `AUTH_N_PROVI
 
 ## ENV `KOPANO_REDIRECT_URL`
 
-specifies the redirect url, only necessary if `AUTH_N_PROVIDER` is set to `keycloak`
+specifies the redirect url, only necessary if `AUTH_N_PROVIDER` is set to `kopano`
 
 * default value: `https://localhost:9200/oidc-callback.html`
 * `export KOPANO_REDIRECT_URL=https://cloud-domain.org/oidc-callback.html`
