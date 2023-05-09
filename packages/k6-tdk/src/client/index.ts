@@ -1,7 +1,5 @@
-import { AuthNHTTPProvider } from '@/auth'
-import { Platform } from '@/const'
-import { authNProviderForUser, defaultAuthNProvider, defaultPlatform } from '@/snippets'
-import { requestFactory } from '@/utils'
+import { HttpClient } from '@/utils'
+import { Platform } from '@/values'
 
 import { Application } from './application'
 import { Drive } from './drive'
@@ -17,60 +15,36 @@ import { User } from './user'
 export * from './client'
 
 export class Client {
-  application: Application
+  readonly application: Application
 
-  drive: Drive
+  readonly drive: Drive
 
-  me: Me
+  readonly me: Me
 
-  group: Group
+  readonly group: Group
 
-  resource: Resource
+  readonly resource: Resource
 
-  role: Role
+  readonly role: Role
 
-  search: Search
+  readonly search: Search
 
-  share: Share
+  readonly share: Share
 
-  tag: Tag
+  readonly tag: Tag
 
-  user: User
+  readonly user: User
 
-  constructor(p: {
-    platformUrl?: string,
-    platform?: Platform,
-    userLogin?: string,
-    userPassword?: string
-    authNProvider?: AuthNHTTPProvider
-  }) {
-
-    if(!p.authNProvider && (!p.userLogin || !p.userPassword)){
-      throw new Error('Please provide an "authNProvider" or "userLogin" and "userPassword"')
-    }
-
-    const platform = p.platform || defaultPlatform.type
-    const platformUrl = p.platformUrl || defaultPlatform.url
-    const authNProvider = p.authNProvider || authNProviderForUser({
-      userLogin: p.userLogin!,
-      userPassword: p.userPassword!,
-      defaultProvider: defaultAuthNProvider.type
-    })
-
-    const request = requestFactory({
-      authNProvider,
-      baseUrl: platformUrl
-    })
-
-    this.application = new Application(platform, request)
-    this.drive = new Drive(platform, request)
-    this.group = new Group(platform, request)
-    this.me = new Me(platform, request)
-    this.resource = new Resource(platform, request)
-    this.role = new Role(platform, request)
-    this.search = new Search(platform, request)
-    this.share = new Share(platform, request)
-    this.tag = new Tag(platform, request)
-    this.user = new User(platform, request)
+  constructor(p: { platform: Platform, httpClient: HttpClient }) {
+    this.application = new Application(p.platform, p.httpClient)
+    this.drive = new Drive(p.platform, p.httpClient)
+    this.group = new Group(p.platform, p.httpClient)
+    this.me = new Me(p.platform, p.httpClient)
+    this.resource = new Resource(p.platform, p.httpClient)
+    this.role = new Role(p.platform, p.httpClient)
+    this.search = new Search(p.platform, p.httpClient)
+    this.share = new Share(p.platform, p.httpClient)
+    this.tag = new Tag(p.platform, p.httpClient)
+    this.user = new User(p.platform, p.httpClient)
   }
 }

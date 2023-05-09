@@ -16,12 +16,17 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/client/cjs/index.js"
+      "require": "./dist/cjs/index.js"
     },
     "./lib/auth": {
       "types": "./dist/types/auth/index.d.ts",
       "import": "./dist/esm/auth/index.js",
-      "require": "./dist/client/cjs/index.js"
+      "require": "./dist/cjs/auth/index.js"
+    },
+    "./lib/values": {
+      "types": "./dist/types/values/index.d.ts",
+      "import": "./dist/esm/values/index.js",
+      "require": "./dist/cjs/values/index.js"
     },
     "./lib/client": {
       "types": "./dist/types/client/index.d.ts",
@@ -31,12 +36,7 @@
     "./lib/endpoints": {
       "types": "./dist/types/endpoints/index.d.ts",
       "import": "./dist/esm/endpoints/index.js",
-      "require": "./dist/endpoints/cjs/index.js"
-    },
-    "./lib/snippets": {
-      "types": "./dist/types/snippets/index.d.ts",
-      "import": "./dist/esm/snippets/index.js",
-      "require": "./dist/snippets/cjs/index.js"
+      "require": "./dist/cjs/endpoints/index.js"
     },
     "./lib/utils": {
       "types": "./dist/types/utils/index.d.ts",
@@ -55,25 +55,13 @@
       ]
     }
   },
-  "files": [
-    "dist/cjs/**/!(*.tsbuildinfo)",
-    "dist/esm/**/!(*.tsbuildinfo)",
-    "dist/types/**/!(*.tsbuildinfo)",
-    "lib/api",
-    "lib/auth",
-    "lib/client",
-    "lib/utils",
-    "src",
-    "package.json",
-    "tsconfig.json"
-  ],
   "scripts": {
     "build": "concurrently pnpm:build:*",
     "build:artifacts": "node build.mjs",
     "build:types": "tsc --outDir dist/types",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli dist lib",
-    "clean:vendor": "del-cli .turbo node_modules",
+    "clean:vendor": "del-cli node_modules",
     "dev": "turbowatch",
     "lint": "eslint package.json 'src/**/*.ts'",
     "lint:fix": "pnpm run lint --fix",
@@ -82,24 +70,22 @@
   "dependencies": {
     "jsonpath": "^1.1.1",
     "lodash": "^4.17.21",
-    "xmlbuilder2": "^3.0.2"
+    "xmlbuilder2": "^3.1.1"
   },
   "devDependencies": {
-    "@ownclouders/esbuild": "workspace:*",
     "@ownclouders/eslint-config": "workspace:*",
     "@ownclouders/tsconfig": "workspace:*",
     "@ownclouders/turbowatch": "workspace:*",
     "@types/jsonpath": "^0.2.0",
-    "@types/k6": "^0.43.3",
+    "@types/k6": "^0.44.1",
     "@types/lodash": "^4.14.194",
-    "@types/node": "^18.15.11",
+    "@types/node": "^20.1.4",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",
-    "esbuild": "^0.17.16",
-    "eslint": "^8.38.0",
-    "turbowatch": "^2.21.0",
+    "eslint": "^8.40.0",
+    "tsup": "^6.7.0",
+    "turbowatch": "^2.22.0",
     "typescript": "^5.0.4",
-    "vite-tsconfig-paths": "^4.2.0",
-    "vitest": "^0.30.1"
+    "vitest": "^0.31.0"
   }
 }

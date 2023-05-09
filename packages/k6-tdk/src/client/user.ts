@@ -1,8 +1,8 @@
 import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const'
 import { endpoints } from '@/endpoints'
 import { check } from '@/utils'
+import { Platform } from '@/values'
 
 import { EndpointClient } from './client'
 
@@ -12,11 +12,11 @@ export class User extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.ocs.v2.apps.cloud.users.POST__create_user(this.request, p)
+        response = endpoints.ocs.v2.apps.cloud.users.POST__create_user(this.httpClient, p)
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.users.POST__create_user(this.request, p)
+        response = endpoints.graph.v1.users.POST__create_user(this.httpClient, p)
     }
 
     check({ val: response }, {
@@ -34,12 +34,12 @@ export class User extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.ocs.v2.apps.cloud.users.DELETE__delete_user(this.request, p)
+        response = endpoints.ocs.v2.apps.cloud.users.DELETE__delete_user(this.httpClient, p)
         expectedStatus = 200
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.users.DELETE__delete_user(this.request, p)
+        response = endpoints.graph.v1.users.DELETE__delete_user(this.httpClient, p)
         expectedStatus = 204
     }
 
@@ -58,7 +58,7 @@ export class User extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.ocs.v2.apps.cloud.users.PUT__enable_user(this.request, p)
+        response = endpoints.ocs.v2.apps.cloud.users.PUT__enable_user(this.httpClient, p)
         break
       case Platform.ownCloudInfiniteScale:
       default:

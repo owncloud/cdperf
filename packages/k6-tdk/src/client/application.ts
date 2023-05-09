@@ -1,8 +1,8 @@
 import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const'
 import { endpoints } from '@/endpoints'
 import { check } from '@/utils'
+import { Platform } from '@/values'
 
 import { EndpointClient } from './client'
 
@@ -15,7 +15,7 @@ export class Application extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.applications.GET__get_applications(this.request, {})
+        response = endpoints.graph.v1.applications.GET__get_applications(this.httpClient, {})
     }
 
     check({ skip:!response, val: response }, {

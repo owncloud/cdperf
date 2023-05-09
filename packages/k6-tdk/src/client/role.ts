@@ -1,8 +1,8 @@
 import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const'
 import { endpoints } from '@/endpoints'
 import { check } from '@/utils'
+import { Platform } from '@/values'
 
 import { EndpointClient } from './client'
 
@@ -15,7 +15,7 @@ export class Role extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.api.v0.settings.POST__get_roles(this.request, {})
+        response = endpoints.api.v0.settings.POST__get_roles(this.httpClient, {})
     }
 
     check({ skip: !response, val: response }, {
@@ -39,7 +39,7 @@ export class Role extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.users.POST__add_app_role_to_user(this.request, p)
+        response = endpoints.graph.v1.users.POST__add_app_role_to_user(this.httpClient, p)
     }
 
     check({ skip: !response, val: response }, {

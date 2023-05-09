@@ -1,5 +1,5 @@
 {
-  "extends": "@ownclouders/tsconfig/esbuild.json",
+  "extends": "@ownclouders/tsconfig/project.json",
   "compilerOptions": {
 	"baseUrl": ".",
 	"paths": {

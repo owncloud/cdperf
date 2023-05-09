@@ -5,13 +5,13 @@ import { AuthNHTTPProvider } from '@/auth'
 
 import { cleanURL } from './url'
 
-export type Request = typeof request
+export type HttpClient = typeof request
 
-export const requestFactory = (p: {
+export const httpClientFactory = (p: {
   baseUrl: string,
   authNProvider?: AuthNHTTPProvider,
   params?: Params
-}): Request => {
+}): HttpClient => {
   return (<RT extends ResponseType | undefined>(
     method: string,
     url: string,
@@ -30,5 +30,5 @@ export const requestFactory = (p: {
     }
 
     return request<RT>(method, cleanURL(p.baseUrl, url), body, merge(params, requestParams))
-  }) as Request
+  }) as HttpClient
 }

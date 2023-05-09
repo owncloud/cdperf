@@ -7,17 +7,9 @@ import { check, cleanURL, objectToQueryString, queryStringToObject } from '@/uti
 import { AuthNHTTPProvider, Token } from './auth'
 
 export class Keycloak implements AuthNHTTPProvider {
-  private readonly userLogin: string
+  jar: CookieJar
 
-  private readonly userPassword: string
-
-  private readonly baseUrl: string
-
-  private readonly realm: string
-
-  private readonly redirectUrl: string
-
-  readonly jar: CookieJar
+  readonly info
 
   private cache?: {
     validTo: Date
@@ -25,37 +17,49 @@ export class Keycloak implements AuthNHTTPProvider {
   }
 
   constructor(p: { userLogin: string, userPassword: string, baseUrl: string, realm: string, redirectUrl: string }) {
-    this.userLogin = p.userLogin
-    this.userPassword = p.userPassword
-    this.baseUrl = cleanURL(p.baseUrl)
-    this.redirectUrl = cleanURL(p.redirectUrl)
-    this.realm = p.realm
+    this.info = {
+      userLogin: p.userLogin,
+      userPassword: p.userPassword,
+      baseUrl: cleanURL(p.baseUrl),
+      redirectUrl: cleanURL(p.redirectUrl),
+      realm: p.realm
+    }
+
     this.jar = new CookieJar()
   }
 
 
-
   get header(): string {
-    if (!this.cache || this.cache.validTo <= new Date()) {
-      const token = this.authenticate()
+    const upsertCache = (t: Token) => {
       this.cache = {
         validTo: ((): Date => {
-          const offset = 5
           const d = new Date()
 
-          d.setSeconds(d.getSeconds() + token.expiresIn - offset)
+          d.setSeconds(d.getSeconds() + t.expiresIn - Math.min(60, t.expiresIn * .1))
 
           return d
         })(),
-        token
+        token: t
       }
     }
 
-    return `${this.cache.token.tokenType} ${this.cache.token.accessToken}`
+    const loginRequired = !this.cache
+    if(loginRequired){
+      const token = this.login()
+      upsertCache(token)
+    }
+
+    const refreshRequired = this.cache && this.cache.validTo <= new Date()
+    if(refreshRequired){
+      const token = this.refreshTokens()
+      upsertCache(token)
+    }
+
+    return `${this.cache!.token.tokenType} ${this.cache!.token.accessToken}`
   }
 
   private get endpoints() {
-    const baseUrl = cleanURL(`${this.baseUrl}/realms/${this.realm}`)
+    const baseUrl = cleanURL(`${this.info.baseUrl}/realms/${this.info.realm}`)
     return {
       login: cleanURL(`${baseUrl}/protocol/openid-connect/auth`),
       token: cleanURL(`${baseUrl}/protocol/openid-connect/token`),
@@ -64,14 +68,14 @@ export class Keycloak implements AuthNHTTPProvider {
     }
   }
 
-  public authenticate(): Token {
+  public login(): Token {
     const loginParams = {
       login: 'true',
       response_type: 'code',
       scope: 'openid profile email',
       client_id: 'web',
       state: uuidv4(),
-      redirect_uri: this.redirectUrl
+      redirect_uri: this.info.redirectUrl
     }
 
 
@@ -88,7 +92,7 @@ export class Keycloak implements AuthNHTTPProvider {
     }
     const authorizationResponse = loginPageResponse.submitForm({
       formSelector: '#kc-form-login',
-      fields: { username: this.userLogin, password: this.userPassword },
+      fields: { username: this.info.userLogin, password: this.info.userPassword },
       params: { redirects: 0, jar: this.jar }
     })
 
@@ -103,13 +107,13 @@ export class Keycloak implements AuthNHTTPProvider {
 
     const { code } = queryStringToObject(authorizationResponse.headers.Location)
     const accessTokenResponse = http.post(this.endpoints.token, {
-      'grant_type': 'authorization_code',
-      'code': code,
-      'redirect_uri': cleanURL(this.redirectUrl),
-      'client_id': 'web'
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: cleanURL(this.info.redirectUrl),
+      client_id: 'web'
     }, { jar: this.jar })
     check({ val: accessTokenResponse }, {
-      'authn ->accessTokenResponse - status': ({ status }) => {
+      'authn -> accessTokenResponse - status': ({ status }) => {
         return status === 200
       }
     })
@@ -118,6 +122,33 @@ export class Keycloak implements AuthNHTTPProvider {
     }
 
     return {
+      refreshToken: accessTokenResponse.json('refresh_token') as string,
+      accessToken: accessTokenResponse.json('access_token') as string,
+      tokenType: accessTokenResponse.json('token_type') as string,
+      idToken: accessTokenResponse.json('id_token') as string,
+      expiresIn: accessTokenResponse.json('expires_in') as number
+    }
+  }
+
+  refreshTokens(): Token {
+    const accessTokenResponse = http.post(this.endpoints.token, {
+      grant_type: 'refresh_token',
+      refresh_token: this.cache!.token.refreshToken,
+      client_id: 'web'
+    }, { jar: this.jar })
+
+
+    check({ val: accessTokenResponse }, {
+      'authn -> accessTokenResponse - status': ({ status }) => {
+        return status === 200
+      }
+    })
+    if (accessTokenResponse.status !== 200) {
+      throw new Error(`accessTokenResponse.status is ${accessTokenResponse.status}, expected 200`)
+    }
+
+    return {
+      refreshToken: accessTokenResponse.json('refresh_token') as string,
       accessToken: accessTokenResponse.json('access_token') as string,
       tokenType: accessTokenResponse.json('token_type') as string,
       idToken: accessTokenResponse.json('id_token') as string,
@@ -125,3 +156,4 @@ export class Keycloak implements AuthNHTTPProvider {
     }
   }
 }
+

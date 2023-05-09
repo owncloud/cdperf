@@ -11,7 +11,6 @@ This repository contains the tools we use to test and measure the performance of
 
 * [k6-tdk](packages/k6-tdk): Test development kit, look here how to write tests.
 * [k6-tests](packages/k6-tests): Ready to use k6 tests, If you want to start testing right away, look here.
-* [esbuild](packages/esbuild): Helpers we use to bundle our libraries and artifacts, not public facing.
 * [eslint-config](packages/eslint-config): ESLint config shared across the packages, not public facing.
 * [tsconfig](packages/tsconfig): TypeScript config shared across the packages, not public facing.
 * [turbowatch](packages/turbowatch): Turbowatch config shared across the packages, not public facing.

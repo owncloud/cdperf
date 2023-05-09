@@ -13,7 +13,7 @@
   "author": "ownCloud GmbH <devops@owncloud.com>",
   "scripts": {
     "clean": "pnpm clean:vendor",
-    "clean:vendor": "del-cli .turbo node_modules",
+    "clean:vendor": "del-cli node_modules",
     "lint": "eslint package.json",
     "lint:fix": "pnpm run lint --fix"
   },

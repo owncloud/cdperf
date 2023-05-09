@@ -1,7 +1,8 @@
 import { RefinedResponse } from 'k6/http'
 
-import { endpoints, Permission, ShareType } from '@/endpoints'
+import { endpoints } from '@/endpoints'
 import { check } from '@/utils'
+import { Permission, ShareType } from '@/values'
 
 import { EndpointClient } from './client'
 
@@ -10,9 +11,10 @@ export class Share extends EndpointClient {
     shareResourcePath: string,
     shareType: ShareType,
     shareReceiver: string,
+    spaceRef?: string,
     shareReceiverPermission: Permission
   }): RefinedResponse<'text'> {
-    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__create_share(this.request, p,
+    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__create_share(this.httpClient, p,
       { platform: this.platform })
 
     check({ val: response }, {
@@ -25,7 +27,7 @@ export class Share extends EndpointClient {
   }
 
   deleteShare(p: { shareId: string }): RefinedResponse<'text'> {
-    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.DELETE__delete_share(this.request, p)
+    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.DELETE__delete_share(this.httpClient, p)
 
     check({ val: response }, {
       'client -> share.deleteShare - status': ({ status }) => {
@@ -37,7 +39,7 @@ export class Share extends EndpointClient {
   }
 
   acceptShare(p: { shareId: string }): RefinedResponse<'text'> {
-    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__accept_share(this.request, p)
+    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__accept_share(this.httpClient, p)
 
     check({ val: response }, {
       'client -> share.acceptShare - status': ({ status }) => {

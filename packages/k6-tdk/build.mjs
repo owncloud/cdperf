@@ -1,4 +1,4 @@
-import {build} from '@ownclouders/esbuild';
+import {build} from 'tsup';
 import path from 'path';
 import fs from 'fs';
 
@@ -10,7 +10,7 @@ const instructions = {
     'auth/index.ts',
     'client/index.ts',
     'endpoints/index.ts',
-    'snippets/index.ts',
+    'values/index.ts',
     'utils/index.ts',
   ],
   packageName: '@ownclouders/k6-tdk',
@@ -20,10 +20,17 @@ const instructions = {
 
 await Promise.all(instructions.formats.map(format => {
   return build({
+    outDir: path.join(instructions.outdir, format === 'esm' ? '' : format),
+    external: ['k6'],
     entryPoints: instructions.entryPoints.map(entryPoint => path.join(instructions.root, entryPoint)),
-    outdir: path.join(instructions.outdir, format),
     format: format,
     packages: 'external',
+    bundle: true,
+    splitting: false,
+    treeShaking: true,
+    minify: true,
+    sourcemap: true,
+    legacyOutput: true
   })
 }))
 
@@ -38,7 +45,6 @@ instructions.entryPoints.forEach((entryPoint) => {
   const packageFolder = path.resolve(instructions.packageRoot, entryPointInfo.dir)
   const data = {
       name: path.join(instructions.packageName, entryPointInfo.dir),
-      sideEffects: false,
     }
 
   ;['types', ...instructions.formats].forEach(format => {

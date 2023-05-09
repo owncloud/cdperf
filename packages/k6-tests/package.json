@@ -16,28 +16,29 @@
     "build:artifacts": "node build.mjs",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli artifacts",
-    "clean:vendor": "del-cli .turbo node_modules",
+    "clean:vendor": "del-cli node_modules",
     "dev": "turbowatch",
     "lint": "eslint package.json 'src/**/*.ts'",
-    "lint:fix": "pnpm run lint --fix"
+    "lint:fix": "pnpm run lint --fix",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ownclouders/k6-tdk": "workspace:*",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@ownclouders/esbuild": "workspace:*",
     "@ownclouders/eslint-config": "workspace:*",
     "@ownclouders/tsconfig": "workspace:*",
     "@ownclouders/turbowatch": "workspace:*",
-    "@types/k6": "^0.43.3",
+    "@types/k6": "^0.44.1",
     "@types/lodash": "^4.14.194",
-    "@types/node": "^18.15.11",
+    "@types/node": "^20.1.4",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",
-    "esbuild": "^0.17.16",
     "fast-glob": "^3.2.12",
-    "turbowatch": "^2.21.0",
-    "typescript": "^5.0.4"
+    "tsup": "^6.7.0",
+    "turbowatch": "^2.22.0",
+    "typescript": "^5.0.4",
+    "vitest": "^0.31.0"
   }
 }

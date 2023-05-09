@@ -9,7 +9,7 @@
     "changeset": "changeset",
     "changeset:publish": "changeset publish",
     "changeset:version": "changeset version",
-    "clean": "turbo run clean --no-daemon --parallel && del-cli .pnpm-store node_modules",
+    "clean": "turbo run clean --no-daemon --parallel",
     "dev": "ROARR_LOG=true turbo run dev --parallel --concurrency 64 --no-daemon | roarr",
     "docs:build": "vitepress build",
     "docs:dev": "vitepress dev",
@@ -19,18 +19,17 @@
     "test": "turbo run test --no-daemon"
   },
   "devDependencies": {
-    "@algolia/client-search": ">= 4.9.1 < 6",
+    "@algolia/client-search": "^4.17.0",
     "@changesets/cli": "^2.26.1",
     "@ownclouders/eslint-config": "workspace:*",
-    "@roarr/cli": "^5.11.0",
+    "@roarr/cli": "^5.12.2",
     "@types/lodash": "^4.14.194",
-    "del-cli": "^5.0.0",
     "fast-glob": "^3.2.12",
     "lodash": "^4.17.21",
-    "syncpack": "^9.8.4",
-    "turbo": "^1.9.1",
+    "syncpack": "^9.8.6",
+    "turbo": "^1.9.4",
     "typescript": "^5.0.4",
-    "vitepress": "^1.0.0-alpha.73"
+    "vitepress": "1.0.0-alpha.75"
   },
   "peerDependencies": {
     "@algolia/client-search": ">= 4.9.1 < 6"

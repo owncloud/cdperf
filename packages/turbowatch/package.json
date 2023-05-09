@@ -20,20 +20,20 @@
     "build:types": "tsc --outDir dist",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli dist",
-    "clean:vendor": "del-cli .turbo node_modules",
+    "clean:vendor": "del-cli node_modules",
     "lint": "eslint package.json 'src/**/*.ts'",
     "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {
-    "turbowatch": "^2.21.0"
+    "turbowatch": "^2.22.0"
   },
   "devDependencies": {
-    "@ownclouders/esbuild": "workspace:*",
     "@ownclouders/eslint-config": "workspace:*",
     "@ownclouders/tsconfig": "workspace:*",
-    "@types/node": "^18.15.11",
+    "@types/node": "^20.1.4",
     "concurrently": "^8.0.1",
     "del-cli": "^5.0.0",
+    "tsup": "^6.7.0",
     "typescript": "^5.0.4"
   }
 }

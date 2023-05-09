@@ -28,6 +28,12 @@ export const watch = ({ project, onChange }: ConfigurationInput) => {
             ['not', ['dirname', 'node_modules']],
             ['dirname', 'src'],
             ['match', '*', 'basename']
+          ],
+          [
+            'allof',
+            ['not', ['dirname', 'node_modules']],
+            ['dirname', 'tests'],
+            ['match', '*', 'basename']
           ]
         ],
         onChange

@@ -9,6 +9,7 @@ module.exports = {
     'quotes': ['error', 'single', { 'avoidEscape': true }],
     'comma-spacing': ['error', { 'before': false, 'after': true }],
     'comma-dangle': ['error', 'never'],
-    'no-console': 'off'
+    'no-console': 'off',
+    'no-lone-blocks': 'off'
   }
 }
