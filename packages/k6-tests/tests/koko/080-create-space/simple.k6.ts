@@ -3,9 +3,9 @@ import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
 
-import {  userPool } from '@/pools'
+import { userPool } from '@/pools'
 import { clientFor } from '@/shortcuts'
-import {  getPoolItem } from '@/utils'
+import { getPoolItem } from '@/utils'
 import { envValues } from '@/values'
 
 export const options: Options = {
@@ -26,7 +26,9 @@ export const create_space_080 = async (): Promise<void> => {
     return clientFor(user)
   })
 
-  const driveCreateResponse = await client.drive.createDrive({ driveName: [user.userLogin, 'iteration', exec.vu.iterationInInstance + 1].join('-') })
+  const driveCreateResponse = await client.drive.createDrive({
+    driveName: [user.userLogin.replace(/[^A-Za-z0-9]/g, ''), 'iteration', exec.vu.iterationInInstance + 1].join('-')
+  })
   const [driveId] = queryJson('$.id', driveCreateResponse?.body)
   sleep(settings.sleep.after_request)
 

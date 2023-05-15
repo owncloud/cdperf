@@ -74,7 +74,7 @@ export const add_remove_tag_100 = async (): Promise<void> => {
 
   const tag = getOrCreateTag({
     client,
-    tagName: [user.userLogin, exec.vu.iterationInInstance + 1, randomString()].join('-')
+    tagName: [user.userLogin.replace(/[^A-Za-z0-9]/g, ''), exec.vu.iterationInInstance + 1, randomString()].join('-')
   })
   sleep(settings.sleep.after_request)
 

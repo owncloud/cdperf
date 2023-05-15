@@ -1,1 +1,0 @@
-"use strict";Object.defineProperty(exports, "__esModule", {value: true});var _chunk47WR64ISjs = require('./chunk-47WR64IS.js');var e={..._chunk47WR64ISjs.a,iterations:10,duration:"7d",teardownTimeout:"1h"},r= exports.b =_chunk47WR64ISjs.b;exports.a = e; exports.b = r;

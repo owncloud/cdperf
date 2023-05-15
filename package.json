@@ -31,9 +31,6 @@
     "typescript": "^5.0.4",
     "vitepress": "1.0.0-alpha.75"
   },
-  "peerDependencies": {
-    "@algolia/client-search": ">= 4.9.1 < 6"
-  },
   "packageManager": "pnpm@7.30.5",
   "engines": {
     "node": ">=18"

@@ -35,7 +35,7 @@ export const create_upload_rename_delete_folder_and_file_040 = async (): Promise
     return actorRoot
   })
 
-  const folderNameCreate = [user.userLogin, randomString(), 'iteration', exec.vu.iterationInInstance + 1].join('-')
+  const folderNameCreate = [user.userLogin.replace(/[^A-Za-z0-9]/g, ''), randomString(), 'iteration', exec.vu.iterationInInstance + 1].join('-')
   await client.resource.createResource({ root, resourcePath: folderNameCreate })
   sleep(settings.sleep.after_request)
 
