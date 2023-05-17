@@ -16,6 +16,12 @@
       "rules": {
         "no-restricted-globals": "off"
       }
+    },
+    {
+      "files": ["src/clients/onlyoffice/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/naming-convention": "off"
+      }
     }
   ]
 }

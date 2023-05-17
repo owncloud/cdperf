@@ -35,7 +35,12 @@ export class Client {
 
   readonly user: User
 
+  readonly httpClient: HttpClient
+
+
   constructor(p: { platform: Platform, httpClient: HttpClient }) {
+    this.httpClient = p.httpClient
+
     this.application = new Application(p.platform, p.httpClient)
     this.drive = new Drive(p.platform, p.httpClient)
     this.group = new Group(p.platform, p.httpClient)

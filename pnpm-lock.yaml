@@ -119,9 +119,11 @@ importers:
       turbowatch: ^2.22.0
       typescript: ^5.0.4
       vitest: ^0.31.0
+      zod: ^3.21.4
     dependencies:
       '@ownclouders/k6-tdk': link:../k6-tdk
       lodash: 4.17.21
+      zod: 3.21.4
     devDependencies:
       '@ownclouders/eslint-config': link:../eslint-config
       '@ownclouders/tsconfig': link:../tsconfig
@@ -5453,7 +5455,6 @@ packages:
 
   /zod/3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
-    dev: true
 
   /zx/7.2.2:
     resolution: {integrity: sha512-50Gjicd6ijTt7Zcz5fNX+rHrmE0uVqC+X6lYKhf2Cu8wIxDpNIzXwTmzchNdW+JY3LFsRcU43B1lHE4HBMmKgQ==}

@@ -35,8 +35,9 @@ await build({
   external: ['k6'],
   bundle: true,
   clean: true,
-  noExternal: ['lodash', '@ownclouders/k6-tdk'],
+  noExternal: ['lodash', '@ownclouders/k6-tdk', 'zod'],
   splitting: true,
+  sourcemap: false,
   esbuildOptions: (options) => {
     options.chunkNames = `__chunk/[name]-[hash]`;
   }
