@@ -105,3 +105,16 @@ export const isSaveLockMessage = () => {
     data: [message, { type: MessageType.enum.isSaveLock }]
   })
 }
+
+export const unLockDocumentMessage = () => {
+  return encodeData({
+    engineType: EngineType.enum.message,
+    socketType: SocketType.enum.event,
+    data: [message, {
+      type: MessageType.enum.unLockDocument,
+      isSave: false,
+      unlock: true,
+      deleteIndex: -1
+    }]
+  })
+}

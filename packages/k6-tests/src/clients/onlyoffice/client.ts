@@ -1,3 +1,6 @@
+import { sleep } from 'k6'
+import exec from 'k6/execution'
+
 import { FileInfo, UserAuth } from './info'
 import { EngineType, MessageType, Session, SocketType } from './io'
 import {
@@ -6,7 +9,7 @@ import {
   saveChangesMessage,
   tokenMessage
 } from './message'
-import { docsRom } from './rom'
+import { docsWorker } from './worker'
 
 export class Client {
   // @ts-ignore
@@ -25,14 +28,15 @@ export class Client {
     this.documentId = p.documentId
     this.userAuth = p.userAuth
     this.fileInfo = p.fileInfo
-    this.session = new Session({ url: p.url, rom: docsRom })
+    this.session = new Session({ url: p.url })
   }
 
   async establishSession(): Promise<void> {
+    await docsWorker({ session: this.session })
     await this.session.waitFor({ engineType: EngineType.enum.open })
-    this.session.publish({ data: tokenMessage({ token: this.token }) })
+    await this.session.publish({ data: tokenMessage({ token: this.token }) })
     await this.session.waitFor({ engineType: EngineType.enum.message, socketType: SocketType.enum.connect })
-    this.session.publish({
+    await this.session.publish({
       data: authMessage({
         token: this.token,
         userAuth: this.userAuth,
@@ -43,18 +47,26 @@ export class Client {
     await this.session.waitFor({
       engineType: EngineType.enum.message,
       socketType: SocketType.enum.event,
-      messageType: MessageType.enum.auth
+      messageType: MessageType.enum.documentOpen
     })
   }
 
   async makeChanges(p: { changes: string }) {
-    this.session.publish({ data: isSaveLockMessage() })
-    await this.session.waitFor({
+    await this.session.publish({ data: isSaveLockMessage() })
+    const { messageData: { saveLock: isLocked } } = await this.session.waitFor({
       engineType: EngineType.enum.message,
       socketType: SocketType.enum.event,
       messageType: MessageType.enum.saveLock
     })
-    this.session.publish({ data: saveChangesMessage(p) })
+
+    if (isLocked) {
+      sleep(0.5)
+      await this.makeChanges(p)
+      return
+    }
+
+    await this.session.publish({ data: saveChangesMessage(p) })
+
     await this.session.waitFor({
       engineType: EngineType.enum.message,
       socketType: SocketType.enum.event,

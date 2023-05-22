@@ -1,10 +1,11 @@
+import exec from 'k6/execution'
 import { ErrorEvent, MessageEvent } from 'k6/experimental/websockets'
 import { z } from 'zod'
 
-import { EngineType, MessageType, SocketType } from './io'
+import { EngineType, KV, MessageType, SocketType } from './io'
 
 export abstract class Handler {
-  protected abstract notify(p: { engineType?: EngineType, socketType?: SocketType, messageType?: MessageType })
+  protected abstract notify(p: { engineType?: EngineType, socketType?: SocketType, messageType?: MessageType, messageData: KV })
 
   // eslint-disable-next-line class-methods-use-this
   protected handleError(event: MessageEvent | ErrorEvent) {
@@ -29,11 +30,10 @@ export abstract class Handler {
     const socketType = socketParsedType.success ? SocketType.parse(socketParsedType.data) : undefined
 
     const parsedResponse = String(message.data).match(/\[.+\]/)
-    const [, msg] = parsedResponse ? JSON.parse(parsedResponse[0]) : []
-    const { type } = msg || {}
-    const messageParsedType = MessageType.safeParse(type)
+    const [, messageData = {}] = parsedResponse ? JSON.parse(parsedResponse[0]) : []
+    const messageParsedType = MessageType.safeParse(messageData.type)
     const messageType = messageParsedType.success ? messageParsedType.data : undefined
 
-    this.notify({ engineType, socketType, messageType })
+    this.notify({ engineType, socketType, messageType, messageData })
   }
 }

@@ -25,13 +25,18 @@ export const SocketType = z.nativeEnum({
 export type SocketType = z.infer<typeof SocketType>;
 
 export const MessageType = z.enum([
+  'drop',
+  'error',
   'auth',
   'authChanges',
   'authChangesAck',
   'saveChanges',
   'saveLock',
   'unSaveLock',
-  'isSaveLock'
+  'isSaveLock',
+  'unLockDocument',
+  'connectState',
+  'documentOpen'
 ])
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type MessageType = z.infer<typeof MessageType>;
@@ -40,7 +45,9 @@ export const Lifetime = z.enum(['once', 'constant'])
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type Lifetime = z.infer<typeof Lifetime>;
 
+export type KV = Record<string, any>
+
 export type Instruction = {
-  fn: () => void,
+  fn: (p: { messageData: KV }) => void,
   lifetime: Lifetime
 }
