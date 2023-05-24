@@ -6,33 +6,40 @@ import { check, cleanURL, objectToQueryString, queryStringToObject, randomString
 import { AuthNHTTPProvider, Token } from './auth'
 
 export class Kopano implements AuthNHTTPProvider {
-  readonly jar: CookieJar
+  private readonly jar: CookieJar
 
-  readonly info
+  private readonly clientId: string
+
+  private readonly userLogin: string
+
+  private readonly userPassword: string
+
+  private readonly baseUrl: string
+
+  private readonly redirectUrl: string
 
   private cache?: {
     validTo: Date
     token: Token
   }
 
-  constructor(p: { userLogin: string, userPassword: string, baseUrl: string, redirectUrl: string }) {
-    this.info = {
-      userLogin: p.userLogin,
-      userPassword: p.userPassword,
-      baseUrl: cleanURL(p.baseUrl),
-      redirectUrl: cleanURL(p.redirectUrl)
-    }
-    this.jar = new CookieJar()
+  constructor(p: { userLogin: string, userPassword: string, baseUrl: string, redirectUrl: string, clientId: string, jar: CookieJar }) {
+    this.clientId = p.clientId
+    this.userLogin = p.userLogin
+    this.userPassword = p.userPassword
+    this.baseUrl = cleanURL(p.baseUrl)
+    this.redirectUrl = cleanURL(p.redirectUrl)
+    this.jar = p.jar
   }
 
-  public get header(): string {
-    return `${this.credential.tokenType} ${this.credential.accessToken}`
+  public get headers() {
+    return { Authorization: `${this.credential.tokenType} ${this.credential.accessToken}` }
   }
 
   private get endpoints() {
     return {
-      logon: cleanURL(`${this.info.baseUrl}/signin/v1/identifier/_/logon`),
-      token: cleanURL(`${this.info.baseUrl}/konnect/v1/token`)
+      logon: cleanURL(`${this.baseUrl}/signin/v1/identifier/_/logon`),
+      token: cleanURL(`${this.baseUrl}/konnect/v1/token`)
     }
   }
 
@@ -61,11 +68,11 @@ export class Kopano implements AuthNHTTPProvider {
     const logonResponse = http.post(
       this.endpoints.logon,
       JSON.stringify({
-        params: [this.info.userLogin, this.info.userPassword, '1'],
+        params: [this.userLogin, this.userPassword, '1'],
         hello: {
           scope: 'openid profile email',
-          client_id: 'web',
-          redirect_uri: this.info.redirectUrl,
+          client_id: this.clientId,
+          redirect_uri: this.redirectUrl,
           flow: 'oidc'
         },
         state: randomString(16)
@@ -73,7 +80,7 @@ export class Kopano implements AuthNHTTPProvider {
       {
         headers: {
           'Kopano-Konnect-XSRF': '1',
-          Referer: this.info.baseUrl,
+          Referer: this.baseUrl,
           'Content-Type': 'application/json'
         },
         jar: this.jar
@@ -93,9 +100,9 @@ export class Kopano implements AuthNHTTPProvider {
 
   private getCode(continueUrl: string): string {
     const authorizeResponse = http.get(`${continueUrl}?${objectToQueryString({
-      client_id: 'web',
+      client_id: this.clientId,
       prompt: 'none',
-      redirect_uri: this.info.redirectUrl,
+      redirect_uri: this.redirectUrl,
       response_mode: 'query',
       response_type: 'code',
       scope: 'openid profile email'
@@ -117,9 +124,9 @@ export class Kopano implements AuthNHTTPProvider {
 
   private getToken(code: string): Token {
     const accessTokenResponse = http.post(this.endpoints.token, {
-      client_id: 'web',
+      client_id: this.clientId,
       code,
-      redirect_uri: this.info.redirectUrl,
+      redirect_uri: this.redirectUrl,
       grant_type: 'authorization_code'
     }, {
       jar: this.jar

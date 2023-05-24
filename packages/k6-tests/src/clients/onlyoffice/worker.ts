@@ -1,5 +1,3 @@
-import exec from 'k6/execution'
-
 import { EngineType, MessageType, Session, SocketType } from './io'
 import {
   authChangesAckMessage,

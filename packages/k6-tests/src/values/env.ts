@@ -1,7 +1,7 @@
 import { ENV, platformGuard } from '@ownclouders/k6-tdk/lib/utils'
-import { AuthNProvider, Platform } from '@ownclouders/k6-tdk/lib/values'
+import { Platform } from '@ownclouders/k6-tdk/lib/values'
 
-import { Embedded, TestRootType } from './const'
+import { AuthNProvider, Embedded, TestRootType } from './const'
 
 export const envValues = () => {
   const values = {
@@ -16,7 +16,7 @@ export const envValues = () => {
     seed: {
       container: {
         name: ENV('SEED_CONTAINER_NAME', 'cdperf'),
-        get type(){
+        get type() {
           return TestRootType[ENV(
             'ROOT_RESOURCE_TYPE',
             platformGuard(values.platform.type).isOwnCloudInfiniteScale ? TestRootType.space : TestRootType.directory
@@ -66,7 +66,8 @@ export const envValues = () => {
       type: AuthNProvider[ENV('AUTH_N_PROVIDER_TYPE', AuthNProvider.kopano)],
       kopano: {
         base_url: ENV('AUTH_N_PROVIDER_KOPANO_BASE_URL', 'https://localhost:9200'),
-        redirect_url: ENV('AUTH_N_PROVIDER_KOPANO_REDIRECT_URL', 'https://localhost:9200/oidc-callback.html')
+        redirect_url: ENV('AUTH_N_PROVIDER_KOPANO_REDIRECT_URL', 'https://localhost:9200/oidc-callback.html'),
+        client_id: ENV('AUTH_N_PROVIDER_KOPANO_CLIENT_ID', 'web')
       },
       keycloak: {
         get realm() {
@@ -77,7 +78,12 @@ export const envValues = () => {
         },
         get redirect_url() {
           return ENV('AUTH_N_PROVIDER_KEYCLOAK_REDIRECT_URL')
-        }
+        },
+        get social_provider_realm(){
+          const v = ENV('AUTH_N_PROVIDER_KEYCLOAK_SOCIAL_PROVIDER_REALM', 'none')
+          return v === 'none' ? undefined : v
+        },
+        client_id: ENV('AUTH_N_PROVIDER_KEYCLOAK_CLIENT_ID', 'web')
       }
     }
   }

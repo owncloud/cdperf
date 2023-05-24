@@ -1,4 +1,3 @@
-import { CookieJar } from 'k6/http'
 import { describe, expect, it, test, vi } from 'vitest'
 
 import { httpClientFactory } from './http'
@@ -35,11 +34,11 @@ describe('httpClientFactory', async () => {
   it('adds a authorization header to the request', async () => {
     const httpClient = httpClientFactory({
       baseUrl: 'http://root.org',
-      authNProvider: { header: 'anyAuth', jar: new CookieJar(), info: { userLogin: '', userPassword: '' } }
+      authNProvider: { headers: { Authorization: 'any' } }
     })
     const response = httpClient('POST', 'endpoint') as any
 
-    expect(response.params.headers.Authorization).toBe('anyAuth')
+    expect(response.params.headers.Authorization).toBe('any')
   })
 
   it('mixes the request params', async () => {

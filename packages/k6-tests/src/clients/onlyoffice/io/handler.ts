@@ -1,4 +1,3 @@
-import exec from 'k6/execution'
 import { ErrorEvent, MessageEvent } from 'k6/experimental/websockets'
 import { z } from 'zod'
 

@@ -1,4 +1,3 @@
-import * as console from 'console'
 import { EventName, WebSocket } from 'k6/experimental/websockets'
 
 import { Handler } from './handler'

@@ -1,5 +1,3 @@
-import { CookieJar } from 'k6/http'
-
 export interface Token {
   refreshToken: string;
   accessToken: string;
@@ -10,7 +8,5 @@ export interface Token {
 
 
 export interface AuthNHTTPProvider {
-  info: { userLogin: string; userPassword: string };
-  header: string;
-  jar: CookieJar
+  headers: { [name: string]: string };
 }

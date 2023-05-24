@@ -1,5 +1,4 @@
 import { sleep } from 'k6'
-import exec from 'k6/execution'
 
 import { FileInfo, UserAuth } from './info'
 import { EngineType, MessageType, Session, SocketType } from './io'

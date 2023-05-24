@@ -7,29 +7,49 @@ import { check, cleanURL, objectToQueryString, queryStringToObject } from '@/uti
 import { AuthNHTTPProvider, Token } from './auth'
 
 export class Keycloak implements AuthNHTTPProvider {
-  jar: CookieJar
+  private readonly jar: CookieJar
 
-  readonly info
+  private readonly clientId: string
+
+  private readonly userLogin: string
+
+  private readonly userPassword: string
+
+  private readonly baseUrl: string
+
+  private readonly redirectUrl: string
+
+  private readonly realm: string
+
+  private readonly socialProviderRealm?: string
 
   private cache?: {
     validTo: Date
     token: Token
   }
 
-  constructor(p: { userLogin: string, userPassword: string, baseUrl: string, realm: string, redirectUrl: string }) {
-    this.info = {
-      userLogin: p.userLogin,
-      userPassword: p.userPassword,
-      baseUrl: cleanURL(p.baseUrl),
-      redirectUrl: cleanURL(p.redirectUrl),
-      realm: p.realm
-    }
-
-    this.jar = new CookieJar()
+  constructor(p: {
+    userLogin: string,
+    userPassword: string,
+    baseUrl: string,
+    redirectUrl: string,
+    realm: string,
+    clientId: string,
+    jar: CookieJar,
+    socialProviderRealm?: string
+  }) {
+    this.clientId = p.clientId
+    this.userLogin = p.userLogin
+    this.userPassword = p.userPassword
+    this.baseUrl = p.baseUrl
+    this.redirectUrl = p.redirectUrl
+    this.realm = p.realm
+    this.socialProviderRealm = p.socialProviderRealm
+    this.jar = p.jar
   }
 
 
-  get header(): string {
+  get headers() {
     const upsertCache = (t: Token) => {
       this.cache = {
         validTo: ((): Date => {
@@ -44,22 +64,22 @@ export class Keycloak implements AuthNHTTPProvider {
     }
 
     const loginRequired = !this.cache
-    if(loginRequired){
+    if (loginRequired) {
       const token = this.login()
       upsertCache(token)
     }
 
     const refreshRequired = this.cache && this.cache.validTo <= new Date()
-    if(refreshRequired){
+    if (refreshRequired) {
       const token = this.refreshTokens()
       upsertCache(token)
     }
 
-    return `${this.cache!.token.tokenType} ${this.cache!.token.accessToken}`
+    return { Authorization: `${this.cache!.token.tokenType} ${this.cache!.token.accessToken}` }
   }
 
   private get endpoints() {
-    const baseUrl = cleanURL(`${this.info.baseUrl}/realms/${this.info.realm}`)
+    const baseUrl = cleanURL(`${this.baseUrl}/realms/${this.realm}`)
     return {
       login: cleanURL(`${baseUrl}/protocol/openid-connect/auth`),
       token: cleanURL(`${baseUrl}/protocol/openid-connect/token`),
@@ -73,13 +93,12 @@ export class Keycloak implements AuthNHTTPProvider {
       login: 'true',
       response_type: 'code',
       scope: 'openid profile email',
-      client_id: 'web',
+      client_id: this.clientId,
       state: uuidv4(),
-      redirect_uri: this.info.redirectUrl
+      redirect_uri: this.redirectUrl
     }
 
-
-    const loginPageResponse = http.get(`${this.endpoints.login}?${objectToQueryString(loginParams)}`, {
+    let loginPageResponse = http.get(`${this.endpoints.login}?${objectToQueryString(loginParams)}`, {
       jar: this.jar
     })
     check({ val: loginPageResponse }, {
@@ -88,13 +107,23 @@ export class Keycloak implements AuthNHTTPProvider {
       }
     })
     if (loginPageResponse.status !== 200) {
-      throw new Error(`login_page.status is ${loginPageResponse.status}, expected 200`)
+      throw new Error(`loginPageResponse.status is ${loginPageResponse.status}, expected 200`)
     }
+
+    if (this.socialProviderRealm) {
+      loginPageResponse = loginPageResponse.clickLink({
+        selector: `#social-${this.socialProviderRealm}`, params: {
+          jar: this.jar
+        }
+      })
+    }
+
     const authorizationResponse = loginPageResponse.submitForm({
       formSelector: '#kc-form-login',
-      fields: { username: this.info.userLogin, password: this.info.userPassword },
-      params: { redirects: 0, jar: this.jar }
+      fields: { username: this.userLogin, password: this.userPassword },
+      params: { redirects: this.socialProviderRealm ? 1 : 0, jar: this.jar }
     })
+
 
     check({ val: authorizationResponse }, {
       'authn -> authorizationResponse - status': ({ status }) => {
@@ -105,12 +134,13 @@ export class Keycloak implements AuthNHTTPProvider {
       throw new Error(`authorizationResponse.status is ${authorizationResponse.status}, expected 302`)
     }
 
+
     const { code } = queryStringToObject(authorizationResponse.headers.Location)
     const accessTokenResponse = http.post(this.endpoints.token, {
       code,
       grant_type: 'authorization_code',
-      redirect_uri: cleanURL(this.info.redirectUrl),
-      client_id: 'web'
+      redirect_uri: cleanURL(this.redirectUrl),
+      client_id: this.clientId
     }, { jar: this.jar })
     check({ val: accessTokenResponse }, {
       'authn -> accessTokenResponse - status': ({ status }) => {
@@ -134,7 +164,7 @@ export class Keycloak implements AuthNHTTPProvider {
     const accessTokenResponse = http.post(this.endpoints.token, {
       grant_type: 'refresh_token',
       refresh_token: this.cache!.token.refreshToken,
-      client_id: 'web'
+      client_id: this.clientId
     }, { jar: this.jar })
 
 
