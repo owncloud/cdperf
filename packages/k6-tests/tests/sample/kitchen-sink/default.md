@@ -8,9 +8,9 @@ the testing steps as a whole will run 10 times (5 times per user).
 
 ## Available options
 
-* [Shared options](/k6-tests/options)
+* [Shared options](/k6-tests/src/values/env)
 
 
 ## How to run the test
 
-please read [here](/k6-tests/run) how the test can be executed, only the script is different
+please read [here](/k6-tests/docs/run) how the test can be executed, only the script is different

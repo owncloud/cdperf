@@ -52,10 +52,7 @@ export const search_for_filename_030 = async (): Promise<void> => {
     return testRoot.root
   })
 
-  client.search.searchForResources({
-    root,
-    searchQuery: sample(resources)!.resourceName
-  })
+  client.search.searchForResources({ root, searchQuery: sample(resources)!.resourceName })
   sleep(settings.sleep.after_iteration)
 }
 

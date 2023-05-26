@@ -2,45 +2,51 @@ import {defineConfig} from 'vitepress';
 import * as glob from 'fast-glob';
 import * as path from 'path';
 import {createRequire} from 'module'
-import {upperFirst, lowerCase} from 'lodash'
+import {lowerCase} from 'lodash';
 
 // @ts-ignore
 const require = createRequire(import.meta.url)
 const pkg = require('../package.json')
 
 const sidebarK6Tests = () => {
-  const testItems = Object.values(glob.sync('**/*.md', {
-      cwd: path.join(path.dirname(require.resolve('../packages/k6-tests/package.json')), 'src')
-    }).reduce((acc, p) => {
-      const [category, name] = p.split('/')
 
-      if (!acc[category]) {
-        acc[category] = {
-          text: upperFirst(category),
-          collapsed: false,
-          items: []
-        }
-      }
+  const testsNavigation = Object.values(glob.sync(['tests/**/*.md'], {
+    cwd: path.dirname(require.resolve('../packages/k6-tests/package.json'))
+  }).map(item => {
+    const info = path.parse(item)
+    const name = info.dir.split('/').slice(1).map(lowerCase).join(' / ')
+    return {text: '- ' + name, link: path.join('/k6-tests/', info.dir, info.name)}
+  }))
 
-      const pathInfo = path.parse(p)
-      acc[category].items.push({text: lowerCase(name), link: path.join('/k6-tests/', pathInfo.dir, pathInfo.name)},)
+  const srcNavigation = Object.values(glob.sync(['src/**/*.md'], {
+    cwd: path.dirname(require.resolve('../packages/k6-tests/package.json'))
+  }).map(item => {
+    const info = path.parse(item)
+    const name = [...info.dir.split('/').slice(1), info.name].map(lowerCase).join(' / ')
+    return {text: '- ' + name, link: path.join('/k6-tests/', info.dir, info.name)}
+  }))
 
-      return acc
-    }, {})
-  )
   return {
     '/k6-tests/': [
       {
         text: 'Introduction',
         collapsed: false,
         items: [
-          {text: 'Welcome', link: '/k6-tests/'},
-          {text: 'Considerations', link: '/k6-tests/considerations'},
-          {text: 'Hot to run', link: '/k6-tests/run'},
-          {text: 'Available options', link: '/k6-tests/options'},
+          {text: '- Welcome', link: '/k6-tests/docs/'},
+          {text: '- Considerations', link: '/k6-tests/docs/considerations'},
+          {text: '- Hot to run', link: '/k6-tests/docs/run'},
         ]
       },
-      ...testItems,
+      {
+        text: 'Src',
+        collapsed: false,
+        items: srcNavigation
+      },
+      {
+        text: 'Tests',
+        collapsed: false,
+        items: testsNavigation
+      },
     ],
   }
 }
@@ -61,7 +67,7 @@ const vitePressConfig = defineConfig({
 
   rewrites: {
     'docs/(.*)': '(.*)',
-    'packages/:pkg/:ds(docs|src)/(.*)': ':pkg/(.*)',
+    'packages/:pkg/:ds(docs|tests|src)/(.*)': ':pkg/:ds/(.*)',
   },
 
   themeConfig: {

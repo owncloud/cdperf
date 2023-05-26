@@ -1,12 +1,12 @@
 # Run the tests
 
-all tests are executed in the same way, only the (options)[/k6-tests/options] and the way of execution differ. below you can see how this works
+all tests are executed in the same way, only the (options)[/k6-tests/src/values/env] and the way of execution differ. below you can see how this works
 
 you can find more information on how use or install K6 [here](https://k6.io/docs/get-started/running-k6/). 
 
 ## The following platforms are supported
+* [ownCloud Infinite Scale](https://github.com/owncloud/ocis)
 * [ownCloud Core](https://github.com/owncloud/core)
-* [Infinite Scale](https://github.com/owncloud/ocis)
 * [Nextcloud](https://github.com/nextcloud/server/)
 
 ## Requirements
@@ -17,7 +17,7 @@ you can find more information on how use or install K6 [here](https://k6.io/docs
 ### local K6
 
 ```shell
-PLATFORM_URL=https://cloud-domain.org:80 \
+PLATFORM_BASE_URL=https://cloud-domain.org:80 \
 k6 run TEST_FILE.js --vus 2 --iterations 5
 ```
 
@@ -25,7 +25,7 @@ k6 run TEST_FILE.js --vus 2 --iterations 5
 
 ```shell
 docker run \
--e PLATFORM_URL=https://cloud-domain.org:80 \
+-e PLATFORM_BASE_URL=https://cloud-domain.org:80 \
 --rm -i grafana/k6 run --vus 2 - < TEST_FILE.js
 ```
 
@@ -34,9 +34,9 @@ docker run \
 ### local K6
 
 ```shell
-PLATFORM=ownCloudServer \
-PLATFORM_URL=https://cloud-domain.org:80 \
-AUTH_N_PROVIDER=basicAuth \
+PLATFORM_TYPE=ownCloudServer \
+PLATFORM_BASE_URL=https://cloud-domain.org:80 \
+AUTH_N_PROVIDER_TYPE=basicAuth \
 k6 run TEST_FILE.js --vus 2 --iterations 5
 ```
 
@@ -44,9 +44,9 @@ k6 run TEST_FILE.js --vus 2 --iterations 5
 
 ```shell
 docker run \
--e PLATFORM=ownCloudServer \
--e PLATFORM_URL=https://cloud-domain.org:80 \
--e AUTH_N_PROVIDER=basicAuth \
+-e PLATFORM_TYPE=ownCloudServer \
+-e PLATFORM_BASE_URL=https://cloud-domain.org:80 \
+-e AUTH_N_PROVIDER_TYPE=basicAuth \
 --rm -i grafana/k6 run --vus 2 - < TEST_FILE.js
 ```
 
@@ -55,9 +55,9 @@ docker run \
 ### local K6
 
 ```shell
-PLATFORM=nextcloud \
-PLATFORM_URL=https://cloud-domain.org:80 \
-AUTH_N_PROVIDER=basicAuth \
+PLATFORM_TYPE=nextcloud \
+PLATFORM_BASE_URL=https://cloud-domain.org:80 \
+AUTH_N_PROVIDER_TYPE=basicAuth \
 k6 run TEST_FILE.js --vus 2 --iterations 5
 ```
 
@@ -65,8 +65,8 @@ k6 run TEST_FILE.js --vus 2 --iterations 5
 
 ```shell
 docker run \
--e PLATFORM=nextcloud \
--e PLATFORM_URL=https://cloud-domain.org:80 \
--e AUTH_N_PROVIDER=basicAuth \
+-e PLATFORM_TYPE=nextcloud \
+-e PLATFORM_BASE_URL=https://cloud-domain.org:80 \
+-e AUTH_N_PROVIDER_TYPE=basicAuth \
 --rm -i grafana/k6 run --vus 2 - < TEST_FILE.js
 ```

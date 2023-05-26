@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /k6-tests/
+      link: /k6-tests/docs/
     - theme: alt
       text: View on GitHub
       link: https://github.com/owncloud/cdperf
@@ -20,7 +20,7 @@ features:
   - icon: 🚀
     title: K6 test scripts
     details: Easy and simple to use k6 test scripts to test different cloud platforms.
-    link: /k6-tests/
+    link: /k6-tests/docs/
   - icon: 📝
     title: K6 test development kit
     details: Simplifies the writing of tests and is compatible with several cloud platforms out of the box.

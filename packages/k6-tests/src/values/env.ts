@@ -18,7 +18,7 @@ export const envValues = () => {
         name: ENV('SEED_CONTAINER_NAME', 'cdperf'),
         get type() {
           return TestRootType[ENV(
-            'ROOT_RESOURCE_TYPE',
+            'SEED_CONTAINER_TYPE',
             platformGuard(values.platform.type).isOwnCloudInfiniteScale ? TestRootType.space : TestRootType.directory
           )]
         }

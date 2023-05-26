@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports, "__esModule", {value: true});var _chunk5I3Z4AKNjs = require('./chunk-5I3Z4AKN.js');var e={..._chunk5I3Z4AKNjs.a,iterations:10,duration:"7d",teardownTimeout:"1h"},i= exports.b =_chunk5I3Z4AKNjs.b;exports.a = e; exports.b = i;
