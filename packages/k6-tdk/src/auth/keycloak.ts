@@ -116,6 +116,15 @@ export class Keycloak implements AuthNHTTPProvider {
           jar: this.jar
         }
       })
+
+      check({ val: loginPageResponse }, {
+        'authn -> loginPageResponse - social - status': ({ status }) => {
+          return status === 200
+        }
+      })
+      if (loginPageResponse.status !== 200) {
+        throw new Error(`loginPageResponse.status (social) is ${loginPageResponse.status}, expected 200`)
+      }
     }
 
     const authorizationResponse = loginPageResponse.submitForm({

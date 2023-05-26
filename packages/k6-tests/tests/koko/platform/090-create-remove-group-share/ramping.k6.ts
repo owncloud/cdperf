@@ -12,6 +12,9 @@ export const options: Options = {
       executor: 'ramping-vus',
       startVUs: 0,
       exec: 'create_remove_group_share_090',
+      env: {
+        SLEEP_AFTER_ITERATION: '60s'
+      },
       stages: [
         { target: 250, duration: '20m' },
         { target: 250, duration: '30m' },

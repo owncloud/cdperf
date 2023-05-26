@@ -10,12 +10,11 @@ export const options: Options = {
   scenarios: {
     login_010: {
       executor: 'ramping-vus',
-      startVUs: 0,
+      startVUs: 30000,
       exec: 'login_010',
+      gracefulStop: '120s',
       stages: [
-        { target: 5000, duration: '20m' },
-        { target: 5000, duration: '30m' },
-        { target: 0, duration: '10m' }
+        { target: 30000, duration: '60m' }
       ]
     }
   }

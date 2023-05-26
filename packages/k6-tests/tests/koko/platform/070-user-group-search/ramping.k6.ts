@@ -12,6 +12,9 @@ export const options: Options = {
       executor: 'ramping-vus',
       startVUs: 0,
       exec: 'user_group_search_070',
+      env: {
+        SLEEP_AFTER_ITERATION: '30s'
+      },
       stages: [
         { target: 200, duration: '20m' },
         { target: 200, duration: '30m' },

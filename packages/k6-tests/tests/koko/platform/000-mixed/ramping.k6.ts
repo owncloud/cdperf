@@ -1,7 +1,7 @@
 import { Options } from 'k6/options'
 
 import { options as options_020 } from '@/tests/koko/platform/020-navigate-file-tree/ramping.k6'
-import { options as options_030 } from '@/tests/koko/platform/030-search-for-filename/ramping.k6'
+// import { options as options_030 } from '@/tests/koko/platform/030-search-for-filename/ramping.k6'
 import { options as options_040 } from '@/tests/koko/platform/040-create-upload-rename-delete-folder-and-file/ramping.k6'
 import { options as options_050 } from '@/tests/koko/platform/050-download/ramping.k6'
 import { options as options_070 } from '@/tests/koko/platform/070-user-group-search/ramping.k6'
@@ -26,7 +26,7 @@ export const options: Options = {
   insecureSkipTLSVerify: true,
   scenarios: {
     ...options_020.scenarios,
-    ...options_030.scenarios,
+    // ...options_030.scenarios,
     ...options_040.scenarios,
     ...options_050.scenarios,
     ...options_070.scenarios,

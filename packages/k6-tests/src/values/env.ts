@@ -6,16 +6,26 @@ import { AuthNProvider, Embedded, TestRootType } from './const'
 export const envValues = () => {
   const values = {
     admin: {
-      login: ENV('ADMIN_LOGIN', 'admin'),
-      password: ENV('ADMIN_PASSWORD', 'admin')
+      get login() {
+        return ENV('ADMIN_LOGIN', 'admin')
+      },
+      get password() {
+        return ENV('ADMIN_PASSWORD', 'admin')
+      }
     },
     sleep: {
-      after_request: parseFloat(ENV('SLEEP_AFTER_REQUEST', '0.2')),
-      after_iteration: parseFloat(ENV('SLEEP_AFTER_ITERATION', '0'))
+      get after_request() {
+        return parseFloat(ENV('SLEEP_AFTER_REQUEST', '0.2'))
+      },
+      get after_iteration() {
+        return parseFloat(ENV('SLEEP_AFTER_ITERATION', '0'))
+      }
     },
     seed: {
       container: {
-        name: ENV('SEED_CONTAINER_NAME', 'cdperf'),
+        get name() {
+          return ENV('SEED_CONTAINER_NAME', 'cdperf')
+        },
         get type() {
           return TestRootType[ENV(
             'SEED_CONTAINER_TYPE',
@@ -24,50 +34,98 @@ export const envValues = () => {
         }
       },
       users: {
-        create: ENV('SEED_USERS_CREATE', 'true') === 'true',
-        delete: ENV('SEED_USERS_DELETE', 'true') === 'true',
-        total: parseInt(ENV('SEED_USERS_TOTAL', '25'), 10)
+        get create() {
+          return ENV('SEED_USERS_CREATE', 'true') === 'true'
+        },
+        get delete() {
+          return ENV('SEED_USERS_DELETE', 'true') === 'true'
+        },
+        get total() {
+          return parseInt(ENV('SEED_USERS_TOTAL', '25'), 10)
+        }
       },
       groups: {
-        create: ENV('SEED_GROUPS_CREATE', 'true') === 'true',
-        delete: ENV('SEED_GROUPS_DELETE', 'true') === 'true',
-        total: parseInt(ENV('SEED_GROUPS_TOTAL', '1'), 10)
+        get create(){
+          return ENV('SEED_GROUPS_CREATE', 'true') === 'true'
+        },
+        get delete() {
+          return ENV('SEED_GROUPS_DELETE', 'true') === 'true'
+        },
+        get total(){
+          return parseInt(ENV('SEED_GROUPS_TOTAL', '1'), 10)
+        }
       },
       calendar: {
-        root: ENV('DATA_CALENDAR_ROOT', 'calendar'),
-        from_year: parseInt(ENV('DATA_CALENDAR_FROM_YEAR', '2023'), 10),
-        to_year: parseInt(ENV('DATA_CALENDAR_TO_YEAR', '2023'), 10)
+        get root(){
+          return ENV('DATA_CALENDAR_ROOT', 'calendar')
+        },
+        get from_year(){
+          return parseInt(ENV('DATA_CALENDAR_FROM_YEAR', '2023'), 10)
+        },
+        get to_year(){
+          return parseInt(ENV('DATA_CALENDAR_TO_YEAR', '2023'), 10)
+        }
       },
       resource: {
-        root: ENV('SEED_RESOURCE_ROOT', 'resource'),
+        get root(){
+          return ENV('SEED_RESOURCE_ROOT', 'resource')
+        },
         small: {
-          name: ENV('SEED_RESOURCE_SMALL_NAME', 'small.zip'),
-          size: parseInt(ENV('SEED_RESOURCE_SMALL_SIZE', '1'), 10) * 1000 * 1000
+          get name(){
+            return ENV('SEED_RESOURCE_SMALL_NAME', 'small.zip')
+          },
+          get size(){
+            return parseInt(ENV('SEED_RESOURCE_SMALL_SIZE', '1'), 10) * 1000 * 1000
+          }
         },
         medium: {
-          name: ENV('SEED_RESOURCE_MEDIUM_NAME', 'medium.zip'),
-          size: parseInt(ENV('SEED_RESOURCE_MEDIUM_SIZE', '20'), 10) * 1000 * 1000
+          get name(){
+            return ENV('SEED_RESOURCE_MEDIUM_NAME', 'medium.zip')
+          },
+          get size(){
+            return parseInt(ENV('SEED_RESOURCE_MEDIUM_SIZE', '20'), 10) * 1000 * 1000
+          }
         },
         large: {
-          name: ENV('SEED_RESOURCE_LARGE_NAME', 'large.zip'),
-          size: parseInt(ENV('SEED_RESOURCE_LARGE_SIZE', '100'), 10) * 1000 * 1000
+          get name(){
+            return ENV('SEED_RESOURCE_LARGE_NAME', 'large.zip')
+          },
+          get size(){
+            return parseInt(ENV('SEED_RESOURCE_LARGE_SIZE', '100'), 10) * 1000 * 1000
+          }
         }
       }
     },
     pool: {
-      users: ENV('POOL_USERS', Embedded),
-      groups: ENV('POOL_GROUPS', Embedded)
+      get users(){
+        return ENV('POOL_USERS', Embedded)
+      },
+      get groups(){
+        return ENV('POOL_GROUPS', Embedded)
+      }
     },
     platform: {
-      type: Platform[ENV('PLATFORM_TYPE', Platform.ownCloudInfiniteScale)],
-      base_url: ENV('PLATFORM_BASE_URL', 'https://localhost:9200')
+      get type(){
+        return Platform[ENV('PLATFORM_TYPE', Platform.ownCloudInfiniteScale)]
+      },
+      get base_url(){
+        return ENV('PLATFORM_BASE_URL', 'https://localhost:9200')
+      }
     },
     auth_n_provider: {
-      type: AuthNProvider[ENV('AUTH_N_PROVIDER_TYPE', AuthNProvider.kopano)],
+      get type(){
+        return AuthNProvider[ENV('AUTH_N_PROVIDER_TYPE', AuthNProvider.kopano)]
+      },
       kopano: {
-        base_url: ENV('AUTH_N_PROVIDER_KOPANO_BASE_URL', 'https://localhost:9200'),
-        redirect_url: ENV('AUTH_N_PROVIDER_KOPANO_REDIRECT_URL', 'https://localhost:9200/oidc-callback.html'),
-        client_id: ENV('AUTH_N_PROVIDER_KOPANO_CLIENT_ID', 'web')
+        get base_url(){
+          return ENV('AUTH_N_PROVIDER_KOPANO_BASE_URL', 'https://localhost:9200')
+        },
+        get redirect_url(){
+          return ENV('AUTH_N_PROVIDER_KOPANO_REDIRECT_URL', 'https://localhost:9200/oidc-callback.html')
+        },
+        get client_id(){
+          return ENV('AUTH_N_PROVIDER_KOPANO_CLIENT_ID', 'web')
+        }
       },
       keycloak: {
         get realm() {
@@ -79,11 +137,13 @@ export const envValues = () => {
         get redirect_url() {
           return ENV('AUTH_N_PROVIDER_KEYCLOAK_REDIRECT_URL')
         },
-        get social_provider_realm(){
+        get social_provider_realm() {
           const v = ENV('AUTH_N_PROVIDER_KEYCLOAK_SOCIAL_PROVIDER_REALM', 'none')
           return v === 'none' ? undefined : v
         },
-        client_id: ENV('AUTH_N_PROVIDER_KEYCLOAK_CLIENT_ID', 'web')
+        get client_id(){
+          return ENV('AUTH_N_PROVIDER_KEYCLOAK_CLIENT_ID', 'web')
+        }
       }
     }
   }
