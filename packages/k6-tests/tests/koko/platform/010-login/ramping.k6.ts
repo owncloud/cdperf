@@ -1,3 +1,4 @@
+import { ENV } from '@ownclouders/k6-tdk/lib/utils'
 import { Options } from 'k6/options'
 import { omit } from 'lodash'
 
@@ -10,11 +11,14 @@ export const options: Options = {
   scenarios: {
     login_010: {
       executor: 'ramping-vus',
-      startVUs: 30000,
+      startVUs: parseInt(ENV('TEST_KOKO_PLATFORM_010_RAMPING_STAGES_VUS', '30000'), 10),
       exec: 'login_010',
       gracefulStop: '120s',
       stages: [
-        { target: 30000, duration: '60m' }
+        {
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_010_RAMPING_STAGES_VUS', '30000'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_010_RAMPING_STAGES_UP_DURATION', '60m')
+        }
       ]
     }
   }

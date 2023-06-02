@@ -1,3 +1,4 @@
+import { ENV } from '@ownclouders/k6-tdk/lib/utils'
 import { Options } from 'k6/options'
 import { omit } from 'lodash'
 
@@ -13,12 +14,21 @@ export const options: Options = {
       startVUs: 0,
       exec: 'create_upload_rename_delete_folder_and_file_040',
       env: {
-        SLEEP_AFTER_ITERATION: '60s'
+        SLEEP_AFTER_ITERATION: ENV('TEST_KOKO_PLATFORM_040_RAMPING_SLEEP_AFTER_ITERATION', '60s')
       },
       stages: [
-        { target: 500, duration: '20m' },
-        { target: 500, duration: '30m' },
-        { target: 0, duration: '10m' }
+        {
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_VUS', '500'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_UP_DURATION', '20m')
+        },
+        {
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_VUS', '500'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_PEAK_DURATION', '30m')
+        },
+        {
+          target: 0,
+          duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_DOWN_DURATION', '10m')
+        }
       ]
     }
   }

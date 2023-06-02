@@ -1,3 +1,4 @@
+import { ENV } from '@ownclouders/k6-tdk/lib/utils'
 import { Options } from 'k6/options'
 import { omit } from 'lodash'
 
@@ -13,12 +14,21 @@ export const options: Options = {
       startVUs: 0,
       exec: 'sync_client_110',
       env: {
-        SLEEP_AFTER_ITERATION: '30s'
+        SLEEP_AFTER_ITERATION: ENV('TEST_KOKO_PLATFORM_110_RAMPING_SLEEP_AFTER_ITERATION', '30s')
       },
       stages: [
-        { target: 1000, duration: '20m' },
-        { target: 1000, duration: '30m' },
-        { target: 0, duration: '10m' }
+        {
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_110_RAMPING_STAGES_VUS', '1000'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_110_RAMPING_STAGES_UP_DURATION', '20m')
+        },
+        {
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_110_RAMPING_STAGES_VUS', '1000'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_110_RAMPING_STAGES_PEAK_DURATION', '30m')
+        },
+        {
+          target: 0,
+          duration: ENV('TEST_KOKO_PLATFORM_110_RAMPING_STAGES_DOWN_DURATION', '10m')
+        }
       ]
     }
   }

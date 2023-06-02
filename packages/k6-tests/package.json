@@ -18,7 +18,7 @@
     "clean:artifacts": "del-cli artifacts",
     "clean:vendor": "del-cli node_modules",
     "dev": "turbowatch",
-    "lint": "eslint package.json 'src/**/*.ts'",
+    "lint": "eslint package.json 'src/**/*.ts' 'tests/**/*.ts'",
     "lint:fix": "pnpm run lint --fix",
     "test": "vitest run"
   },
