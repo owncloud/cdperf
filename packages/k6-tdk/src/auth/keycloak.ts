@@ -101,11 +101,13 @@ export class Keycloak implements AuthNHTTPProvider {
     let loginPageResponse = http.get(`${this.endpoints.login}?${objectToQueryString(loginParams)}`, {
       jar: this.jar
     })
+
     check({ val: loginPageResponse }, {
       'authn -> loginPageResponse - status': ({ status }) => {
         return status === 200
       }
     })
+
     if (loginPageResponse.status !== 200) {
       throw new Error(`loginPageResponse.status is ${loginPageResponse.status}, expected 200`)
     }
@@ -122,6 +124,7 @@ export class Keycloak implements AuthNHTTPProvider {
           return status === 200
         }
       })
+
       if (loginPageResponse.status !== 200) {
         throw new Error(`loginPageResponse.status (social) is ${loginPageResponse.status}, expected 200`)
       }
@@ -133,18 +136,38 @@ export class Keycloak implements AuthNHTTPProvider {
       params: { redirects: this.socialProviderRealm ? 1 : 0, jar: this.jar }
     })
 
-
     check({ val: authorizationResponse }, {
       'authn -> authorizationResponse - status': ({ status }) => {
         return status === 302
       }
     })
+
     if (authorizationResponse.status !== 302) {
       throw new Error(`authorizationResponse.status is ${authorizationResponse.status}, expected 302`)
     }
 
+    const getCode = (headers: { [name: string]: string }) => {
+      const { Location } = headers
 
-    const { code } = queryStringToObject(authorizationResponse.headers.Location)
+      if(!Location){
+        throw new Error('no location')
+      }
+
+      const { code } = queryStringToObject(Location)
+
+      if(code){
+        return code
+      }
+
+      const response = http.post(Location, {}, {
+        jar: this.jar,
+        redirects: 1
+      })
+
+      return getCode(response.headers)
+    }
+
+    const code = getCode(authorizationResponse.headers)
     const accessTokenResponse = http.post(this.endpoints.token, {
       code,
       grant_type: 'authorization_code',
