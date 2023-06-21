@@ -25,15 +25,15 @@
     "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {
-    "turbowatch": "^2.22.0"
+    "turbowatch": "^2.29.4"
   },
   "devDependencies": {
     "@ownclouders/eslint-config": "workspace:*",
     "@ownclouders/tsconfig": "workspace:*",
-    "@types/node": "^20.1.4",
-    "concurrently": "^8.0.1",
+    "@types/node": "^20.3.1",
+    "concurrently": "^8.2.0",
     "del-cli": "^5.0.0",
-    "tsup": "^6.7.0",
-    "typescript": "^5.0.4"
+    "tsup": "^7.0.0",
+    "typescript": "^5.1.3"
   }
 }

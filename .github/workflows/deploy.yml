@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
   push:
     branches:
-      - work-on-rc5
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
