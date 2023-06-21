@@ -37,7 +37,7 @@ export const options: Options = {
 
 export function setup(): Environment {
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
-  const getMyDrivesResponseAdmin = adminClient.me.getMyDrives()
+  const getMyDrivesResponseAdmin = adminClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
   const [adminRoot = settings.admin.login] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseAdmin?.body)
 
   adminClient.resource.createResource({ root: adminRoot, resourcePath: settings.testFolder })
@@ -56,7 +56,7 @@ export function setup(): Environment {
     const [createdShareId] = queryXml('ocs.data.id', createShareResponse.body)
 
     const actorClient = clientFor({ userLogin: actorLogin, userPassword: actorPassword })
-    const getMyDrivesResponseActor = actorClient.me.getMyDrives()
+    const getMyDrivesResponseActor = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseActor?.body)
     actorClient.share.acceptShare({ shareId: createdShareId })
 

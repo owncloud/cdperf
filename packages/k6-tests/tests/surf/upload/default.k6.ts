@@ -39,7 +39,7 @@ export function setup(): Environment {
     adminClient.user.enableUser({ userLogin: actorLogin })
 
     const actorClient = clientFor({ userLogin: actorLogin, userPassword: actorPassword })
-    const getMyDrivesResponse = actorClient.me.getMyDrives()
+    const getMyDrivesResponse = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
     return {

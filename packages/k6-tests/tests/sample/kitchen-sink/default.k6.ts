@@ -1,4 +1,3 @@
-import { } from '@ownclouders/k6-tdk'
 import { Client } from '@ownclouders/k6-tdk/lib/client'
 import {
   check,
@@ -50,7 +49,7 @@ export function setup(): Environment {
     adminClient.user.enableUser({ userLogin: actorLogin })
 
     const actorClient = clientFor({ userLogin: actorLogin, userPassword: actorPassword })
-    const getMyDrivesResponse = actorClient.me.getMyDrives()
+    const getMyDrivesResponse = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
 
     return {
@@ -88,7 +87,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
       }
     })
 
-    const getMyDrivesResponse = actorClient.me.getMyDrives()
+    const getMyDrivesResponse = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
     check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: getMyDrivesResponse }, {
       'test -> me.getMyDrives - personal - match': (response) => {
         const [personalDrive] = queryJson("$.value[?(@.driveType === 'personal')].id", response?.body)

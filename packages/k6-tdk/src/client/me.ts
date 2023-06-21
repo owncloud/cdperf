@@ -27,7 +27,7 @@ export class Me extends EndpointClient {
     return response
   }
 
-  getMyDrives(): RefinedResponse<'text'> | undefined {
+  getMyDrives(p: { params?: Record<string, unknown> }): RefinedResponse<'text'> | undefined {
     let response: RefinedResponse<'text'> | undefined
     switch (this.platform) {
       case Platform.ownCloudServer:
@@ -35,7 +35,7 @@ export class Me extends EndpointClient {
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.graph.v1.me.GET__get_current_user_drives(this.httpClient, {})
+        response = endpoints.graph.v1.me.GET__get_current_user_drives(this.httpClient, { params: p.params })
     }
 
     check({ skip: !response, val: response }, {

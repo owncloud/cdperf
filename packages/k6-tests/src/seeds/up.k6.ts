@@ -47,8 +47,8 @@ export async function setup(): Promise<void> {
    * users
    */
   {
-    const poolUsers = getPoolItems({ pool: userPool, n: values.seed.users.total })
     if (values.seed.users.create) {
+      const poolUsers = getPoolItems({ pool: userPool, n: values.seed.users.total })
       const getRolesResponse = adminClient.role.getRoles()
       const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", getRolesResponse?.body)
 

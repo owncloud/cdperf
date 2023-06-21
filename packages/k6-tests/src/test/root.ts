@@ -27,20 +27,25 @@ export const getTestRoot = async (p: {
   const rv = { root: '', path: '' }
   const guards = buildGuards(p)
   let query
+  let params
+
   if (guards.isSpace) {
     query = `driveAlias === 'project/${p.resourceName}'`
+    params = { $filter: "driveType eq 'project'" }
   }
 
   if (guards.isDirectory && !guards.isOwner) {
     query = `driveAlias === 'mountpoint/${p.resourceName}'`
+    params = { $filter: "driveType eq 'mountpoint'" }
   }
 
   if (guards.isDirectory && guards.isOwner) {
     query = `driveAlias === 'personal/${p.userLogin}'`
+    params = { $filter: "driveType eq 'personal'" }
   }
 
   if (guards.isOwnCloudInfiniteScale) {
-    const getMyDrivesResponse = await p.client.me.getMyDrives()
+    const getMyDrivesResponse = await p.client.me.getMyDrives({ params })
     ;[rv.root] = queryJson(`$.value[?(@.${query})].id`, getMyDrivesResponse?.body)
   }
 
@@ -80,7 +85,7 @@ export const createTestRoot = async (p: {
   }
 
   if (guards.isOwnCloudInfiniteScale && guards.isDirectory) {
-    const getMyDrivesResponse = p.client.me.getMyDrives()
+    const getMyDrivesResponse = p.client.me.getMyDrives({})
     const [personalDriveId] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
     rv.root = personalDriveId
   }

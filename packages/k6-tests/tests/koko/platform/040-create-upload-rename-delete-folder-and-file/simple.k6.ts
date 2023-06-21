@@ -28,7 +28,7 @@ export const create_upload_rename_delete_folder_and_file_040 = async (): Promise
   })
 
   const root = await userStore.setOrGet('root', async () => {
-    const getMyDrivesResponse = await client.me.getMyDrives()
+    const getMyDrivesResponse = await client.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
     const [actorRoot = user.userLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
     sleep(settings.sleep.after_request)
 

@@ -5,8 +5,12 @@ export const cleanURL = (...parts: string[]): string => {
   return parts.join('/').replace(/(?<!:)\/+/gm, '/')
 }
 
-export const objectToQueryString = (params: { [key: string]: string | number | undefined }): string => {
-  const searchParams = new K6URLSearchParams(Object.keys(params).map((k) => {
+export const objectToQueryString = (params?: Record<string, unknown>): string => {
+  if (!params) {
+    return ''
+  }
+
+  const searchParams = new K6URLSearchParams(Object.keys(params || {}).map((k) => {
     return [k, String(params[k])]
   }))
 
