@@ -99,7 +99,8 @@ export class Keycloak implements AuthNHTTPProvider {
     }
 
     let loginPageResponse = http.get(`${this.endpoints.login}?${objectToQueryString(loginParams)}`, {
-      jar: this.jar
+      jar: this.jar,
+      redirects: 0
     })
 
     check({ val: loginPageResponse }, {

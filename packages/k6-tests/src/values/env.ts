@@ -15,7 +15,7 @@ export const envValues = () => {
     },
     sleep: {
       get after_request() {
-        return parseFloat(ENV('SLEEP_AFTER_REQUEST', '0.2'))
+        return parseFloat(ENV('SLEEP_AFTER_REQUEST', '1'))
       },
       get after_iteration() {
         return parseFloat(ENV('SLEEP_AFTER_ITERATION', '0'))
