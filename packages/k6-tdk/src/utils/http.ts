@@ -1,33 +1,47 @@
 import { Params, RefinedParams, RefinedResponse, request, RequestBody, ResponseType } from 'k6/http'
-import { merge, set } from 'lodash-es'
+import { get, merge, set } from 'lodash'
 
-import { Authenticator } from '@/auth'
+import { AuthNHTTPProvider } from '@/auth'
 
 import { cleanURL } from './url'
 
-export type Request = typeof request
+export type HttpClient = typeof request
 
-export const requestFactory = (p: {
+export const httpClientFactory = (p: {
   baseUrl: string,
-  authn?: Authenticator,
+  authNProvider?: AuthNHTTPProvider,
   params?: Params
-}): Request => {
+}): HttpClient => {
   return (<RT extends ResponseType | undefined>(
     method: string,
     url: string,
     body?: RequestBody | null,
     requestParams?: RefinedParams<RT> | null
   ): RefinedResponse<RT> => {
-    const params: Params = merge({}, p.params)
+    const outerParams = p.params || {}
+    const innerParams = requestParams || {}
+    const localParams: RefinedParams<RT> = { headers: {} }
 
-    if (p.authn) {
-      set(params, 'headers.Authorization', p.authn.header)
+    if (p.authNProvider) {
+      merge(localParams.headers, p.authNProvider.headers)
     }
 
-    if (p.params?.jar) {
-      set(params, 'jar', p.params.jar)
-    }
+    const params = merge(localParams, outerParams, innerParams)
 
-    return request<RT>(method, cleanURL(p.baseUrl, url), body, merge(params, requestParams))
-  }) as Request
+    // some keys needs to be picked manually because of merge could distort the object, for example .jar, seems to be one of these.
+    const manualPickedKeys = ['jar']
+    manualPickedKeys.forEach((k) => {
+      const outerV = get(outerParams, k)
+      if (outerV) {
+        set(params, k, outerV)
+      }
+
+      const innerV = get(innerParams, k)
+      if (innerV) {
+        set(params, k, innerV)
+      }
+    })
+
+    return request<RT>(method, cleanURL(p.baseUrl, url), body, params)
+  }) as HttpClient
 }

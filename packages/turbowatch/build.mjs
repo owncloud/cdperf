@@ -1,7 +1,6 @@
-import {build} from '@ownclouders/esbuild';
+import {build} from 'tsup';
 
 await build({
-  platform:    'node',
-  format:      'esm',
-  packages:    'external',
+  entryPoints: ['src/index.ts'],
+  format: 'esm'
 });

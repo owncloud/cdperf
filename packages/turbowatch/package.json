@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "description": "common turbowatch helpers used withing @ownclouders namespace.",
-  "homepage": "https://github.com/owncloud/web/tree/master/packages/turbowatch",
+  "homepage": "https://github.com/owncloud/cdperf/tree/master/packages/turbowatch",
   "repository": {
     "type": "git",
     "url": "https://github.com/owncloud/cdperf",
@@ -20,20 +20,20 @@
     "build:types": "tsc --outDir dist",
     "clean": "pnpm clean:artifacts && pnpm clean:vendor",
     "clean:artifacts": "del-cli dist",
-    "clean:vendor": "del-cli .turbo node_modules",
+    "clean:vendor": "del-cli node_modules",
     "lint": "eslint package.json 'src/**/*.ts'",
     "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {
-    "turbowatch": "^2.21.0"
+    "turbowatch": "^2.29.4"
   },
   "devDependencies": {
-    "@ownclouders/esbuild": "workspace:*",
     "@ownclouders/eslint-config": "workspace:*",
     "@ownclouders/tsconfig": "workspace:*",
-    "@types/node": "^18.15.11",
-    "concurrently": "^8.0.1",
+    "@types/node": "^20.3.1",
+    "concurrently": "^8.2.0",
     "del-cli": "^5.0.0",
-    "typescript": "^5.0.4"
+    "tsup": "^7.0.0",
+    "typescript": "^5.1.3"
   }
 }

@@ -1,8 +1,8 @@
 import encoding from 'k6/encoding'
 
-import { Authenticator } from './auth'
+import { AuthNHTTPProvider } from './auth'
 
-export class BasicAuth implements Authenticator {
+export class BasicAuth implements AuthNHTTPProvider {
   private readonly userLogin: string
 
   private readonly userPassword: string
@@ -12,7 +12,7 @@ export class BasicAuth implements Authenticator {
     this.userPassword = p.userPassword
   }
 
-  public get header(): string {
-    return `Basic ${encoding.b64encode(`${this.userLogin}:${this.userPassword}`)}`
+  public get headers() {
+    return { Authorization: `Basic ${encoding.b64encode(`${this.userLogin}:${this.userPassword}`)}` }
   }
 }

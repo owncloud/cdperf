@@ -1,13 +1,26 @@
 {
 	"root": true,
 	"extends": ["@ownclouders"],
+  "ignorePatterns": ["!*.test.ts"],
   "overrides": [
     {
-      "files": ["src/**/*.ts"],
+      "files": ["tests/**/*.ts", "src/seeds/*.ts"],
       "rules": {
         "@typescript-eslint/naming-convention": "off",
         // k6 uses the default export function as vu stage
         "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["src/pools/*.ts"],
+      "rules": {
+        "no-restricted-globals": "off"
+      }
+    },
+    {
+      "files": ["src/clients/onlyoffice/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/naming-convention": "off"
       }
     }
   ]

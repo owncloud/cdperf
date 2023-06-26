@@ -1,6 +1,6 @@
 import { create } from 'xmlbuilder2'
 
-import { Platform } from '@/const'
+import { Platform } from '@/values'
 
 const namespace: Readonly<Record<string, string>> = {
   oc: 'http://owncloud.org/ns',

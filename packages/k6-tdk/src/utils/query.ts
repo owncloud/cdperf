@@ -1,6 +1,6 @@
 import * as jsonpath from 'jsonpath'
 import { JSONValue } from 'k6'
-import { isEmpty, isObject } from 'lodash-es'
+import { isEmpty, isObject } from 'lodash'
 import * as xmlbuilder from 'xmlbuilder2'
 
 export const queryJson = <V = any>(pathExpression: string, val?: JSONValue): V[] => {

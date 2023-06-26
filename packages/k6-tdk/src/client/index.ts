@@ -1,8 +1,5 @@
-import { CookieJar } from 'k6/http'
-
-import { Adapter, Authenticator, BasicAuth, Kopano } from '@/auth'
-import { Platform } from '@/const'
-import { requestFactory } from '@/utils'
+import { HttpClient } from '@/utils'
+import { Platform } from '@/values'
 
 import { Application } from './application'
 import { Drive } from './drive'
@@ -18,61 +15,41 @@ import { User } from './user'
 export * from './client'
 
 export class Client {
-  application: Application
+  readonly application: Application
 
-  drive: Drive
+  readonly drive: Drive
 
-  me: Me
+  readonly me: Me
 
-  group: Group
+  readonly group: Group
 
-  resource: Resource
+  readonly resource: Resource
 
-  role: Role
+  readonly role: Role
 
-  search: Search
+  readonly search: Search
 
-  share: Share
+  readonly share: Share
 
-  tag: Tag
+  readonly tag: Tag
 
-  user: User
+  readonly user: User
 
-  constructor(p: {
-    baseUrl: string,
-    platform: Platform,
-    authAdapter: Adapter,
-    userLogin: string,
-    userPassword: string
-  }) {
-    let authn: Authenticator
-    switch (p.authAdapter) {
-      case Adapter.basicAuth:
-        authn = new BasicAuth(p)
-        break
-      case Adapter.kopano:
-      default:
-        authn = new Kopano(p)
-        break
-    }
+  readonly httpClient: HttpClient
 
-    const request = requestFactory({
-      authn,
-      baseUrl: p.baseUrl,
-      params: {
-        jar: new CookieJar()
-      }
-    })
 
-    this.application = new Application(p.platform, request)
-    this.drive = new Drive(p.platform, request)
-    this.group = new Group(p.platform, request)
-    this.me = new Me(p.platform, request)
-    this.resource = new Resource(p.platform, request)
-    this.role = new Role(p.platform, request)
-    this.search = new Search(p.platform, request)
-    this.share = new Share(p.platform, request)
-    this.tag = new Tag(p.platform, request)
-    this.user = new User(p.platform, request)
+  constructor(p: { platform: Platform, httpClient: HttpClient }) {
+    this.httpClient = p.httpClient
+
+    this.application = new Application(p.platform, p.httpClient)
+    this.drive = new Drive(p.platform, p.httpClient)
+    this.group = new Group(p.platform, p.httpClient)
+    this.me = new Me(p.platform, p.httpClient)
+    this.resource = new Resource(p.platform, p.httpClient)
+    this.role = new Role(p.platform, p.httpClient)
+    this.search = new Search(p.platform, p.httpClient)
+    this.share = new Share(p.platform, p.httpClient)
+    this.tag = new Tag(p.platform, p.httpClient)
+    this.user = new User(p.platform, p.httpClient)
   }
 }

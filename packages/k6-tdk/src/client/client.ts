@@ -1,14 +1,14 @@
-import { Platform } from '@/const'
-import { Request } from '@/utils'
+import { HttpClient } from '@/utils'
+import { Platform } from '@/values'
 
 
 export abstract class EndpointClient {
   protected readonly platform: Platform
 
-  protected readonly request: Request
+  protected readonly httpClient: HttpClient
 
-  constructor(platform: Platform, request: Request) {
+  constructor(platform: Platform, httpClient: HttpClient) {
     this.platform = platform
-    this.request = request
+    this.httpClient = httpClient
   }
 }

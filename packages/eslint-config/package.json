@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "description": "common eslint config used withing @ownclouders namespace.",
-  "homepage": "https://github.com/owncloud/web/tree/master/packages/eslint-config",
+  "homepage": "https://github.com/owncloud/cdperf/tree/master/packages/eslint-config",
   "repository": {
     "type": "git",
     "url": "https://github.com/owncloud/cdperf",
@@ -14,27 +14,27 @@
   "main": "index.js",
   "scripts": {
     "clean": "pnpm clean:vendor",
-    "clean:vendor": "del-cli .turbo node_modules",
+    "clean:vendor": "del-cli node_modules",
     "lint": "eslint package.json index.js",
     "lint:fix": "pnpm run lint --fix"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.58.0",
-    "@typescript-eslint/parser": "^5.58.0",
+    "@typescript-eslint/eslint-plugin": "^5.60.0",
+    "@typescript-eslint/parser": "^5.60.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.8.0",
-    "eslint-config-turbo": "^1.9.1",
+    "eslint-config-turbo": "^1.10.3",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-json-files": "^2.1.0",
+    "eslint-plugin-json-files": "^2.2.0",
     "eslint-plugin-no-relative-import-paths": "^1.5.2",
     "eslint-plugin-relative-imports-when-same-folder": "^0.0.4",
     "eslint-plugin-simple-import-sort": "^10.0.0"
   },
   "devDependencies": {
     "del-cli": "^5.0.0",
-    "eslint": "^8.38.0",
-    "typescript": "^5.0.4"
+    "eslint": "^8.43.0",
+    "typescript": "^5.1.3"
   }
 }

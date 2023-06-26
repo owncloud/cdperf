@@ -1,8 +1,8 @@
 import { RefinedResponse } from 'k6/http'
 
-import { Platform } from '@/const'
 import { endpoints } from '@/endpoints'
 import { check } from '@/utils'
+import { Platform } from '@/values'
 
 import { EndpointClient } from './client'
 import { TAG__get_tags, TAG__get_tags_for_resource } from './xml'
@@ -25,7 +25,7 @@ export class Tag extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.dav.systemtags.POST__create_tag(this.request, {
+        response = endpoints.dav.systemtags.POST__create_tag(this.httpClient, {
           tagName,
           userAssignableTag,
           userVisibleTag,
@@ -50,7 +50,7 @@ export class Tag extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.dav.systemtags.DELETE__delete_tag(this.request, { tagId: p.tag })
+        response = endpoints.dav.systemtags.DELETE__delete_tag(this.httpClient, { tagId: p.tag })
         break
       case Platform.ownCloudInfiniteScale:
       default:
@@ -70,7 +70,7 @@ export class Tag extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.dav.systemtags.PROPFIND__get_tags_with_properties(this.request, {
+        response = endpoints.dav.systemtags.PROPFIND__get_tags_with_properties(this.httpClient, {
           propfindXml: TAG__get_tags[this.platform]({})
         })
         break
@@ -94,7 +94,7 @@ export class Tag extends EndpointClient {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
         expectedStatus = 201
-        response = endpoints.dav.systemtags_relations.PUT__add_tag_to_resource(this.request, {
+        response = endpoints.dav.systemtags_relations.PUT__add_tag_to_resource(this.httpClient, {
           resourceId: p.resourceId,
           tagId: p.tag
         })
@@ -102,7 +102,7 @@ export class Tag extends EndpointClient {
       case Platform.ownCloudInfiniteScale:
       default:
         expectedStatus = 200
-        response = endpoints.graph.v1.extensions.org_libre_graph.tags.PUT__add_tags_to_resource(this.request, {
+        response = endpoints.graph.v1.extensions.org_libre_graph.tags.PUT__add_tags_to_resource(this.httpClient, {
           resourceId: p.resourceId,
           tagNames: [p.tag]
         })
@@ -124,7 +124,7 @@ export class Tag extends EndpointClient {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
         expectedStatus = 204
-        response = endpoints.dav.systemtags_relations.DELETE__remove_tag_from_resource(this.request, {
+        response = endpoints.dav.systemtags_relations.DELETE__remove_tag_from_resource(this.httpClient, {
           resourceId: p.resourceId,
           tagId: p.tag
         })
@@ -132,7 +132,7 @@ export class Tag extends EndpointClient {
       case Platform.ownCloudInfiniteScale:
       default:
         expectedStatus = 200
-        response = endpoints.graph.v1.extensions.org_libre_graph.tags.DELETE__remove_tags_from_resource(this.request, {
+        response = endpoints.graph.v1.extensions.org_libre_graph.tags.DELETE__remove_tags_from_resource(this.httpClient, {
           resourceId: p.resourceId,
           tagNames: [p.tag]
         })
@@ -154,12 +154,12 @@ export class Tag extends EndpointClient {
     switch (this.platform) {
       case Platform.ownCloudServer:
       case Platform.nextcloud:
-        response = endpoints.dav.systemtags_relations.PROPFIND__get_tags_with_properties_for_resource(this.request,
+        response = endpoints.dav.systemtags_relations.PROPFIND__get_tags_with_properties_for_resource(this.httpClient,
           { resourceId: p.resourceId, propfindXml })
         break
       case Platform.ownCloudInfiniteScale:
       default:
-        response = endpoints.dav.spaces.PROPFIND__get_properties_for_resource(this.request,
+        response = endpoints.dav.spaces.PROPFIND__get_properties_for_resource(this.httpClient,
           { driveId: p.root, resourcePath: p.resourcePath, propfindXml })
     }
 
