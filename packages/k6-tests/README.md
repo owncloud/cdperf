@@ -2,7 +2,7 @@
 This repository contains the tools we use to test and measure the performance of different cloud systems.
 
 ## Usage
-Please read the [how to run](https://owncloud.dev/cdperf/run/) section.
+Please read the [how to run](https://owncloud.dev/cdperf/k6-tests/docs/run) section.
 
 ## How to test
 It's important to know how to compare the tests against each other and what those numbers mean.
