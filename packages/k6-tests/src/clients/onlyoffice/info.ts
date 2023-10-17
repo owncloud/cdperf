@@ -48,8 +48,9 @@ export type FileInfo = z.infer<typeof FileInfo>
 export const obtainDocumentInformation = async (p: {
   client: Client,
   resourceId: string,
+  appName: string
 }) => {
-  const openRequestParams = { file_id: p.resourceId, lang: 'de', app_name: 'OnlyOffice' }
+  const openRequestParams = { file_id: p.resourceId, lang: 'de', app_name: p.appName }
   const appOpenResponse = p.client.httpClient<'text'>(
     'POST',
     `/app/open?${objectToQueryString(openRequestParams)}`,

@@ -4,5 +4,6 @@
 .pnpm-store
 dist
 lib
+tmp
 node_modules
 cache

@@ -1,4 +1,4 @@
-import { EventName, WebSocket } from 'k6/experimental/websockets'
+import { ErrorEvent, EventName, WebSocket } from 'k6/experimental/websockets'
 
 import { Handler } from './handler'
 import { EngineType, Instruction, KV, Lifetime, MessageType, SocketType } from './io'
@@ -50,6 +50,10 @@ export class Session extends Handler {
 
   async publish(p: { data: string | ArrayBuffer }) {
     this.socket.send(p.data)
+  }
+
+  onError(h: (event?: ErrorEvent) => void) {
+    this.socket.onerror = h
   }
 
   subscribe(p: {

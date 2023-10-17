@@ -1,4 +1,5 @@
 import { sleep } from 'k6'
+import { ErrorEvent } from 'k6/experimental/websockets'
 
 import { FileInfo, UserAuth } from './info'
 import { EngineType, MessageType, Session, SocketType } from './io'
@@ -28,6 +29,10 @@ export class Client {
     this.userAuth = p.userAuth
     this.fileInfo = p.fileInfo
     this.session = new Session({ url: p.url })
+  }
+
+  onError(h: (event?: ErrorEvent) => void) {
+    this.session.onError(h)
   }
 
   async establishSession(): Promise<void> {

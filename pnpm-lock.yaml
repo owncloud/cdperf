@@ -142,6 +142,16 @@ importers:
         specifier: ^0.32.2
         version: 0.32.2
 
+  packages/k6-tdk/lib/auth: {}
+
+  packages/k6-tdk/lib/client: {}
+
+  packages/k6-tdk/lib/endpoints: {}
+
+  packages/k6-tdk/lib/utils: {}
+
+  packages/k6-tdk/lib/values: {}
+
   packages/k6-tests:
     dependencies:
       '@ownclouders/k6-tdk':
