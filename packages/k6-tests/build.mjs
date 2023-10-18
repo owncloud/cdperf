@@ -15,7 +15,6 @@ const buildToFromMap = (glob, stripExtension = false) => {
     if (!stripExtension) {
       to = to + fromInfo.ext
     }
-
     if (src === 'src'){
       to = '_' + to
     }
@@ -43,6 +42,4 @@ await build({
   }
 });
 
-Object.entries(buildToFromMap('./{src,tests}/**/*.pool.json')).forEach(([to, from]) => {
-  fs.copyFileSync(path.resolve(from), path.resolve(path.join(outdir, to)))
-})
+fs.cpSync('data', path.resolve(path.join(outdir, 'data')), {recursive: true})

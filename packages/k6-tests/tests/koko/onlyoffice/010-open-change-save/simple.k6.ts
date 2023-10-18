@@ -11,8 +11,13 @@ import { getTestRoot } from '@/test'
 import { getPoolItem } from '@/utils'
 import { envValues } from '@/values'
 
+export interface Environment {
+  testRoot: string;
+  
+}
+
 // eslint-disable-next-line no-restricted-globals
-const docX = open('/Users/fschade/Downloads/document-server-stress-testing-develop/K6/7.3-and-later/dataset/sample.docx', 'b')
+const docX = open('../data/sample.docx', 'b')
 
 export const options: Options = {
   vus: 1,
@@ -22,16 +27,16 @@ export const options: Options = {
 
 const settings = {
   ...envValues(),
-  get docx(){
+  get docx() {
     return ENV('DOCX', [settings.seed.resource.root, 'sample.docx'].join('/'))
   }
 }
 
 const ooClientErrors = new Counter('oo_client_errors')
 
-export async function setup(): Promise<void> {
+export const open_change_save_010_setup = async (): Promise<Environment> => {
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
-  const testRoot = await getTestRoot({
+  const rootInfo = await getTestRoot({
     client: adminClient,
     userLogin: settings.admin.login,
     platform: settings.platform.type,
@@ -39,30 +44,28 @@ export async function setup(): Promise<void> {
     resourceType: settings.seed.container.type,
     isOwner: false
   })
+
+  const testRoot = [rootInfo.root, rootInfo.path].join('/')
+
   adminClient.resource.uploadResource({
-    root: [testRoot.root, testRoot.path].join('/'),
+    root: testRoot,
     resourcePath: settings.docx,
     resourceBytes: docX
   })
+
+  return {
+    testRoot
+  }
 }
 
-export const open_change_save_010 = async (): Promise<void> => {
+export const open_change_save_010 = async ({ testRoot }: Environment): Promise<void> => {
   const user = getPoolItem({ pool: userPool, n: exec.vu.idInTest })
   const userStore = store(user.userLogin)
   const documentInformation = await userStore.setOrGet('root', async () => {
     const ocisClient = clientFor(user)
-    const testRoot = await getTestRoot({
-      client: ocisClient,
-      userLogin: user.userLogin,
-      platform: settings.platform.type,
-      resourceName: settings.seed.container.name,
-      resourceType: settings.seed.container.type,
-      isOwner: false
-    })
 
-    const root = [testRoot.root, testRoot.path].filter(Boolean).join('/')
     const getResourcePropertiesResponse = await ocisClient.resource.getResourceProperties({
-      root,
+      root: testRoot,
       resourcePath: settings.docx
     })
     sleep(settings.sleep.after_request)
@@ -120,18 +123,23 @@ export const open_change_save_010 = async (): Promise<void> => {
   sleep(settings.sleep.after_iteration)
 }
 
-export async function teardown(): Promise<void> {
+export const open_change_save_010_teardown = ({ testRoot }: Environment): void => {
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
-  const testRoot = await getTestRoot({
-    client: adminClient,
-    userLogin: settings.admin.login,
-    platform: settings.platform.type,
-    resourceName: settings.seed.container.name,
-    resourceType: settings.seed.container.type,
-    isOwner: false
-  })
 
-  adminClient.resource.deleteResource({ root: [testRoot.root, testRoot.path].join('/'), resourcePath: settings.docx })
+  const waitForUnlock = () => {
+    const { body } = adminClient.resource.getResourceProperties({ root: testRoot, resourcePath: settings.docx })
+
+    if(queryXml("$..['d:activelock']", body).length !== 0){
+      sleep(1)
+      waitForUnlock()
+    }
+  }
+
+  waitForUnlock()
+
+  adminClient.resource.deleteResource({ root: testRoot, resourcePath: settings.docx })
 }
 
+export const setup = open_change_save_010_setup
 export default open_change_save_010
+export const teardown = open_change_save_010_teardown

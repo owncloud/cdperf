@@ -148,7 +148,7 @@ export const envValues = () => {
     },
     only_office: {
       get wss_url() {
-        return ENV('ONLY_OFFICE_WSS_URL', 'wss://host.docker.internal:9981/7.3.3-49')
+        return ENV('ONLY_OFFICE_WSS_URL', 'wss://localhost:9981/7.3.3-49')
       },
       get app_name() {
         return ENV('ONLY_OFFICE_APP_NAME', 'OnlyOffice')
