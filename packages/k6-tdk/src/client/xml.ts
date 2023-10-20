@@ -31,6 +31,7 @@ export const RESOURCE__get_resource_properties: PlatformXml = {
       .ele(namespace.dav, 'prop')
       .ele(namespace.oc, 'fileid').up()
       .ele(namespace.oc, 'tags').up()
+      .ele(namespace.dav, 'lockdiscovery').up()
       .end()
   },
   [Platform.ownCloudServer]() {
