@@ -41,7 +41,7 @@ export class Group extends EndpointClient {
 
     check({ val: response }, {
       'client -> group.createGroup - status': ({ status }) => {
-        return status === 200
+        return status === 201
       }
     })
 
