@@ -2,6 +2,8 @@
 
 This repository contains the tools we use to test and measure the performance of different cloud systems.
 
+For detailed information how to run and write new tests, please read [the cdperf documentation](https://owncloud.dev/cdperf/).
+
 ## Supported clouds
 * [ownCloud Core](https://github.com/owncloud/core)
 * [Infinite Scale](https://github.com/owncloud/ocis)
