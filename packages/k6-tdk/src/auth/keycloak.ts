@@ -1,6 +1,6 @@
 // @ts-ignore
 import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.0.0/index.js'
-import http, { CookieJar } from 'k6/http'
+import http, { CookieJar, RefinedResponse } from 'k6/http'
 
 import { check, cleanURL, objectToQueryString, queryStringToObject } from '@/utils'
 
@@ -98,10 +98,28 @@ export class Keycloak implements AuthNHTTPProvider {
       redirect_uri: this.redirectUrl
     }
 
-    let loginPageResponse = http.get(`${this.endpoints.login}?${objectToQueryString(loginParams)}`, {
-      jar: this.jar,
-      redirects: 0
-    })
+    let authorizationResponseRedirects = 0
+
+    // regular redirects param follow does not work because we need to detect if we are being redirected or not
+    // see authorizationResponseRedirects
+    const followGet = (url: string): [RefinedResponse<'text'>, boolean] => {
+      const r = http.get(url, {
+        jar: this.jar,
+        redirects: 0
+      })
+
+      if (r.headers.Location) {
+        return [followGet(r.headers.Location)[0], true]
+      }
+
+      return [r, false]
+    }
+
+    // eslint-disable-next-line prefer-const
+    let [loginPageResponse, loginPageResponseFollowed] = followGet(`${this.endpoints.login}?${objectToQueryString(loginParams)}`)
+    if (loginPageResponseFollowed) {
+      authorizationResponseRedirects = 1
+    }
 
     check({ val: loginPageResponse }, {
       'authn -> loginPageResponse - status': ({ status }) => {
@@ -114,6 +132,7 @@ export class Keycloak implements AuthNHTTPProvider {
     }
 
     if (this.socialProviderRealm) {
+      authorizationResponseRedirects = 1
       loginPageResponse = loginPageResponse.clickLink({
         selector: `#social-${this.socialProviderRealm}`, params: {
           jar: this.jar
@@ -134,7 +153,7 @@ export class Keycloak implements AuthNHTTPProvider {
     const authorizationResponse = loginPageResponse.submitForm({
       formSelector: '#kc-form-login',
       fields: { username: this.userLogin, password: this.userPassword },
-      params: { redirects: this.socialProviderRealm ? 1 : 0, jar: this.jar }
+      params: { redirects: authorizationResponseRedirects, jar: this.jar }
     })
 
     check({ val: authorizationResponse }, {

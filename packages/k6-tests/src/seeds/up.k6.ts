@@ -1,13 +1,14 @@
 import { noop, queryJson } from '@ownclouders/k6-tdk/lib/utils'
+import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/values'
 import { randomBytes } from 'k6/crypto'
 import { Options } from 'k6/options'
 
 import { createCalendar, createCalendarResource } from '@/mock'
 import { groupPool, userPool } from '@/pools'
-import { clientFor, shareResource } from '@/shortcuts'
+import { clientFor } from '@/shortcuts'
 import { createTestRoot } from '@/test'
 import { getPoolItems } from '@/utils'
-import { envValues } from '@/values'
+import { envValues, TestRootType } from '@/values'
 
 export const options: Options = {
   vus: 1,
@@ -27,16 +28,22 @@ export async function setup(): Promise<void> {
     platform: values.platform.type
   })
 
+  const availableGroups: string[] = []
+  const availableUsers: string[] = []
+
   /**
    * groups
    */
   if (values.seed.groups.create) {
     const poolGroups = getPoolItems({ pool: groupPool, n: values.seed.groups.total })
+
     await Promise.all(
       poolGroups.map(async ({ groupName }) => {
         const createGroupResponse = adminClient.group.createGroup({ groupName })
         const [groupId] = queryJson('id', createGroupResponse.body)
         const groupIdOrName = groupId || groupName
+
+        availableGroups.push(groupName)
 
         noop(groupIdOrName)
       })
@@ -60,24 +67,47 @@ export async function setup(): Promise<void> {
           const createUserResponse = adminClient.user.createUser(user)
           const [principalId] = queryJson('$.id', createUserResponse.body)
 
+          availableUsers.push(principalId)
+
           await adminClient.user.enableUser(user)
           await adminClient.role.addRoleToUser({ appRoleId, resourceId, principalId })
-
-          const shareId = await shareResource({
-            client: adminClient,
-            root: testRoot.root,
-            path: testRoot.path,
-            shareReceiver: user.userLogin,
-            type: values.seed.container.type
-          })
-
-          if (shareId) {
-            const userClient = clientFor(user)
-            await userClient.share.acceptShare({ shareId })
-          }
         })
       )
     }
+  }
+
+  if (values.seed.groups.create && values.seed.users.create) {
+    const targetGroup = availableGroups.filter(Boolean)[0]
+    const targetMembers = availableUsers.filter(Boolean)
+
+    const params = {
+      shareResourcePath: testRoot.path,
+      shareReceiver: targetGroup
+    } as any
+
+    // fixme: check shareResource shortcut
+    switch (values.seed.container.type) {
+      case TestRootType.space:
+        // params.shareType = ShareType.spaceMembershipUser // fixme: check classic and nextCloud
+        params.shareType = ShareType.spaceMembershipGroup
+        params.shareReceiverPermission = Permission.coOwner
+        params.spaceRef = testRoot.root
+        break
+      case TestRootType.directory:
+        // params.shareType = ShareType.user // fixme: check classic and nextCloud
+        params.shareType = ShareType.group
+        params.shareReceiverPermission = Permission.all
+        break
+      default:
+    }
+
+    await adminClient.share.createShare(params)
+
+    await Promise.all(
+      targetMembers.map(async (principalId) => {
+        await adminClient.group.addGroupMember({ groupId: targetGroup, userId: principalId })
+      })
+    )
   }
 
   /**

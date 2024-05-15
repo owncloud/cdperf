@@ -6,7 +6,6 @@ export interface Token {
   expiresIn: number;
 }
 
-
 export interface AuthNHTTPProvider {
   headers: { [name: string]: string };
 }

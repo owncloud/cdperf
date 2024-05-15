@@ -3,7 +3,8 @@ export const ShareType = {
   group: 1,
   publicLink: 3,
   federatedCloudShare: 6,
-  spaceMembershipUser: 7
+  spaceMembershipUser: 7,
+  spaceMembershipGroup: 8
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare

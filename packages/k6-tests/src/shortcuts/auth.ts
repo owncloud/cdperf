@@ -1,4 +1,4 @@
-import { AuthNHTTPProvider, BasicAuth, Keycloak, Kopano } from '@ownclouders/k6-tdk/lib/auth'
+import { AuthNHTTPProvider, BasicAuth, Eduteams, Keycloak, Kopano } from '@ownclouders/k6-tdk/lib/auth'
 import { CookieJar } from 'k6/http'
 
 import { AuthNProvider, envValues } from '@/values'
@@ -21,6 +21,13 @@ export const authNProviderFor = (p: {
         redirectUrl: values.auth_n_provider.keycloak.redirect_url,
         clientId: values.auth_n_provider.keycloak.client_id,
         socialProviderRealm: values.auth_n_provider.keycloak.social_provider_realm
+      })
+    case AuthNProvider.eduteams:
+      return new Eduteams({
+        ...p,
+        redirectUrl: values.auth_n_provider.eduteams.redirect_url,
+        clientId: values.auth_n_provider.eduteams.client_id,
+        openidConfigurationUrl: values.auth_n_provider.eduteams.openid_configuration_url
       })
     case AuthNProvider.kopano:
     default:

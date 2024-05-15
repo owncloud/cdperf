@@ -9,7 +9,8 @@ export type TestRootType = (typeof TestRootType)[keyof typeof TestRootType];
 export const AuthNProvider = {
   kopano: 'kopano',
   keycloak: 'keycloak',
-  basicAuth: 'basicAuth'
+  basicAuth: 'basicAuth',
+  eduteams: 'eduteams'
 } as const
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare

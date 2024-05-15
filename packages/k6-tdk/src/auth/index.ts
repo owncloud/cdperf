@@ -1,3 +1,4 @@
+export { Eduteams } from './aaitest'
 export { AuthNHTTPProvider } from './auth'
 export { BasicAuth } from './basicAuth'
 export { Keycloak } from './keycloak'

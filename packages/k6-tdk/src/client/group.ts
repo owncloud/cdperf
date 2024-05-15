@@ -41,7 +41,7 @@ export class Group extends EndpointClient {
 
     check({ val: response }, {
       'client -> group.createGroup - status': ({ status }) => {
-        return status === 201
+        return [201, 200].includes(status)
       }
     })
 
@@ -71,4 +71,27 @@ export class Group extends EndpointClient {
 
     return response
   }
+
+  addGroupMember(p: { groupId: string, userId: string }): RefinedResponse<'none'> | undefined {
+    let response: RefinedResponse<'none'> | undefined
+
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.groups.POST__add_group_member(this.httpClient, { groupId: p.groupId, userId: p.userId })
+    }
+
+    check({ skip: !response, val: response }, {
+      'client -> group.addGroupMember - status': (r) => {
+        return r?.status === 204
+      }
+    })
+
+    return response
+  }
 }
+
+

@@ -127,6 +127,17 @@ export const envValues = () => {
           return ENV('AUTH_N_PROVIDER_KOPANO_CLIENT_ID', 'web')
         }
       },
+      eduteams: {
+        get redirect_url() {
+          return ENV('AUTH_N_PROVIDER_EDUTEAMS_REDIRECT_URL')
+        },
+        get client_id(){
+          return ENV('AUTH_N_PROVIDER_EDUTEAMS_CLIENT_ID', 'web')
+        },
+        get openid_configuration_url(){
+          return ENV('AUTH_N_PROVIDER_EDUTEAMS_OPENID_CONFIGURATION_URL')
+        }
+      },
       keycloak: {
         get realm() {
           return ENV('AUTH_N_PROVIDER_KEYCLOAK_REALM')

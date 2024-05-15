@@ -21,7 +21,7 @@ export class User extends EndpointClient {
 
     check({ val: response }, {
       'client -> user.createUser - status': ({ status }) => {
-        return status === 201
+        return [201, 200].includes(status)
       }
     })
 
