@@ -4,7 +4,7 @@ All tests are executed in the same way, only the [options](/k6-tests/src/values/
 
 You can find more information on how use or install K6 [here](https://k6.io/docs/get-started/running-k6/). 
 
-All tests need to run with the admin user who is capable of provisioning users. If you have a non standard password for admin, set the environment variables `ADMIN_USER` and `ADMIN_PASSWORD` to match that.
+All tests need to run with the admin user who is capable of provisioning users. If you have a non standard password for admin, set the environment variables `ADMIN_LOGIN` and `ADMIN_PASSWORD` to match that.
 
 ## The following platforms are supported
 * [ownCloud Infinite Scale](https://github.com/owncloud/ocis)

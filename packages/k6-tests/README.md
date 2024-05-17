@@ -1,6 +1,97 @@
 # ownCloud cloud testing toolbox
 This repository contains the tools we use to test and measure the performance of different cloud systems.
 
+## Quickstart
+
+### Provision users
+First provision some test users. Note that the default ramping test uses 3750 VUs. A small scale example can be found below as well
+```shell
+ADMIN_LOGIN=admin \
+ADMIM_PASSWORD=admin \
+PLATFORM_BASE_URL=https://localhost:9200 \
+SEED_USERS_TOTAL=75 \
+AUTH_N_PROVIDER_KOPANO_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_REDIRECT_URL=https://localhost:9200/oidc-callback.html \
+k6 run packages/k6-tests/artifacts/_seeds-up-k6.js
+```
+To add more users set the number of desired VUs and rerun the tests. There will be errors for the users that already exist, but the remaining users will be created.
+
+### Simple test with static number of users 
+To run a simple test, the number of VUs that should be simulated to execute the test scenario for the given number of iterations pick one of the existing tests. Thear name should describe what the user will be doing. Every test will wait between requests to simulate actual user behavior and not just hammer the server with requests.
+```shell
+ADMIN_LOGIN=admin \
+ADMIM_PASSWORD=admin \
+PLATFORM_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_REDIRECT_URL=https://localhost:9200/oidc-callback.html \
+k6 run packages/k6-tests/artifacts/koko-platform-040-create-upload-rename-delete-folder-and-file-simple-k6.js --vus 25 --iterations 125
+```
+
+
+### 6min quick ramp test (2m up / 3m peak / 1m down)
+Reducing the duration of the phases requires setting a lot of env vars, but it it a good initial test. This configuration will use all 75 test users created by the above seed run.
+```shell
+TEST_KOKO_PLATFORM_020_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_020_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_020_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_040_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_040_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_040_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_050_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_050_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_050_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_070_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_070_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_070_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_080_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_080_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_080_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_090_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_090_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_090_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_100_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_100_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_100_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_110_RAMPING_STAGES_UP_DURATION=2m \
+TEST_KOKO_PLATFORM_110_RAMPING_STAGES_PEAK_DURATION=3m \
+TEST_KOKO_PLATFORM_110_RAMPING_STAGES_DOWN_DURATION=1m \
+TEST_KOKO_PLATFORM_020_RAMPING_STAGES_VUS=20 \
+TEST_KOKO_PLATFORM_040_RAMPING_STAGES_VUS=10 \
+TEST_KOKO_PLATFORM_050_RAMPING_STAGES_VUS=10 \
+TEST_KOKO_PLATFORM_070_RAMPING_STAGES_VUS=4 \
+TEST_KOKO_PLATFORM_080_RAMPING_STAGES_VUS=1 \
+TEST_KOKO_PLATFORM_090_RAMPING_STAGES_VUS=5 \
+TEST_KOKO_PLATFORM_100_RAMPING_STAGES_VUS=5 \
+TEST_KOKO_PLATFORM_110_RAMPING_STAGES_VUS=20 \
+ADMIN_LOGIN=admin \
+ADMIM_PASSWORD=admin \
+PLATFORM_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_REDIRECT_URL=https://localhost:9200/oidc-callback.html \
+k6 run packages/k6-tests/artifacts/koko-platform-000-mixed-ramping-k6.js
+```
+
+### 1h ramping test (20m up / 30m peak / 10m down)
+The ramping test mixes all scenarios and will slowly add VUs until the end of the ramp up phase.
+The configured number of VUs will remain active during the peak phase and then be reduced to 0 during ramp down.
+This kind of setup can be used to monitor the system under the expected workload by changing the VUs per test scenario as needed.
+```shell
+TEST_KOKO_PLATFORM_020_RAMPING_STAGES_VUS=1000 \
+TEST_KOKO_PLATFORM_040_RAMPING_STAGES_VUS=500 \
+TEST_KOKO_PLATFORM_050_RAMPING_STAGES_VUS=500 \
+TEST_KOKO_PLATFORM_070_RAMPING_STAGES_VUS=200 \
+TEST_KOKO_PLATFORM_080_RAMPING_STAGES_VUS=50 \
+TEST_KOKO_PLATFORM_090_RAMPING_STAGES_VUS=250 \
+TEST_KOKO_PLATFORM_100_RAMPING_STAGES_VUS=250 \
+TEST_KOKO_PLATFORM_110_RAMPING_STAGES_VUS=1000 \
+ADMIN_LOGIN=admin \
+ADMIM_PASSWORD=admin \
+PLATFORM_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_BASE_URL=https://localhost:9200 \
+AUTH_N_PROVIDER_KOPANO_REDIRECT_URL=https://localhost:9200/oidc-callback.html \
+k6 run packages/k6-tests/artifacts/koko-platform-000-mixed-ramping-k6.js
+```
+
 ## Usage
 Please read the [how to run](https://owncloud.dev/cdperf/k6-tests/docs/run) section.
 
