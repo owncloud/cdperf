@@ -25,6 +25,12 @@ If you find a security issue please contact [security@owncloud.com](mailto:secur
 
 Fork -> Patch -> Push -> Pull Request
 
+### Building
+
+- You need pnpm
+- Run `pnpm install`
+- Run `pnpm build`
+
 ## License
 
 Apache-2.0
