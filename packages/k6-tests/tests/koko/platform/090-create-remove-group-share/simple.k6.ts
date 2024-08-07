@@ -1,5 +1,5 @@
 import { queryJson, queryXml, randomString, store } from '@ownclouders/k6-tdk/lib/utils'
-import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/values'
+import { Roles, ShareType } from '@ownclouders/k6-tdk/lib/values'
 import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
@@ -43,18 +43,21 @@ export const create_remove_group_share_090 = async (): Promise<void> => {
   const [sharedFolderFileId] = queryXml("$..['oc:fileid']", getResourcePropertiesResponse.body)
   sleep(settings.sleep.after_request)
 
-  const createShareResponse = await client.share.createShare({
-    shareType: ShareType.group,
-    shareReceiver: sample(groupPool)!.groupName,
-    shareReceiverPermission: Permission.all,
-    shareResourcePath: shareFolderName,
-    spaceRef: sharedFolderFileId
-  })
+  const findGroupResponse = await client.group.findGroup({ group: sample(groupPool)!.groupName })
+  const [groupId] = queryJson('$.value[*].id', findGroupResponse?.body)
 
-  const [shareId] = queryXml('ocs.data.id', createShareResponse.body)
+  const createShareResponse = await client.share.createShareInvitation({
+    driveId: root,
+    itemId: sharedFolderFileId,
+    recipientId: groupId,
+    roleId: Roles.editor,
+    shareType: ShareType.group
+  })
+  
+  const [shareId] = queryJson('$.value[*].id', createShareResponse?.body)
   sleep(settings.sleep.after_request)
 
-  await client.share.deleteShare({ shareId })
+  await client.share.deleteShareInvitation({ driveId:root, itemId: sharedFolderFileId, shareId })
   sleep(settings.sleep.after_request)
 
   await client.resource.deleteResource({ root, resourcePath: shareFolderName })

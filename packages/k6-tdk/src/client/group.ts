@@ -92,6 +92,26 @@ export class Group extends EndpointClient {
 
     return response
   }
+
+  findGroup(p: { group: string }): RefinedResponse<'text'> | undefined {
+    let response: RefinedResponse<'text'> | undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.groups.GET_find_group(this.httpClient, p)
+    }
+
+    check({ skip: !response, val: response }, {
+      'client -> group.findGroup - status': (r) => {
+        return r?.status === 200
+      }
+    })
+
+    return response
+  }
 }
 
 

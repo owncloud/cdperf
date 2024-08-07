@@ -1,5 +1,5 @@
 import { noop, queryJson } from '@ownclouders/k6-tdk/lib/utils'
-import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/values'
+import { Roles, ShareType } from '@ownclouders/k6-tdk/lib/values'
 import { randomBytes } from 'k6/crypto'
 import { Options } from 'k6/options'
 
@@ -8,7 +8,7 @@ import { groupPool, userPool } from '@/pools'
 import { clientFor } from '@/shortcuts'
 import { createTestRoot } from '@/test'
 import { getPoolItems } from '@/utils'
-import { envValues, TestRootType } from '@/values'
+import { envValues } from '@/values'
 
 export const options: Options = {
   vus: 1,
@@ -71,6 +71,13 @@ export async function setup(): Promise<void> {
 
           await adminClient.user.enableUser(user)
           await adminClient.role.addRoleToUser({ appRoleId, resourceId, principalId })
+
+          await adminClient.share.createSpaceInvitation({
+            driveId: testRoot.root,
+            recipientId: principalId,
+            roleId: Roles.spaceEditor,
+            shareType: ShareType.user
+          })
         })
       )
     }
@@ -79,29 +86,6 @@ export async function setup(): Promise<void> {
   if (values.seed.groups.create && values.seed.users.create) {
     const targetGroup = availableGroups.filter(Boolean)[0]
     const targetMembers = availableUsers.filter(Boolean)
-
-    const params = {
-      shareResourcePath: testRoot.path,
-      shareReceiver: targetGroup
-    } as any
-
-    // fixme: check shareResource shortcut
-    switch (values.seed.container.type) {
-      case TestRootType.space:
-        // params.shareType = ShareType.spaceMembershipUser // fixme: check classic and nextCloud
-        params.shareType = ShareType.spaceMembershipGroup
-        params.shareReceiverPermission = Permission.coOwner
-        params.spaceRef = testRoot.root
-        break
-      case TestRootType.directory:
-        // params.shareType = ShareType.user // fixme: check classic and nextCloud
-        params.shareType = ShareType.group
-        params.shareReceiverPermission = Permission.all
-        break
-      default:
-    }
-
-    await adminClient.share.createShare(params)
 
     await Promise.all(
       targetMembers.map(async (principalId) => {
