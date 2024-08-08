@@ -7,3 +7,4 @@ lib
 tmp
 node_modules
 cache
+/packages/k6-tests/artifacts

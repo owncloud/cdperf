@@ -29,14 +29,14 @@ const buildToFromMap = (glob, stripExtension = false) => {
 await build({
   entry: buildToFromMap(['./{src,tests}/**/*.k6.ts'], true),
   outDir: outdir,
-  minify: true,
+  minify: false,
   platform: 'browser',
   external: ['k6'],
   bundle: true,
   clean: true,
   noExternal: ['lodash', '@ownclouders/k6-tdk', 'zod'],
   splitting: true,
-  sourcemap: false,
+  sourcemap: true,
   esbuildOptions: (options) => {
     options.chunkNames = `__chunk/[name]-[hash]`;
   }
