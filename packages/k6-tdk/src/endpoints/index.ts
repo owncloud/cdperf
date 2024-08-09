@@ -14,7 +14,6 @@ import * as graph_v1beta1_drive_invite from './graph-v1beta1-drive-invite'
 import * as ocs_v2_apps_cloud_groups from './ocs-v2-apps-cloud-groups'
 import * as ocs_v2_apps_cloud_users from './ocs-v2-apps-cloud-users'
 import * as ocs_v2_apps_fileSharing_v1_sharees from './ocs-v2-apps-file_sharing-v1-sharees'
-import * as ocs_v2_apps_fileSharing_v1_shares from './ocs-v2-apps-file_sharing-v1-shares'
 
 export * from './endpoints'
 export const endpoints = {
@@ -57,7 +56,6 @@ export const endpoints = {
         file_sharing: {
           v1: {
             sharees: ocs_v2_apps_fileSharing_v1_sharees,
-            shares: ocs_v2_apps_fileSharing_v1_shares
           }
         }
       }
