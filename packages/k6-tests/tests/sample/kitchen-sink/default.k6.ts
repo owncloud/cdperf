@@ -9,7 +9,7 @@ import {
   randomString,
   store
 } from '@ownclouders/k6-tdk/lib/utils'
-import { ItemType, Permission, ShareType } from '@ownclouders/k6-tdk/lib/values'
+import { Roles, ShareType } from '@ownclouders/k6-tdk/lib/values'
 import { sleep } from 'k6'
 import { randomBytes } from 'k6/crypto'
 import { b64encode } from 'k6/encoding'
@@ -192,7 +192,8 @@ export default async function actor({ actorData }: Environment): Promise<void> {
     })
 
     return {
-      defer
+      defer,
+      driveId
     }
   })
 
@@ -356,19 +357,19 @@ export default async function actor({ actorData }: Environment): Promise<void> {
   })
 
   /**
-   * ✓ client.search.searchForSharees
+   * ✓ client.search.searchForRecipient
    * ✓ client.search.searchForResources
    * ✓ client.search.searchForResourcesByTag
    */
   const clientSearch = group('client.search.*', () => {
-    const searchForShareesResponse = actorClient.search.searchForSharees({
-      searchQuery: clientUser.userLogin,
-      searchItemType: ItemType.folder
+    const searchForRecipientResponse = actorClient.user.findUser({
+      user: clientUser.userLogin
     })
-    const [sharee] = queryXml('$..shareWith', searchForShareesResponse.body)
+    const [recipientId] = queryJson('$.value[*].id', searchForRecipientResponse?.body)
+    const [recipientName] = queryJson('$.value[*].onPremisesSamAccountName', searchForRecipientResponse?.body)
     check({ val: undefined }, {
-      'test -> search.searchForSharees - name - match': () => {
-        return sharee === clientUser.userLogin
+      'test -> search.searchForRecipient - name - match': () => {
+        return recipientName === clientUser.userLogin
       }
     })
 
@@ -405,41 +406,34 @@ export default async function actor({ actorData }: Environment): Promise<void> {
     })
 
     return {
-      sharee
+      recipientId
     }
   })
 
   /**
    * ✓ client.share.create
-   * ✓ client.share.accept
    * ✓ client.share.delete
    */
   const clientShare = group('client.share.*', (grouping) => {
-      const createShareResponse = actorClient.share.createShare(
-        {
-          shareReceiver: clientSearch.sharee,
-          shareResourcePath: clientResource.folderName,
-          shareReceiverPermission: Permission.all,
-          shareType: ShareType.user
-        })
-
-      const [shareId] = queryXml('ocs.data.id', createShareResponse.body)
-      const acceptShareResponse = clientUser.userClient.share.acceptShare({ shareId })
-      check({ skip: guards.isNextcloud, val: acceptShareResponse }, {
-        'test -> share.acceptShare - displayname_file_owner - match': ({ body }) => {
-          const [displaynameFileOwner] = queryXml('ocs.data.element.displayname_file_owner', body)
-          return displaynameFileOwner === actorLogin
-        },
-        'test -> share.acceptShare - path - match': ({ body }) => {
-          const [path = ''] = queryXml('ocs.data.element.path', body)
-          return path.endsWith(clientResource.folderName)
-        }
+      const createShareResponse = actorClient.share.createShareInvitation({
+        driveId: clientDrive.driveId,
+        itemId: clientResource.folderId,
+        recipientId: clientSearch.recipientId,
+        roleId: Roles.editor,
+        shareType: ShareType.user
       })
+      
+      const [shareId] = queryJson('$.value[*].id', createShareResponse?.body)
+      sleep(settings.sleep.after_request)
 
       const defer = deferer()
       defer.add(() => {
         group(grouping, () => {
-          actorClient.share.deleteShare({ shareId })
+          actorClient.share.deleteShareInvitation({
+             driveId: clientDrive.driveId,
+             itemId: clientResource.folderId,
+             shareId 
+            })
         })
       })
 

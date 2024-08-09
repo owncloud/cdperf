@@ -2,23 +2,22 @@ import { RefinedResponse } from 'k6/http'
 
 import { endpoints } from '@/endpoints'
 import { check } from '@/utils'
-import { Permission, ShareType } from '@/values'
+import { Roles, ShareType } from '@/values'
 
 import { EndpointClient } from './client'
 
 export class Share extends EndpointClient {
-  createShare(p: {
-    shareResourcePath: string,
-    shareType: ShareType,
-    shareReceiver: string,
-    spaceRef?: string,
-    shareReceiverPermission: Permission
+  createShareInvitation(p: {
+    driveId: string,
+    itemId: string,
+    recipientId: string,
+    roleId: Roles,
+    shareType: ShareType
   }): RefinedResponse<'text'> {
-    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__create_share(this.httpClient, p,
-      { platform: this.platform })
+    const response = endpoints.graph.v1beta1.invite.POST__create_share_invitation(this.httpClient, p)    
 
     check({ val: response }, {
-      'client -> share.createShare - status': ({ status }) => {
+      'client -> share.createShareInvitation - status': ({ status }) => {
         return status === 200
       }
     })
@@ -26,23 +25,28 @@ export class Share extends EndpointClient {
     return response
   }
 
-  deleteShare(p: { shareId: string }): RefinedResponse<'text'> {
-    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.DELETE__delete_share(this.httpClient, p)
+  deleteShareInvitation(p: { driveId: string, itemId: string, shareId: string }): RefinedResponse<'text'> {
+    const response = endpoints.graph.v1beta1.invite.DELETE__delete_share_invitation(this.httpClient, p)
 
     check({ val: response }, {
-      'client -> share.deleteShare - status': ({ status }) => {
-        return status === 200
+      'client -> share.deleteShareInvitation - status': ({ status }) => {
+        return status === 204
       }
     })
 
     return response
   }
 
-  acceptShare(p: { shareId: string }): RefinedResponse<'text'> {
-    const response = endpoints.ocs.v2.apps.file_sharing.v1.shares.POST__accept_share(this.httpClient, p)
+  createSpaceInvitation(p: {
+    driveId: string,
+    recipientId: string,
+    roleId: Roles,
+    shareType: ShareType
+  }): RefinedResponse<'text'> {
+    const response = endpoints.graph.v1beta1.invite.POST__create_space_invitation(this.httpClient, p)    
 
     check({ val: response }, {
-      'client -> share.acceptShare - status': ({ status }) => {
+      'client -> share.createSpaceInvitation - status': ({ status }) => {
         return status === 200
       }
     })

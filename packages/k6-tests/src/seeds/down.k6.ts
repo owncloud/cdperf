@@ -54,8 +54,6 @@ export async function setup(): Promise<void> {
       })
     )
   }
-
-
 }
 
 export default function noop(): void {

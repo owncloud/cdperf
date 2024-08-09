@@ -72,4 +72,24 @@ export class User extends EndpointClient {
 
     return response
   }
+
+  findUser(p: { user: string }): RefinedResponse<'text'> | undefined {
+    let response: RefinedResponse<'text'> | undefined
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.users.GET_find_user(this.httpClient, p)
+    }
+
+    check({ skip: !response, val: response }, {
+      'client -> user.findUser - status': (r) => {
+        return r?.status === 200
+      }
+    })
+
+    return response
+  }
 }

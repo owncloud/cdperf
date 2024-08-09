@@ -27,3 +27,7 @@ export const POST__add_app_role_to_user: Endpoint<{
     resourceId
   }))
 }
+
+export const GET_find_user: Endpoint<{ user: string }, 'text'> = (httpClient, { user }) => {
+  return httpClient('GET', `/graph/v1.0/users?$search="${user}"`)
+}

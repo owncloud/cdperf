@@ -1,5 +1,5 @@
 import {  ENV, queryJson,  queryXml, randomString, store  } from '@ownclouders/k6-tdk/lib/utils'
-import { Permission, ShareType } from '@ownclouders/k6-tdk/lib/values'
+import { Roles, ShareType } from '@ownclouders/k6-tdk/lib/values'
 import { randomBytes } from 'k6/crypto'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
@@ -41,24 +41,28 @@ export function setup(): Environment {
   const [adminRoot = settings.admin.login] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseAdmin?.body)
 
   adminClient.resource.createResource({ root: adminRoot, resourcePath: settings.testFolder })
+  const getResourcePropertiesResponse = adminClient.resource.getResourceProperties({ root: adminRoot, resourcePath: settings.testFolder })
+  const [sharedFolderFileId] = queryXml("$..['oc:fileid']", getResourcePropertiesResponse.body)
 
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
     adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     adminClient.user.enableUser({ userLogin: actorLogin })
 
-    const createShareResponse = adminClient.share.createShare({
-      shareResourcePath: settings.testFolder,
-      shareReceiver: actorLogin,
-      shareType: ShareType.user,
-      shareReceiverPermission: Permission.all
+    const searchForRecipientResponse = adminClient.user.findUser({ user: actorLogin })
+    const [recipientId] = queryJson('$.value[*].id', searchForRecipientResponse?.body)
+
+    adminClient.share.createShareInvitation({
+      driveId: adminRoot,
+      itemId: sharedFolderFileId,
+      recipientId,
+      roleId: Roles.editor,
+      shareType: ShareType.user
     })
-    const [createdShareId] = queryXml('ocs.data.id', createShareResponse.body)
 
     const actorClient = clientFor({ userLogin: actorLogin, userPassword: actorPassword })
     const getMyDrivesResponseActor = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
     const [actorRoot = actorLogin] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponseActor?.body)
-    actorClient.share.acceptShare({ shareId: createdShareId })
 
     return {
       actorLogin,
