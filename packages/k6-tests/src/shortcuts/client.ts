@@ -15,6 +15,6 @@ export const clientFor = (p: { userLogin: string, userPassword: string }): Clien
     userPassword: p.userPassword
   })
 
-  const httpClient = httpClientFactory({ authNProvider, baseUrl: values.platform.base_url, params: { jar } })
-  return new Client({ httpClient, platform: values.platform.type })
+  const httpClient = httpClientFactory({ authNProvider, baseUrl: values.auth_n_provider.base_url, params: { jar } })
+  return new Client({ httpClient })
 }

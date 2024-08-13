@@ -47,7 +47,6 @@ export function setup(): Environment {
   const actorData = times(options.vus || 1, () => {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
     adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
-    adminClient.user.enableUser({ userLogin: actorLogin })
 
     const searchForRecipientResponse = adminClient.user.findUser({ user: actorLogin })
     const [recipientId] = queryJson('$.value[*].id', searchForRecipientResponse?.body)

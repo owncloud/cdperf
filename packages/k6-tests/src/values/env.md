@@ -59,7 +59,6 @@ name of the container that stores the test dummy data. This is used for the seed
 not every platform supports every container type. This option can be used to decide which type of container is used
 
 * default value for ownCloudInfiniteScale: `space`
-* default value for ownCloudServer and nextcloud: `directory`
 * `export SEED_CONTAINER_TYPE=space`
 * `export SEED_CONTAINER_TYPE=directory`
 
@@ -240,18 +239,6 @@ defines the path to the json files that contain the group information
 
 * default value: `Embedded`
 * `export POOL_GROUPS=$HOME/test/pools/groups.json`
-
-
-<!--- -->
-
-## ENV `PLATFORM_TYPE`
-
-specifies which client platform should be used
-
-* default value: `ownCloudInfiniteScale`
-* `export PLATFORM_TYPE=ownCloudInfiniteScale`
-* `export PLATFORM_TYPE=ownCloudServer`
-* `export PLATFORM_TYPE=nextcloud`
 
 
 <!--- -->

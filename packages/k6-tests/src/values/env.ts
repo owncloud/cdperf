@@ -1,5 +1,4 @@
-import { ENV, platformGuard } from '@ownclouders/k6-tdk/lib/utils'
-import { Platform } from '@ownclouders/k6-tdk/lib/values'
+import { ENV } from '@ownclouders/k6-tdk/lib/utils'
 
 import { AuthNProvider, Embedded, TestRootType } from './const'
 
@@ -29,7 +28,7 @@ export const envValues = () => {
         get type() {
           return TestRootType[ENV(
             'SEED_CONTAINER_TYPE',
-            platformGuard(values.platform.type).isOwnCloudInfiniteScale ? TestRootType.space : TestRootType.directory
+            TestRootType.space
           )]
         }
       },
@@ -104,17 +103,12 @@ export const envValues = () => {
         return ENV('POOL_GROUPS', Embedded)
       }
     },
-    platform: {
-      get type(){
-        return Platform[ENV('PLATFORM_TYPE', Platform.ownCloudInfiniteScale)]
-      },
-      get base_url(){
-        return ENV('PLATFORM_BASE_URL', 'https://localhost:9200')
-      }
-    },
     auth_n_provider: {
       get type(){
         return AuthNProvider[ENV('AUTH_N_PROVIDER_TYPE', AuthNProvider.kopano)]
+      },
+      get base_url(){
+        return ENV('PLATFORM_BASE_URL', 'https://localhost:9200')
       },
       kopano: {
         get base_url(){

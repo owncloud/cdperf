@@ -19,3 +19,7 @@ export const DELETE__remove_tags_from_resource: Endpoint<{
     tags: tagNames
   }))
 }
+
+export const GET__get_tags_for_resource: Endpoint< {}, 'text'> = (httpClient) => {
+  return httpClient('GET', '/graph/v1.0/extensions/org.libregraph/tags')
+}

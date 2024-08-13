@@ -42,8 +42,7 @@ export async function setup(): Promise<void> {
     client: adminClient,
     resourceName: values.seed.container.name,
     resourceType: values.seed.container.type,
-    userLogin: values.admin.login,
-    platform: values.platform.type
+    userLogin: values.admin.login
   })
 
   if (values.seed.users.delete) {

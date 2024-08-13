@@ -1,5 +1,4 @@
 import { HttpClient } from '@/utils'
-import { Platform } from '@/values'
 
 import { Application } from './application'
 import { Drive } from './drive'
@@ -38,18 +37,18 @@ export class Client {
   readonly httpClient: HttpClient
 
 
-  constructor(p: { platform: Platform, httpClient: HttpClient }) {
+  constructor(p: { httpClient: HttpClient }) {
     this.httpClient = p.httpClient
 
-    this.application = new Application(p.platform, p.httpClient)
-    this.drive = new Drive(p.platform, p.httpClient)
-    this.group = new Group(p.platform, p.httpClient)
-    this.me = new Me(p.platform, p.httpClient)
-    this.resource = new Resource(p.platform, p.httpClient)
-    this.role = new Role(p.platform, p.httpClient)
-    this.search = new Search(p.platform, p.httpClient)
-    this.share = new Share(p.platform, p.httpClient)
-    this.tag = new Tag(p.platform, p.httpClient)
-    this.user = new User(p.platform, p.httpClient)
+    this.application = new Application(p.httpClient)
+    this.drive = new Drive(p.httpClient)
+    this.group = new Group(p.httpClient)
+    this.me = new Me(p.httpClient)
+    this.resource = new Resource(p.httpClient)
+    this.role = new Role(p.httpClient)
+    this.search = new Search(p.httpClient)
+    this.share = new Share(p.httpClient)
+    this.tag = new Tag(p.httpClient)
+    this.user = new User(p.httpClient)
   }
 }

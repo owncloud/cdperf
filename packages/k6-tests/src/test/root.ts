@@ -1,12 +1,10 @@
 import { Client } from '@ownclouders/k6-tdk/lib/client'
-import { platformGuard, queryJson } from '@ownclouders/k6-tdk/lib/utils'
-import { Platform } from '@ownclouders/k6-tdk/lib/values'
+import { queryJson } from '@ownclouders/k6-tdk/lib/utils'
 
 import { TestRootType } from '@/values'
 
-const buildGuards = (p: { resourceType: TestRootType, platform: Platform, isOwner?: boolean }) => {
+const buildGuards = (p: { resourceType: TestRootType, isOwner?: boolean }) => {
   return {
-    ...platformGuard(p.platform),
     isSpace: p.resourceType === TestRootType.space,
     isDirectory: p.resourceType === TestRootType.directory,
     isOwner: !!p.isOwner
@@ -15,7 +13,6 @@ const buildGuards = (p: { resourceType: TestRootType, platform: Platform, isOwne
 
 export const getTestRoot = async (p: {
   client: Client,
-  platform: Platform,
   userLogin: string,
   resourceName: string,
   resourceType: TestRootType,
@@ -44,25 +41,15 @@ export const getTestRoot = async (p: {
     params = { $filter: "driveType eq 'personal'" }
   }
 
-  if (guards.isOwnCloudInfiniteScale) {
-    const getMyDrivesResponse = await p.client.me.getMyDrives({ params })
-    ;[rv.root] = queryJson(`$.value[?(@.${query})].id`, getMyDrivesResponse?.body)
-  }
+  const getMyDrivesResponse = await p.client.me.getMyDrives({ params })
+  ;[rv.root] = queryJson(`$.value[?(@.${query})].id`, getMyDrivesResponse?.body)
 
-  if (!guards.isOwnCloudInfiniteScale) {
-    rv.root = p.userLogin
-  }
-
-  if (!guards.isOwnCloudInfiniteScale || guards.isDirectory && guards.isOwner) {
-    rv.path = p.resourceName
-  }
 
   return rv
 }
 
 export const createTestRoot = async (p: {
   client: Client,
-  platform: Platform,
   userLogin: string,
   resourceName: string,
   resourceType: TestRootType
@@ -73,7 +60,7 @@ export const createTestRoot = async (p: {
   const rv = { root: '', path: '' }
   const guards = buildGuards(p)
 
-  if (guards.isOwnCloudInfiniteScale && guards.isSpace) {
+  if (guards.isSpace) {
     const existingSpace = await getTestRoot({ ...p, isOwner: true })
     if (existingSpace.root) {
       return existingSpace
@@ -84,14 +71,10 @@ export const createTestRoot = async (p: {
     rv.root = createdDriveId
   }
 
-  if (guards.isOwnCloudInfiniteScale && guards.isDirectory) {
+  if (guards.isDirectory) {
     const getMyDrivesResponse = p.client.me.getMyDrives({})
     const [personalDriveId] = queryJson("$.value[?(@.driveType === 'personal')].id", getMyDrivesResponse?.body)
     rv.root = personalDriveId
-  }
-
-  if (!guards.isOwnCloudInfiniteScale) {
-    rv.root = p.userLogin
   }
 
   if (guards.isDirectory) {
@@ -104,7 +87,6 @@ export const createTestRoot = async (p: {
 
 export const deleteTestRoot = async (p: {
   client: Client,
-  platform: Platform,
   userLogin: string,
   resourceName: string,
   resourceType: TestRootType
@@ -116,7 +98,7 @@ export const deleteTestRoot = async (p: {
 
   const guards = buildGuards(p)
 
-  if (guards.isOwnCloudInfiniteScale && guards.isSpace) {
+  if (guards.isSpace) {
     await p.client.drive.deactivateDrive({ driveId: existingTestRoot.root })
     await p.client.drive.deleteDrive({ driveId: existingTestRoot.root })
     return
