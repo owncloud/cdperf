@@ -42,7 +42,6 @@ export const search_for_filename_030 = async (): Promise<void> => {
     const testRoot = await getTestRoot({
       client,
       userLogin: user.userLogin,
-      platform: settings.platform.type,
       resourceName: settings.seed.container.name,
       resourceType: settings.seed.container.type,
       isOwner: false

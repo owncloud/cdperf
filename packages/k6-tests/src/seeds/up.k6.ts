@@ -24,8 +24,7 @@ export async function setup(): Promise<void> {
     client: adminClient,
     resourceName: values.seed.container.name,
     resourceType: values.seed.container.type,
-    userLogin: values.admin.login,
-    platform: values.platform.type
+    userLogin: values.admin.login
   })
 
   const availableGroups: string[] = []
@@ -56,8 +55,8 @@ export async function setup(): Promise<void> {
   {
     if (values.seed.users.create) {
       const poolUsers = getPoolItems({ pool: userPool, n: values.seed.users.total })
-      const getRolesResponse = adminClient.role.getRoles()
-      const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", getRolesResponse?.body)
+      const getApplicationResponse = adminClient.role.getRoles()
+      const [appRoleId] = queryJson("$.value[*].appRoles[?(@.displayName == 'Space Admin')].id", getApplicationResponse?.body)
 
       const listApplicationsResponse = adminClient.application.listApplications()
       const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", listApplicationsResponse?.body)
@@ -69,7 +68,6 @@ export async function setup(): Promise<void> {
 
           availableUsers.push(principalId)
 
-          await adminClient.user.enableUser(user)
           await adminClient.role.addRoleToUser({ appRoleId, resourceId, principalId })
 
           await adminClient.share.createSpaceInvitation({

@@ -1,5 +1,4 @@
 import { store } from '@ownclouders/k6-tdk/lib/utils'
-import { ItemType } from '@ownclouders/k6-tdk/lib/values'
 import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
@@ -48,7 +47,7 @@ export const user_group_search_070 = async (): Promise<void> =>{
     searchQuery = sample(groupPool)!.groupName
   }
 
-  await client.search.searchForSharees({ searchQuery, searchItemType: ItemType.folder })
+  await client.user.findUser({ user: searchQuery })
   sleep(settings.sleep.after_iteration)
 }
 

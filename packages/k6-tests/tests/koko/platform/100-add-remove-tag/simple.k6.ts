@@ -1,4 +1,4 @@
-import { queryXml, randomString, store } from '@ownclouders/k6-tdk/lib/utils'
+import { check, queryJson, queryXml, randomString, store } from '@ownclouders/k6-tdk/lib/utils'
 import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
@@ -6,7 +6,7 @@ import { sample } from 'lodash'
 
 import { createCalendar, createCalendarResource } from '@/mock'
 import { userPool } from '@/pools'
-import { clientFor, getOrCreateTag } from '@/shortcuts'
+import { clientFor } from '@/shortcuts'
 import { getTestRoot } from '@/test'
 import { getPoolItem } from '@/utils'
 import { envValues } from '@/values'
@@ -48,7 +48,6 @@ export const add_remove_tag_100 = async (): Promise<void> => {
     const testRoot = await getTestRoot({
       client,
       userLogin: user.userLogin,
-      platform: settings.platform.type,
       resourceName: settings.seed.container.name,
       resourceType: settings.seed.container.type,
       isOwner: false
@@ -72,16 +71,20 @@ export const add_remove_tag_100 = async (): Promise<void> => {
   const [resourceId] = queryXml("$..['oc:fileid']", getResourcePropertiesRequest.body)
   sleep(settings.sleep.after_request)
 
-  const tag = getOrCreateTag({
-    client,
-    tagName: [user.userLogin.replace(/[^A-Za-z0-9]/g, ''), exec.vu.iterationInInstance + 1, randomString()].join('-')
-  })
+  const tagName = randomString()
+
+  await client.tag.addTagToResource({ resourceId, tag:tagName })
   sleep(settings.sleep.after_request)
 
-  await client.tag.addTagToResource({ resourceId, tag })
-  sleep(settings.sleep.after_request)
+  const getTagsResponse = client.tag.getTagForResource()
+    check({ val: getTagsResponse }, {
+      'test -> resource.getTags - name - match': (r) => {
+        const values = queryJson('$.value[*]', r?.body)
+        return values.includes(tagName)
+      }
+    })
 
-  await client.tag.removeTagFromResource({ resourceId, tag })
+  await client.tag.removeTagFromResource({ resourceId, tag:tagName })
   sleep(settings.sleep.after_iteration)
 }
 

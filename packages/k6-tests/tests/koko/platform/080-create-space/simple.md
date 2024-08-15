@@ -16,8 +16,6 @@ the testing steps as a whole will run 10 times (5 times per user).
 ## Compatibility
 
 * :white_check_mark: ownCloud Infinite Scale
-* :x: ownCloud Server
-* :x: Nextcloud
 
 
 ## Available options

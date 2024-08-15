@@ -3,7 +3,6 @@ import {
   check,
   deferer,
   group,
-  platformGuard,
   queryJson,
   queryXml,
   randomString,
@@ -46,7 +45,6 @@ export function setup(): Environment {
     const [actorLogin, actorPassword] = [randomString(), randomString()]
     const createUserResponse = adminClient.user.createUser({ userLogin: actorLogin, userPassword: actorPassword })
     const [actorId] = queryJson('$.id', createUserResponse.body)
-    adminClient.user.enableUser({ userLogin: actorLogin })
 
     const actorClient = clientFor({ userLogin: actorLogin, userPassword: actorPassword })
     const getMyDrivesResponse = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
@@ -66,7 +64,6 @@ export function setup(): Environment {
 }
 
 export default async function actor({ actorData }: Environment): Promise<void> {
-  const guards = { ...platformGuard(envValues().platform.type) }
   const { actorLogin, actorPassword, actorId, actorRoot } = actorData[exec.vu.idInTest - 1]
   const actorStore = store(actorLogin)
 
@@ -80,7 +77,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
    */
   group('client.me.*', () => {
     const getMyProfileResponse = actorClient.me.getMyProfile()
-    check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: getMyProfileResponse }, {
+    check({ val: getMyProfileResponse }, {
       'test -> me.getMyProfile - displayName - match': (response) => {
         const [displayName] = queryJson('displayName', response?.body)
         return displayName === actorLogin
@@ -88,7 +85,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
     })
 
     const getMyDrivesResponse = actorClient.me.getMyDrives({ params: { $filter: "driveType eq 'personal'" } })
-    check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: getMyDrivesResponse }, {
+    check({ val: getMyDrivesResponse }, {
       'test -> me.getMyDrives - personal - match': (response) => {
         const [personalDrive] = queryJson("$.value[?(@.driveType === 'personal')].id", response?.body)
         return personalDrive === actorRoot
@@ -108,7 +105,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
   const clientGroup = group('client.group.*', (grouping) => {
     const groupName = randomString()
     const createGroupResponse = adminClient.group.createGroup({ groupName })
-    check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: createGroupResponse }, {
+    check({ val: createGroupResponse }, {
       'test -> group.createGroup - displayName - match': ({ body }) => {
         const [displayName] = queryJson('displayName', body)
         return displayName === groupName
@@ -147,8 +144,8 @@ export default async function actor({ actorData }: Environment): Promise<void> {
    * ✓ client.role.addRoleToUser
    */
   group('client.role.*', () => {
-    const getRolesResponse = adminClient.role.getRoles()
-    const [appRoleId] = queryJson("$.bundles[?(@.name === 'spaceadmin')].id", getRolesResponse?.body)
+    const getApplicationResponse = adminClient.role.getRoles()
+    const [appRoleId] = queryJson("$.value[*].appRoles[?(@.displayName == 'Space Admin')].id", getApplicationResponse?.body)
 
     const addRoleToUserParameters = {
       principalId: actorId,
@@ -156,7 +153,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
       resourceId: clientApplication.applicationId
     }
     const addRoleToUserResponse = adminClient.role.addRoleToUser(addRoleToUserParameters)
-    check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: addRoleToUserResponse }, {
+    check({ val: addRoleToUserResponse }, {
       'test -> role.addRoleToUser - match': (r) => {
         const result = Object.keys(addRoleToUserParameters).map((k) => {
           const [v] = queryJson(k, r?.body)
@@ -176,7 +173,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
   const clientDrive = group('client.drive.*', (grouping) => {
     const driveName = randomString()
     const createDriveResponse = actorClient.drive.createDrive({ driveName })
-    check({ skip: guards.isOwnCloudServer || guards.isNextcloud, val: createDriveResponse }, {
+    check({ val: createDriveResponse }, {
       'test -> resource.createDrive - name - match': (r) => {
         const [name] = queryJson('name', r?.body)
         return name === driveName
@@ -254,84 +251,37 @@ export default async function actor({ actorData }: Environment): Promise<void> {
   })
 
   /**
-   * ✓ client.tag.createTag
-   * ✓ client.tag.deleteTag
-   * ✓ client.tag.getTags
    * ✓ client.tag.addTagToResource
    * ✓ client.tag.removeTagFromResource
-   * ✓ client.tag.getTagsForResource
    */
   const clientTag = group('client.tag.*', (grouping) => {
     const tagName = randomString()
 
-    const getTagsResponse = actorClient.tag.getTags()
-    const [{ 'oc:id': existingTagId } = { 'oc:id': '' }] = queryXml(`$..[?(@['oc:display-name'] === '${tagName}')]`, getTagsResponse?.body)
-    check({ skip: !existingTagId, val: undefined }, {
-      'test -> tag.getTagsResponse - exists': () => {
-        return !!existingTagId
+    actorClient.tag.addTagToResource({ tag: tagName, resourceId: clientResource.folderId })
+
+    const getTagsResponse = actorClient.tag.getTagForResource()
+    check({ val: getTagsResponse }, {
+      'test -> resource.getTags - name - match': (r) => {
+        const values = queryJson('$.value[*]', r?.body)
+        return values.includes(tagName)
       }
     })
-
-
-    let createdTagId = ''
-    if (!existingTagId) {
-      const createTagResponse = actorClient.tag.createTag({ tagName })
-      const contentLocationHeader = createTagResponse?.headers['Content-Location'] || ''
-      createdTagId = contentLocationHeader.split('/').pop() || ''
-    }
-
-    check({ skip: !createdTagId, val: undefined }, {
-      'test -> tag.createTag - created': () => {
-        return !!createdTagId
-      }
-    })
-
-    // fallBack to tagName for oCis
-    const tagNameOrId = existingTagId || createdTagId || tagName
-
-    actorClient.tag.addTagToResource({ tag: tagNameOrId, resourceId: clientResource.folderId })
-    const getTagsForResourceResponseAfterAdd = actorClient.tag.getTagsForResource(
-      { root: actorRoot, resourceId: clientResource.folderId, resourcePath: clientResource.folderName })
-
-    const extractTag = (body: string) => {
-      const [foundTagOcis] = queryXml("$..['oc:tags']", body)
-      const [foundTagOccOrNc] = queryXml(`$..[?(@['oc:id'] === '${tagNameOrId}')]['oc:display-name']`, body)
-      return foundTagOcis || foundTagOccOrNc
-    }
-
-    check({ val: extractTag(getTagsForResourceResponseAfterAdd.body) }, {
-      'test -> tag.getTagsForResource - match': (foundTag) => {
-        return foundTag === tagName
-      }
-    })
-
+    
     const defer = deferer()
     defer.add(() => {
       group(grouping, () => {
-        actorClient.tag.removeTagFromResource({ resourceId: clientResource.folderId, tag: tagNameOrId })
-        const getTagsForResourceResponseAfterRemove = actorClient.tag.getTagsForResource(
-          { root: actorRoot, resourceId: clientResource.folderId, resourcePath: clientResource.folderName })
-
-
-        check({ val: extractTag(getTagsForResourceResponseAfterRemove.body) }, {
-          'test -> tag.removeTagFromResource - removed': (foundTag) => {
-            return !foundTag
-          }
-        })
-
-        adminClient.tag.deleteTag({ tag: tagNameOrId })
+        actorClient.tag.removeTagFromResource({ resourceId: clientResource.folderId, tag: tagName })
       })
     })
 
     return {
       defer,
-      tagNameOrId
+      tagName
     }
   })
 
   /**
    * ✓ client.user.createUser
-   * ✓ client.user.enableUser
    * ✓ client.user.deleteUser
    */
   const clientUser = group('client.user.*', (grouping) => {
@@ -344,9 +294,6 @@ export default async function actor({ actorData }: Environment): Promise<void> {
         adminClient.user.deleteUser({ userLogin })
       })
     })
-
-    adminClient.user.enableUser({ userLogin })
-
     const userClient = clientFor({ userLogin, userPassword })
 
     return {
@@ -366,8 +313,8 @@ export default async function actor({ actorData }: Environment): Promise<void> {
       user: clientUser.userLogin
     })
     const [recipientId] = queryJson('$.value[*].id', searchForRecipientResponse?.body)
-    const [recipientName] = queryJson('$.value[*].onPremisesSamAccountName', searchForRecipientResponse?.body)
-    check({ val: undefined }, {
+    const [recipientName] = queryJson('$.value[*].displayName', searchForRecipientResponse?.body)
+    check({ val: searchForRecipientResponse }, {
       'test -> search.searchForRecipient - name - match': () => {
         return recipientName === clientUser.userLogin
       }
@@ -395,7 +342,7 @@ export default async function actor({ actorData }: Environment): Promise<void> {
     })
 
     const searchForResourcesByTag = actorClient.search.searchForResourcesByTag({
-      tag: clientTag.tagNameOrId,
+      tag: clientTag.tagName,
       root: actorRoot
     })
     check({ val: searchForResourcesByTag }, {

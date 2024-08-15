@@ -39,7 +39,6 @@ export const open_change_save_010_setup = async (): Promise<Environment> => {
   const rootInfo = await getTestRoot({
     client: adminClient,
     userLogin: settings.admin.login,
-    platform: settings.platform.type,
     resourceName: settings.seed.container.name,
     resourceType: settings.seed.container.type,
     isOwner: false

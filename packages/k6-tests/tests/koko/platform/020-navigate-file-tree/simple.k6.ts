@@ -38,7 +38,6 @@ export const navigate_file_tree_020 = async (): Promise<void> => {
     const testRoot = await getTestRoot({
       client,
       userLogin: user.userLogin,
-      platform: settings.platform.type,
       resourceName: settings.seed.container.name,
       resourceType: settings.seed.container.type,
       isOwner: false
