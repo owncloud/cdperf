@@ -1,6 +1,6 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "pipeline": {
+  "tasks": {
     "lint": {
       "cache": false
     },
@@ -8,8 +8,9 @@
       "cache": false
     },
     "build": {
-      "outputMode": "new-only",
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "inputs": [
         "./*.json",
         "./*.mjs",
@@ -17,10 +18,11 @@
         "./tests/**/*"
       ],
       "outputs": [
-	"dist/**",
-	"lib/**",
-	"artifacts/**"
-      ]
+        "dist/**",
+        "lib/**",
+        "artifacts/**"
+      ],
+      "outputLogs": "new-only"
     },
     "dev": {
       "cache": false,
