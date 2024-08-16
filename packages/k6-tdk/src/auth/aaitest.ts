@@ -41,7 +41,7 @@ export class Eduteams implements AuthNHTTPProvider {
     this.redirectUrl = p.redirectUrl
     this.jar = p.jar
 
-    const openidConfigurationResponse = http.get(p.openidConfigurationUrl)
+    const openidConfigurationResponse = http.get<'text'>(p.openidConfigurationUrl)
     const [authorizationEndpoint] = queryJson('authorization_endpoint', openidConfigurationResponse.body)
     const [tokenEndpoint] = queryJson('token_endpoint', openidConfigurationResponse.body)
     this.authorizationEndpoint = authorizationEndpoint

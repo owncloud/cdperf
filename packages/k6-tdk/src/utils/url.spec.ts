@@ -27,5 +27,5 @@ test.each([
   { obj: { strange: undefined }, expected: 'strange=undefined' },
   { obj: { strange: undefined, second: 2 }, expected: 'strange=undefined&second=2' }
 ])('objectToQueryString($url) -> $expected', ({ obj, expected }) => {
-  expect(objectToQueryString(obj)).toMatchObject(expected)
+  expect(objectToQueryString(obj)).toBe(expected)
 })

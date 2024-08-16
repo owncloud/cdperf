@@ -33,8 +33,8 @@
     "eslint-plugin-simple-import-sort": "^10.0.0"
   },
   "devDependencies": {
-    "del-cli": "^5.0.0",
+    "del-cli": "^5.1.0",
     "eslint": "^8.43.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.5.4"
   }
 }
