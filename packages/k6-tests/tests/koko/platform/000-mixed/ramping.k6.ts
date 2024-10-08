@@ -1,4 +1,5 @@
 import { Options } from 'k6/options'
+import { envValues } from '@/values'
 
 import { options as options_020 } from '@/tests/koko/platform/020-navigate-file-tree/ramping.k6'
 // import { options as options_030 } from '@/tests/koko/platform/030-search-for-filename/ramping.k6'
@@ -22,6 +23,10 @@ export { create_remove_group_share_090 } from '@/tests/koko/platform/090-create-
 export { add_remove_tag_100 } from '@/tests/koko/platform/100-add-remove-tag/simple.k6'
 export { sync_client_110 } from '@/tests/koko/platform/110-sync-client/simple.k6'
 
+const settings = {
+  ...envValues()
+}
+
 export const options: Options = {
   insecureSkipTLSVerify: true,
   scenarios: {
@@ -34,5 +39,11 @@ export const options: Options = {
     ...options_090.scenarios,
     ...options_100.scenarios,
     ...options_110.scenarios
-  }
+  },
+  ...(settings.thresholds.enabled && {
+    thresholds: {
+      http_req_failed: [settings.thresholds.rate],
+      http_req_duration: [settings.thresholds.duration],
+    },
+  })
 }

@@ -44,80 +44,80 @@ export const envValues = () => {
         }
       },
       groups: {
-        get create(){
+        get create() {
           return ENV('SEED_GROUPS_CREATE', 'true') === 'true'
         },
         get delete() {
           return ENV('SEED_GROUPS_DELETE', 'true') === 'true'
         },
-        get total(){
+        get total() {
           return parseInt(ENV('SEED_GROUPS_TOTAL', '1'), 10)
         }
       },
       calendar: {
-        get root(){
+        get root() {
           return ENV('DATA_CALENDAR_ROOT', 'calendar')
         },
-        get from_year(){
+        get from_year() {
           return parseInt(ENV('DATA_CALENDAR_FROM_YEAR', '2023'), 10)
         },
-        get to_year(){
+        get to_year() {
           return parseInt(ENV('DATA_CALENDAR_TO_YEAR', '2023'), 10)
         }
       },
       resource: {
-        get root(){
+        get root() {
           return ENV('SEED_RESOURCE_ROOT', 'resource')
         },
         small: {
-          get name(){
+          get name() {
             return ENV('SEED_RESOURCE_SMALL_NAME', 'small.zip')
           },
-          get size(){
+          get size() {
             return parseInt(ENV('SEED_RESOURCE_SMALL_SIZE', '1'), 10) * 1000 * 1000
           }
         },
         medium: {
-          get name(){
+          get name() {
             return ENV('SEED_RESOURCE_MEDIUM_NAME', 'medium.zip')
           },
-          get size(){
+          get size() {
             return parseInt(ENV('SEED_RESOURCE_MEDIUM_SIZE', '20'), 10) * 1000 * 1000
           }
         },
         large: {
-          get name(){
+          get name() {
             return ENV('SEED_RESOURCE_LARGE_NAME', 'large.zip')
           },
-          get size(){
+          get size() {
             return parseInt(ENV('SEED_RESOURCE_LARGE_SIZE', '100'), 10) * 1000 * 1000
           }
         }
       }
     },
     pool: {
-      get users(){
+      get users() {
         return ENV('POOL_USERS', Embedded)
       },
-      get groups(){
+      get groups() {
         return ENV('POOL_GROUPS', Embedded)
       }
     },
     auth_n_provider: {
-      get type(){
+      get type() {
         return AuthNProvider[ENV('AUTH_N_PROVIDER_TYPE', AuthNProvider.kopano)]
       },
-      get base_url(){
+      get base_url() {
         return ENV('PLATFORM_BASE_URL', 'https://localhost:9200')
       },
       kopano: {
-        get base_url(){
+        get base_url() {
           return ENV('AUTH_N_PROVIDER_KOPANO_BASE_URL', 'https://localhost:9200')
         },
-        get redirect_url(){
+        get redirect_url() {
           return ENV('AUTH_N_PROVIDER_KOPANO_REDIRECT_URL', 'https://localhost:9200/oidc-callback.html')
         },
-        get client_id(){
+        get client_id() {
           return ENV('AUTH_N_PROVIDER_KOPANO_CLIENT_ID', 'web')
         }
       },
@@ -125,10 +125,10 @@ export const envValues = () => {
         get redirect_url() {
           return ENV('AUTH_N_PROVIDER_EDUTEAMS_REDIRECT_URL')
         },
-        get client_id(){
+        get client_id() {
           return ENV('AUTH_N_PROVIDER_EDUTEAMS_CLIENT_ID', 'web')
         },
-        get openid_configuration_url(){
+        get openid_configuration_url() {
           return ENV('AUTH_N_PROVIDER_EDUTEAMS_OPENID_CONFIGURATION_URL')
         }
       },
@@ -146,7 +146,7 @@ export const envValues = () => {
           const v = ENV('AUTH_N_PROVIDER_KEYCLOAK_SOCIAL_PROVIDER_REALM', 'none')
           return v === 'none' ? undefined : v
         },
-        get client_id(){
+        get client_id() {
           return ENV('AUTH_N_PROVIDER_KEYCLOAK_CLIENT_ID', 'web')
         }
       }
@@ -157,6 +157,17 @@ export const envValues = () => {
       },
       get app_name() {
         return ENV('ONLY_OFFICE_APP_NAME', 'OnlyOffice')
+      }
+    },
+    thresholds: {
+      get rate() {
+        return ENV('THRESHOLD_HTTP_REQ_FAILED', 'rate<0.01')
+      },
+      get duration() {
+        return ENV('THRESHOLD_HTTP_REQ_DURATION', 'p(95)<200')
+      },
+      get enabled() {
+        return ENV('ENABLE_THRESHOLDS', 'false') === 'true'
       }
     }
   }
