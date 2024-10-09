@@ -34,13 +34,13 @@ export const options: Options = {
           target: 0,
           duration: ENV('TEST_KOKO_PLATFORM_110_RAMPING_STAGES_DOWN_DURATION', '10m')
         }
-      ],
-      ...(settings.thresholds.enabled && {
-        thresholds: {
-          http_req_failed: [settings.thresholds.rate],
-          http_req_duration: ENV('TEST_KOKO_PLATFORM_110_RAMPING_THRESHOLDS_DURATION', 'p(95)<300'),
-        },
-      })
+      ]
     }
-  }
+  },
+  ...(settings.thresholds.enabled && {
+    thresholds: {
+      http_req_failed: [settings.thresholds.rate],
+      http_req_duration: [ENV('TEST_KOKO_PLATFORM_110_RAMPING_THRESHOLDS_DURATION', 'p(95)<300')],
+    }
+  })
 }
