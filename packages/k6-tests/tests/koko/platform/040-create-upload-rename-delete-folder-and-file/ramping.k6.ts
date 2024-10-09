@@ -1,10 +1,15 @@
 import { ENV } from '@ownclouders/k6-tdk/lib/utils'
 import { Options } from 'k6/options'
 import { omit } from 'lodash'
+import { envValues } from '@/values'
 
 import { options as inherited_options } from './baseline.k6'
 
 export { create_upload_rename_delete_folder_and_file_040 } from './simple.k6'
+
+const settings = {
+  ...envValues()
+}
 
 export const options: Options = {
   ...omit(inherited_options, 'iterations', 'duration'),
@@ -29,7 +34,13 @@ export const options: Options = {
           target: 0,
           duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_DOWN_DURATION', '10m')
         }
-      ]
+      ],
+      ...(settings.thresholds.enabled && {
+        thresholds: {
+          http_req_failed: [settings.thresholds.rate],
+          http_req_duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_THRESHOLDS_DURATION', 'p(95)<750'),
+        },
+      })
     }
   }
 }

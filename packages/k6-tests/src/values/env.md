@@ -334,3 +334,44 @@ specifies client id to use, only necessary if `AUTH_N_PROVIDER_TYPE` is set to `
 
 * default value: `web`
 * `export AUTH_N_PROVIDER_KEYCLOAK_CLIENT_ID=other-client-id`
+
+
+<!--- -->
+
+## ENV `ENABLE_THRESHOLDS`
+
+enables or disables the thresholds for HTTP requests.
+
+* default value: `false`
+* `export ENABLE_THRESHOLDS=true`
+
+If `ENABLE_THRESHOLDS` is set to true, the thresholds for HTTP requests (failure rate and duration) will be applied.
+
+<!--- -->
+
+## ENV `THRESHOLD_HTTP_REQ_FAILED`
+
+specifies the condition for failed HTTP requests, only necessary if `ENABLE_THRESHOLDS` is set to `true`.
+
+* default value: `rate<0.01` (indicating less than 1% of requests should fail)
+* `export THRESHOLD_HTTP_REQ_FAILED='rate<0.01'`
+
+<!--- -->
+
+## ENV `THRESHOLD_HTTP_REQ_DURATION`
+
+specifies the condition for the duration of HTTP requests, only necessary if `ENABLE_THRESHOLDS` is set to `true`.
+The duration can be different for each test, as there are tests where we download files for example, so `http_req_duration` is set as a separate environment variable for each test.
+ 
+example: 
+
+```
+thresholds: {
+    http_req_failed: [settings.thresholds.rate],
+    http_req_duration: ENV('TEST_KOKO_PLATFORM_080_RAMPING_THRESHOLDS_DURATION', 'p(95)<300'),
+},
+```
+
+
+* default value: `p(95)<200` (indicating that 95% of requests should be completed in less than 200ms)
+* `export THRESHOLD_HTTP_REQ_DURATION='p(95)<200'`
