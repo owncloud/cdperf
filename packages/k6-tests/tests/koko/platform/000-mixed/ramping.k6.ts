@@ -31,6 +31,7 @@ export const options: Options = {
   insecureSkipTLSVerify: true,
   scenarios: {
     ...options_020.scenarios,
+    // ...options_030.scenarios,
     ...options_040.scenarios,
     ...options_050.scenarios,
     ...options_070.scenarios,
