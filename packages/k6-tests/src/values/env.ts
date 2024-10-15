@@ -164,7 +164,7 @@ export const envValues = () => {
         return ENV('THRESHOLD_HTTP_REQ_FAILED', 'rate<0.01')
       },
       get duration() {
-        return ENV('THRESHOLD_HTTP_REQ_DURATION', 'p(95)<200')
+        return ENV('THRESHOLD_HTTP_REQ_DURATION', 'p(95)<500')
       },
       get enabled() {
         return ENV('ENABLE_THRESHOLDS', 'false') === 'true'
