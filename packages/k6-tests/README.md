@@ -7,7 +7,7 @@ This repository contains the tools we use to test and measure the performance of
 First provision some test users. Note that the default ramping test uses 3750 VUs. A small scale example can be found below as well
 ```shell
 ADMIN_LOGIN=admin \
-ADMIM_PASSWORD=admin \
+ADMIN_PASSWORD=admin \
 PLATFORM_BASE_URL=https://localhost:9200 \
 SEED_USERS_TOTAL=75 \
 AUTH_N_PROVIDER_KOPANO_BASE_URL=https://localhost:9200 \
@@ -20,7 +20,7 @@ To add more users set the number of desired VUs and rerun the tests. There will 
 To run a simple test, the number of VUs that should be simulated to execute the test scenario for the given number of iterations pick one of the existing tests. Thear name should describe what the user will be doing. Every test will wait between requests to simulate actual user behavior and not just hammer the server with requests.
 ```shell
 ADMIN_LOGIN=admin \
-ADMIM_PASSWORD=admin \
+ADMIN_PASSWORD=admin \
 PLATFORM_BASE_URL=https://localhost:9200 \
 AUTH_N_PROVIDER_KOPANO_BASE_URL=https://localhost:9200 \
 AUTH_N_PROVIDER_KOPANO_REDIRECT_URL=https://localhost:9200/oidc-callback.html \
