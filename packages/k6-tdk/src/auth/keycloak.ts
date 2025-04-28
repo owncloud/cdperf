@@ -100,7 +100,7 @@ export class Keycloak implements AuthNHTTPProvider {
 
     let loginPageResponse = http.get(`${this.endpoints.login}?${objectToQueryString(loginParams)}`, {
       jar: this.jar,
-      redirects: 0
+      redirects: 2
     })
 
     check({ val: loginPageResponse }, {
@@ -134,7 +134,7 @@ export class Keycloak implements AuthNHTTPProvider {
     const authorizationResponse = loginPageResponse.submitForm({
       formSelector: '#kc-form-login',
       fields: { username: this.userLogin, password: this.userPassword },
-      params: { redirects: this.socialProviderRealm ? 1 : 0, jar: this.jar }
+      params: { redirects: 1, jar: this.jar }
     })
 
     check({ val: authorizationResponse }, {
