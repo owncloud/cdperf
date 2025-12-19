@@ -19,20 +19,20 @@ export const options: Options = {
       startVUs: 0,
       exec: 'create_upload_download_delete_file_120',
       env: {
-        SLEEP_AFTER_ITERATION: ENV('TEST_KOKO_PLATFORM_040_RAMPING_SLEEP_AFTER_ITERATION', '60s')
+        SLEEP_AFTER_ITERATION: ENV('TEST_KOKO_PLATFORM_120_RAMPING_SLEEP_AFTER_ITERATION', '60s')
       },
       stages: [
         {
-          target: parseInt(ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_VUS', '500'), 10),
-          duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_UP_DURATION', '20m')
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_120_RAMPING_STAGES_VUS', '500'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_120_RAMPING_STAGES_UP_DURATION', '20m')
         },
         {
-          target: parseInt(ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_VUS', '500'), 10),
-          duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_PEAK_DURATION', '30m')
+          target: parseInt(ENV('TEST_KOKO_PLATFORM_120_RAMPING_STAGES_VUS', '500'), 10),
+          duration: ENV('TEST_KOKO_PLATFORM_120_RAMPING_STAGES_PEAK_DURATION', '30m')
         },
         {
           target: 0,
-          duration: ENV('TEST_KOKO_PLATFORM_040_RAMPING_STAGES_DOWN_DURATION', '10m')
+          duration: ENV('TEST_KOKO_PLATFORM_120_RAMPING_STAGES_DOWN_DURATION', '10m')
         }
       ]
     }
@@ -40,7 +40,7 @@ export const options: Options = {
   ...(settings.thresholds.enabled && {
     thresholds: {
       http_req_failed: [settings.thresholds.rate],
-      http_req_duration: [ENV('TEST_KOKO_PLATFORM_040_RAMPING_THRESHOLDS_DURATION', 'p(95)<750')],
+      http_req_duration: [ENV('TEST_KOKO_PLATFORM_120_RAMPING_THRESHOLDS_DURATION', 'p(95)<750')],
     }
   })
 }
