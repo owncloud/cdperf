@@ -6,7 +6,7 @@ import { random } from 'lodash'
 
 import { PoolUser, userPool } from '@/pools'
 import { clientFor } from '@/shortcuts'
-import { getPoolItem } from '@/utils'
+import { getPoolItem, getPoolItems } from '@/utils'
 import { envValues } from '@/values'
 
 export const options: Options = {
@@ -17,6 +17,31 @@ export const options: Options = {
 
 const settings = {
   ...envValues()
+}
+
+export async function setup(): Promise<void> {
+  const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
+
+  // Resolve the Admin role ID
+  const getRolesResponse = adminClient.role.getRoles()
+  const [appRoleId] = queryJson("$.bundles[?(@.name === 'admin')].id", getRolesResponse?.body)
+
+  // Resolve the application resource ID
+  const listApplicationsResponse = adminClient.application.listApplications()
+  const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", listApplicationsResponse?.body)
+
+  // Assign Admin role to all pool users
+  const poolUsers = getPoolItems({ pool: userPool, n: options.vus || 1 })
+  await Promise.all(
+    poolUsers.map(async (poolUser) => {
+      const getUserResponse = adminClient.user.getUser({ userLogin: poolUser.userLogin })
+      const [principalId] = queryJson('$.id', getUserResponse?.body)
+
+      if (principalId && appRoleId && resourceId) {
+        await adminClient.role.addRoleToUser({ appRoleId, resourceId, principalId })
+      }
+    })
+  )
 }
 
 export const ldap_group_writes_130 = async (): Promise<void> => {
