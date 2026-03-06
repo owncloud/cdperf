@@ -1,5 +1,9 @@
 import { Endpoint } from './endpoints'
 
+export const GET__get_user: Endpoint<{ userLogin: string }, 'text'> = (httpClient, { userLogin }) => {
+  return httpClient('GET', `/graph/v1.0/users/${userLogin}`)
+}
+
 export const POST__create_user: Endpoint<{ userLogin: string, userPassword: string }, 'text'> = (httpClient, {
   userLogin,
   userPassword

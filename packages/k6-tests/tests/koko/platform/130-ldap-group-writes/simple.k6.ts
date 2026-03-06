@@ -54,16 +54,22 @@ export const ldap_group_writes_130 = async (): Promise<void> => {
 
   const targetUser = pickUser()
 
-  // Step 3: Add user to the group
+  // Step 3: Resolve the target user's UUID via Graph API
+  const getUserResponse = client.user.getUser({ userLogin: targetUser.userLogin })
+  const [targetUserId] = queryJson('id', getUserResponse?.body)
+
+  sleep(settings.sleep.after_request)
+
+  // Step 4: Add user to the group
   client.group.addUserToGroup({
     groupIdOrName,
-    userIdOrLogin: targetUser.userLogin,
+    userIdOrLogin: targetUserId,
     baseUrl: settings.platform.base_url
   })
 
   sleep(settings.sleep.after_request)
 
-  // Step 4: Delete the group
+  // Step 5: Delete the group
   client.group.deleteGroup({ groupIdOrName })
 
   sleep(settings.sleep.after_iteration)
