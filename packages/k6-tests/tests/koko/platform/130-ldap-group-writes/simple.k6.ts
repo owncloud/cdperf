@@ -1,12 +1,11 @@
-import { queryJson, store } from '@ownclouders/k6-tdk/lib/utils'
+import { queryJson } from '@ownclouders/k6-tdk/lib/utils'
 import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
-import { random } from 'lodash'
 
-import { PoolUser, userPool } from '@/pools'
+import { userPool } from '@/pools'
 import { clientFor } from '@/shortcuts'
-import { getPoolItem, getPoolItems } from '@/utils'
+import { getPoolItems } from '@/utils'
 import { envValues } from '@/values'
 
 export const options: Options = {
@@ -19,83 +18,45 @@ const settings = {
   ...envValues()
 }
 
-export async function setup(): Promise<void> {
+export const ldap_group_writes_130 = async (): Promise<void> => {
+  // Step 1: Login Admin user and resolve pool user UUIDs
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
 
-  // Resolve the Admin role ID
-  const getRolesResponse = adminClient.role.getRoles()
-  const [appRoleId] = queryJson("$.bundles[?(@.name === 'admin')].id", getRolesResponse?.body)
-
-  // Resolve the application resource ID
-  const listApplicationsResponse = adminClient.application.listApplications()
-  const [resourceId] = queryJson("$.value[?(@.displayName === 'ownCloud Infinite Scale')].id", listApplicationsResponse?.body)
-
-  // Assign Admin role to all pool users
+  const addedUsers = new Set<string>()
   const poolUsers = getPoolItems({ pool: userPool, n: options.vus || 1 })
-  await Promise.all(
-    poolUsers.map(async (poolUser) => {
-      const getUserResponse = adminClient.user.getUser({ userLogin: poolUser.userLogin })
-      const [principalId] = queryJson('$.id', getUserResponse?.body)
 
-      if (principalId && appRoleId && resourceId) {
-        await adminClient.role.addRoleToUser({ appRoleId, resourceId, principalId })
-      }
-    })
-  )
-}
+  for (const poolUser of poolUsers) {
+    const getUserResponse = adminClient.user.getUser({ userLogin: poolUser.userLogin })
+    const [targetUserId] = queryJson('$.id', getUserResponse?.body)
 
-export const ldap_group_writes_130 = async (): Promise<void> => {
-  const user = getPoolItem({ pool: userPool, n: exec.vu.idInTest })
-  const userStore = store(user.userLogin)
+    if (targetUserId) {
+      addedUsers.add(targetUserId)
+    }
 
-  // Step 1: Login user
-  const client = await userStore.setOrGet('client', async () => {
-    return clientFor(user)
-  })
+    sleep(settings.sleep.after_request)
+  }
 
-  // Generate unique group name for this iteration
+  // Step 2: Admin creates a test group
   const groupName = `k6-test-group-${exec.vu.idInTest}-${exec.scenario.iterationInTest}-${Date.now()}`
-
-  // Step 2: Create a group
-  const createGroupResponse = client.group.createGroup({ groupName })
-  const [groupId] = queryJson('id', createGroupResponse.body)
+  const createGroupResponse = adminClient.group.createGroup({ groupName })
+  const [groupId] = queryJson('$.id', createGroupResponse.body)
   const groupIdOrName = groupId || groupName
 
   sleep(settings.sleep.after_request)
 
-  // Pick a random user from the pool to add to the group
-  const pickUser = (): PoolUser => {
-    const pickedUser = getPoolItem({ pool: userPool, n: random(1, Math.min(options.vus || 1, userPool.length)) })
-    if (options.vus === 1) {
-      return pickedUser
-    }
+  // Step 3: Add each resolved user to the group
+  for (const userId of addedUsers) {
+    adminClient.group.addUserToGroup({
+      groupIdOrName,
+      userIdOrLogin: userId,
+      baseUrl: settings.platform.base_url
+    })
 
-    if (pickedUser.userLogin === user.userLogin) {
-      return pickUser()
-    }
-
-    return pickedUser
+    sleep(settings.sleep.after_request)
   }
 
-  const targetUser = pickUser()
-
-  // Step 3: Resolve the target user's UUID via Graph API
-  const getUserResponse = client.user.getUser({ userLogin: targetUser.userLogin })
-  const [targetUserId] = queryJson('id', getUserResponse?.body)
-
-  sleep(settings.sleep.after_request)
-
-  // Step 4: Add user to the group
-  client.group.addUserToGroup({
-    groupIdOrName,
-    userIdOrLogin: targetUserId,
-    baseUrl: settings.platform.base_url
-  })
-
-  sleep(settings.sleep.after_request)
-
-  // Step 5: Delete the group
-  client.group.deleteGroup({ groupIdOrName })
+  // Step 4: Admin deletes the group
+  adminClient.group.deleteGroup({ groupIdOrName })
 
   sleep(settings.sleep.after_iteration)
 }
