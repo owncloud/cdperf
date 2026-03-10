@@ -71,4 +71,52 @@ export class Group extends EndpointClient {
 
     return response
   }
+
+  addUserToGroup(p: { groupIdOrName: string, userIdOrLogin: string, baseUrl?: string }): RefinedResponse<'text' | 'none'> {
+    let response: RefinedResponse<'text' | 'none'>
+    let expectedStatus: number
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.users.POST__add_user_to_group(this.httpClient, { userLogin: p.userIdOrLogin, groupName: p.groupIdOrName })
+        expectedStatus = 200
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.groups.POST__add_user_to_group(this.httpClient, { groupId: p.groupIdOrName, userId: p.userIdOrLogin, baseUrl: p.baseUrl || '' })
+        expectedStatus = 204
+    }
+
+    check({ val: response }, {
+      'client -> group.addUserToGroup - status': ({ status }) => {
+        return status === expectedStatus
+      }
+    })
+
+    return response
+  }
+
+  removeUserFromGroup(p: { groupIdOrName: string, userIdOrLogin: string }): RefinedResponse<'text' | 'none'> {
+    let response: RefinedResponse<'text' | 'none'>
+    let expectedStatus: number
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        response = endpoints.ocs.v2.apps.cloud.users.DELETE__remove_user_from_group(this.httpClient, { userLogin: p.userIdOrLogin, groupName: p.groupIdOrName })
+        expectedStatus = 200
+        break
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.groups.DELETE__remove_user_from_group(this.httpClient, { groupId: p.groupIdOrName, userId: p.userIdOrLogin })
+        expectedStatus = 204
+    }
+
+    check({ val: response }, {
+      'client -> group.removeUserFromGroup - status': ({ status }) => {
+        return status === expectedStatus
+      }
+    })
+
+    return response
+  }
 }
