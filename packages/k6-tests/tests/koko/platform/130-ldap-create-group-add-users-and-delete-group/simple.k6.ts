@@ -18,7 +18,7 @@ const settings = {
   ...envValues()
 }
 
-export const ldap_group_writes_130 = async (): Promise<void> => {
+export const ldap_create_group_add_users_and_delete_group_130 = async (): Promise<void> => {
   // Step 1: Login Admin user and resolve pool user UUIDs
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
 
@@ -61,4 +61,4 @@ export const ldap_group_writes_130 = async (): Promise<void> => {
   sleep(settings.sleep.after_iteration)
 }
 
-export default ldap_group_writes_130
+export default ldap_create_group_add_users_and_delete_group_130

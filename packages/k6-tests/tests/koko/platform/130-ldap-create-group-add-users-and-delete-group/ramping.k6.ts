@@ -4,15 +4,15 @@ import { omit } from 'lodash'
 
 import { options as inherited_options } from './baseline.k6'
 
-export { ldap_group_writes_130 } from './simple.k6'
+export { ldap_create_group_add_users_and_delete_group_130 } from './simple.k6'
 
 export const options: Options = {
   ...omit(inherited_options, 'iterations', 'duration'),
   scenarios: {
-    ldap_group_writes_130: {
+    ldap_create_group_add_users_and_delete_group_130: {
       executor: 'ramping-vus',
       startVUs: 0,
-      exec: 'ldap_group_writes_130',
+      exec: 'ldap_create_group_add_users_and_delete_group_130',
       env: {
         SLEEP_AFTER_ITERATION: ENV('TEST_KOKO_PLATFORM_130_RAMPING_SLEEP_AFTER_ITERATION', '30s')
       },
