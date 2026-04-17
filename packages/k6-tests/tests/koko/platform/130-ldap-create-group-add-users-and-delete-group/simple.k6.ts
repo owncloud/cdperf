@@ -3,9 +3,7 @@ import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
 
-import { userPool } from '@/pools'
 import { clientFor } from '@/shortcuts'
-import { getPoolItems } from '@/utils'
 import { envValues } from '@/values'
 
 export const options: Options = {
@@ -19,22 +17,15 @@ const settings = {
 }
 
 export const ldap_create_group_add_users_and_delete_group_130 = async (): Promise<void> => {
-  // Step 1: Login Admin user and resolve pool user UUIDs
+  // Step 1: Login Admin user and load existing users
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
 
-  const addedUsers = new Set<string>()
-  const poolUsers = getPoolItems({ pool: userPool, n: options.vus || 1 })
+  const getUsersResponse = adminClient.user.getUsers()
+  const addedUsers = new Set<string>(
+    queryJson('$.value[*].id', getUsersResponse?.body).filter(Boolean)
+  )
 
-  for (const poolUser of poolUsers) {
-    const getUserResponse = adminClient.user.getUser({ userLogin: poolUser.userLogin })
-    const [targetUserId] = queryJson('$.id', getUserResponse?.body)
-
-    if (targetUserId) {
-      addedUsers.add(targetUserId)
-    }
-
-    sleep(settings.sleep.after_request)
-  }
+  sleep(settings.sleep.after_request)
 
   // Step 2: Admin creates a test group
   const groupName = `k6-test-group-${exec.vu.idInTest}-${exec.scenario.iterationInTest}-${Date.now()}`
