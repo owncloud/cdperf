@@ -1,4 +1,4 @@
-import { queryJson } from '@ownclouders/k6-tdk/lib/utils'
+import { ENV, queryJson } from '@ownclouders/k6-tdk/lib/utils'
 import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
@@ -13,7 +13,10 @@ export const options: Options = {
 }
 
 const settings = {
-  ...envValues()
+  ...envValues(),
+  get usersCountPerGroup() {
+    return parseInt(ENV('USERS_COUNT_PER_GROUP', '0'), 10)
+  }
 }
 
 export const ldap_create_group_add_users_and_delete_group_130 = async (): Promise<void> => {
@@ -21,9 +24,17 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
 
   const getUsersResponse = adminClient.user.getUsers()
-  const addedUsers = new Set<string>(
-    queryJson('$.value[*].id', getUsersResponse?.body).filter(Boolean)
-  )
+  let userIds: string[] = queryJson('$.value[*].id', getUsersResponse?.body).filter(Boolean)
+
+  if (settings.usersCountPerGroup > 0) {
+    for (let i = userIds.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [userIds[i], userIds[j]] = [userIds[j], userIds[i]]
+    }
+    userIds = userIds.slice(0, settings.usersCountPerGroup)
+  }
+
+  const addedUsers = new Set<string>(userIds)
 
   sleep(settings.sleep.after_request)
 
