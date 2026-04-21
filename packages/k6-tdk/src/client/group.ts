@@ -72,6 +72,28 @@ export class Group extends EndpointClient {
     return response
   }
 
+  addUsersToGroup(p: { groupIdOrName: string, userIds: string[], baseUrl: string }): RefinedResponse<'text' | 'none'> {
+    let response: RefinedResponse<'text' | 'none'>
+    let expectedStatus: number
+    switch (this.platform) {
+      case Platform.ownCloudServer:
+      case Platform.nextcloud:
+        throw new Error('addUsersToGroup is not supported on this platform')
+      case Platform.ownCloudInfiniteScale:
+      default:
+        response = endpoints.graph.v1.groups.PATCH__add_users_to_group(this.httpClient, { groupId: p.groupIdOrName, userIds: p.userIds, baseUrl: p.baseUrl })
+        expectedStatus = 204
+    }
+
+    check({ val: response }, {
+      'client -> group.addUsersToGroup - status': ({ status }) => {
+        return status === expectedStatus
+      }
+    })
+
+    return response
+  }
+
   addUserToGroup(p: { groupIdOrName: string, userIdOrLogin: string, baseUrl?: string }): RefinedResponse<'text' | 'none'> {
     let response: RefinedResponse<'text' | 'none'>
     let expectedStatus: number

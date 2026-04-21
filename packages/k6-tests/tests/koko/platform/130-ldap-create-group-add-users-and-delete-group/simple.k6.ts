@@ -12,6 +12,8 @@ export const options: Options = {
   insecureSkipTLSVerify: true
 }
 
+const GRAPH_GROUP_MEMBERS_PATCH_LIMIT = 20
+
 const settings = {
   ...envValues(),
   get usersCountPerGroup() {
@@ -36,8 +38,6 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
   }
   userIds = userIds.slice(0, settings.usersCountPerGroup)
 
-  const addedUsers = new Set<string>(userIds)
-
   sleep(settings.sleep.after_request)
 
   // Step 2: Admin creates a test group
@@ -48,11 +48,12 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
 
   sleep(settings.sleep.after_request)
 
-  // Step 3: Add each resolved user to the group
-  for (const userId of addedUsers) {
-    adminClient.group.addUserToGroup({
+  // Step 3: Add users to the group in batches
+  for (let i = 0; i < userIds.length; i += GRAPH_GROUP_MEMBERS_PATCH_LIMIT) {
+    const chunk = userIds.slice(i, i + GRAPH_GROUP_MEMBERS_PATCH_LIMIT)
+    adminClient.group.addUsersToGroup({
       groupIdOrName,
-      userIdOrLogin: userId,
+      userIds: chunk,
       baseUrl: settings.platform.base_url
     })
 

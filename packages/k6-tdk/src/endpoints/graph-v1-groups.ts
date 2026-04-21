@@ -20,6 +20,12 @@ export const POST__add_user_to_group: Endpoint<{ groupId: string, userId: string
   }))
 }
 
+export const PATCH__add_users_to_group: Endpoint<{ groupId: string, userIds: string[], baseUrl: string }, 'none'> = (httpClient, { groupId, userIds, baseUrl }) => {
+  return httpClient('PATCH', `/graph/v1.0/groups/${groupId}`, JSON.stringify({
+    'members@odata.bind': userIds.map((userId) => `${baseUrl}/graph/v1.0/users/${userId}`)
+  }))
+}
+
 export const DELETE__remove_user_from_group: Endpoint<{ groupId: string, userId: string }, 'none'> = (httpClient, { groupId, userId }) => {
   return httpClient('DELETE', `/graph/v1.0/groups/${groupId}/members/${userId}/$ref`)
 }
