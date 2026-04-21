@@ -22,16 +22,20 @@ const settings = {
 }
 
 export const ldap_create_group_add_users_and_delete_group_130 = async (): Promise<void> => {
-  // Step 1: Login Admin user and load existing users
+  
+  // Step 1: Login Admin user
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
 
+  // Step 2: Load all of existing users
   const getUsersResponse = adminClient.user.getUsers()
   let userIds: string[] = queryJson('$.value[*].id', getUsersResponse?.body).filter(Boolean)
 
+  // Guard USERS_COUNT_PER_GROUP > 0
   if (settings.usersCountPerGroup <= 0) {
     throw new Error('USERS_COUNT_PER_GROUP must be greater than 0')
   }
 
+  // Preparing USERS_COUNT_PER_GROUP randomly from the list
   for (let i = userIds.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [userIds[i], userIds[j]] = [userIds[j], userIds[i]]
@@ -40,7 +44,7 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
 
   sleep(settings.sleep.after_request)
 
-  // Step 2: Admin creates a test group
+  // Step 3: Admin creates a test group
   const groupName = `k6-test-group-${exec.vu.idInTest}-${exec.scenario.iterationInTest}-${Date.now()}`
   const createGroupResponse = adminClient.group.createGroup({ groupName })
   const [groupId] = queryJson('$.id', createGroupResponse.body)
@@ -48,7 +52,7 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
 
   sleep(settings.sleep.after_request)
 
-  // Step 3: Add users to the group in batches
+  // Step 4: Add randomly selected users to the group in batches
   for (let i = 0; i < userIds.length; i += GRAPH_GROUP_MEMBERS_PATCH_LIMIT) {
     const chunk = userIds.slice(i, i + GRAPH_GROUP_MEMBERS_PATCH_LIMIT)
     adminClient.group.addUsersToGroup({
@@ -60,7 +64,7 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
     sleep(settings.sleep.after_request)
   }
 
-  // Step 4: Admin deletes the group
+  // Step 5: Admin deletes the group
   adminClient.group.deleteGroup({ groupIdOrName })
 
   sleep(settings.sleep.after_iteration)
