@@ -26,13 +26,15 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
   const getUsersResponse = adminClient.user.getUsers()
   let userIds: string[] = queryJson('$.value[*].id', getUsersResponse?.body).filter(Boolean)
 
-  if (settings.usersCountPerGroup > 0) {
-    for (let i = userIds.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [userIds[i], userIds[j]] = [userIds[j], userIds[i]]
-    }
-    userIds = userIds.slice(0, settings.usersCountPerGroup)
+  if (settings.usersCountPerGroup <= 0) {
+    throw new Error('USERS_COUNT_PER_GROUP must be greater than 0')
   }
+
+  for (let i = userIds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [userIds[i], userIds[j]] = [userIds[j], userIds[i]]
+  }
+  userIds = userIds.slice(0, settings.usersCountPerGroup)
 
   const addedUsers = new Set<string>(userIds)
 
