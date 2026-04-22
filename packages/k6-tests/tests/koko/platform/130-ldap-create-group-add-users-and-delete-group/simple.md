@@ -7,7 +7,7 @@ The `130 LDAP create group add users and delete group` test simulates LDAP write
 
 * the `admin` user logs into the system.
 * each `iteration` performs the following steps:
-  1. **Login Admin & Resolve User UUIDs** - Authenticate as admin and resolve pool user UUIDs via Graph API
+  1. **Login Admin & Load Existing Users** - Authenticate as admin and load all existing users via Graph API
   2. **Create Group** - Admin creates a new test group with a unique name
   3. **Add Users to Group** - Admin adds each resolved user to the created group
   4. **Delete Group** - Admin removes the group from the system

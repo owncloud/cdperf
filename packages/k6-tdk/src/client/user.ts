@@ -7,17 +7,23 @@ import { Platform } from '@/values'
 import { EndpointClient } from './client'
 
 export class User extends EndpointClient {
-  getUser(p: { userLogin: string }): RefinedResponse<'text'> | undefined {
-    let response: RefinedResponse<'text'> | undefined
-    switch (this.platform) {
-      case Platform.ownCloudServer:
-      case Platform.nextcloud:
-        break
-      case Platform.ownCloudInfiniteScale:
-      default:
-        response = endpoints.graph.v1.users.GET__get_user(this.httpClient, p)
-    }
+  getUsers(): RefinedResponse<'text'> | undefined {
+    
+    const response: RefinedResponse<'text'> | undefined = endpoints.graph.v1.users.GET__get_users(this.httpClient, {})
 
+    check({ skip: !response, val: response }, {
+      'client -> user.getUsers - status': (r) => {
+        return r?.status === 200
+      }
+    })
+
+    return response
+  }
+
+  getUser(p: { userLogin: string }): RefinedResponse<'text'> | undefined {
+    
+    const response: RefinedResponse<'text'> | undefined = endpoints.graph.v1.users.GET__get_user(this.httpClient, p)
+    
     check({ skip: !response, val: response }, {
       'client -> user.getUser - status': (r) => {
         return r?.status === 200

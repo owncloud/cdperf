@@ -1,5 +1,9 @@
 import { Endpoint } from './endpoints'
 
+export const GET__get_users: Endpoint<{}, 'text'> = (httpClient) => {
+  return httpClient('GET', '/graph/v1.0/users')
+}
+
 export const GET__get_user: Endpoint<{ userLogin: string }, 'text'> = (httpClient, { userLogin }) => {
   return httpClient('GET', `/graph/v1.0/users/${userLogin}`)
 }

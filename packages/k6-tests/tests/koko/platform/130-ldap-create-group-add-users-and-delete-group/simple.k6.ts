@@ -1,11 +1,9 @@
-import { queryJson } from '@ownclouders/k6-tdk/lib/utils'
+import { ENV, queryJson } from '@ownclouders/k6-tdk/lib/utils'
 import { sleep } from 'k6'
 import exec from 'k6/execution'
 import { Options } from 'k6/options'
 
-import { userPool } from '@/pools'
 import { clientFor } from '@/shortcuts'
-import { getPoolItems } from '@/utils'
 import { envValues } from '@/values'
 
 export const options: Options = {
@@ -14,29 +12,39 @@ export const options: Options = {
   insecureSkipTLSVerify: true
 }
 
+const GRAPH_GROUP_MEMBERS_PATCH_LIMIT = 20
+
 const settings = {
-  ...envValues()
+  ...envValues(),
+  get usersCountPerGroup() {
+    return parseInt(ENV('USERS_COUNT_PER_GROUP', '0'), 10)
+  }
 }
 
 export const ldap_create_group_add_users_and_delete_group_130 = async (): Promise<void> => {
-  // Step 1: Login Admin user and resolve pool user UUIDs
+  
+  // Step 1: Login Admin user
   const adminClient = clientFor({ userLogin: settings.admin.login, userPassword: settings.admin.password })
 
-  const addedUsers = new Set<string>()
-  const poolUsers = getPoolItems({ pool: userPool, n: options.vus || 1 })
+  // Step 2: Load all of existing users
+  const getUsersResponse = adminClient.user.getUsers()
+  let userIds: string[] = queryJson('$.value[*].id', getUsersResponse?.body).filter(Boolean)
 
-  for (const poolUser of poolUsers) {
-    const getUserResponse = adminClient.user.getUser({ userLogin: poolUser.userLogin })
-    const [targetUserId] = queryJson('$.id', getUserResponse?.body)
-
-    if (targetUserId) {
-      addedUsers.add(targetUserId)
-    }
-
-    sleep(settings.sleep.after_request)
+  // Guard USERS_COUNT_PER_GROUP > 0
+  if (settings.usersCountPerGroup <= 0) {
+    throw new Error('USERS_COUNT_PER_GROUP must be greater than 0')
   }
 
-  // Step 2: Admin creates a test group
+  // Preparing USERS_COUNT_PER_GROUP randomly from the list
+  for (let i = userIds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [userIds[i], userIds[j]] = [userIds[j], userIds[i]]
+  }
+  userIds = userIds.slice(0, settings.usersCountPerGroup)
+
+  sleep(settings.sleep.after_request)
+
+  // Step 3: Admin creates a test group
   const groupName = `k6-test-group-${exec.vu.idInTest}-${exec.scenario.iterationInTest}-${Date.now()}`
   const createGroupResponse = adminClient.group.createGroup({ groupName })
   const [groupId] = queryJson('$.id', createGroupResponse.body)
@@ -44,18 +52,19 @@ export const ldap_create_group_add_users_and_delete_group_130 = async (): Promis
 
   sleep(settings.sleep.after_request)
 
-  // Step 3: Add each resolved user to the group
-  for (const userId of addedUsers) {
-    adminClient.group.addUserToGroup({
+  // Step 4: Add randomly selected users to the group in batches
+  for (let i = 0; i < userIds.length; i += GRAPH_GROUP_MEMBERS_PATCH_LIMIT) {
+    const chunk = userIds.slice(i, i + GRAPH_GROUP_MEMBERS_PATCH_LIMIT)
+    adminClient.group.addUsersToGroup({
       groupIdOrName,
-      userIdOrLogin: userId,
+      userIds: chunk,
       baseUrl: settings.platform.base_url
     })
 
     sleep(settings.sleep.after_request)
   }
 
-  // Step 4: Admin deletes the group
+  // Step 5: Admin deletes the group
   adminClient.group.deleteGroup({ groupIdOrName })
 
   sleep(settings.sleep.after_iteration)
