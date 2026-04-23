@@ -39,6 +39,7 @@ export class Kopano implements AuthNHTTPProvider {
   private get endpoints() {
     return {
       logon: cleanURL(`${this.baseUrl}/signin/v1/identifier/_/logon`),
+      authorize: cleanURL(`${this.baseUrl}/signin/v1/identifier/_/authorize`),
       token: cleanURL(`${this.baseUrl}/konnect/v1/token`)
     }
   }
@@ -88,14 +89,19 @@ export class Kopano implements AuthNHTTPProvider {
     )
     check({ val: logonResponse }, {
       'authn -> logonResponse - status': ({ status }) => {
-        return status === 200
+        return status === 200 || status === 204
       }
     })
-    if (logonResponse.status !== 200) {
-      throw new Error(`logonResponse.status is ${logonResponse.status}, expected 200`)
+
+    if (logonResponse.status === 200) {
+      return get(logonResponse.json(), 'hello.continue_uri', '')
     }
 
-    return get(logonResponse.json(), 'hello.continue_uri', '')
+    if (logonResponse.status === 204) {
+      return this.endpoints.authorize
+    }
+
+    throw new Error(`logonResponse.status is ${logonResponse.status}, expected 200 or 204`)
   }
 
   private getCode(continueUrl: string): string {
@@ -116,7 +122,7 @@ export class Kopano implements AuthNHTTPProvider {
       }
     })
     if (authorizeResponse.status !== 302) {
-      throw new Error(`authorizeResponse.status is ${authorizeResponse.status}, expected 302`)
+      throw new Error(`authorizeResponse.status is ${authorizeResponse.status}, expected 302. body: ${authorizeResponse.body}`)
     }
 
     return get(queryStringToObject(authorizeResponse.headers.Location), 'code', '')
