@@ -34,4 +34,4 @@ jobs:
           path: .vitepress/dist
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@f27bcc15848fdcdcc02f01754eb838e44bcf389b # v1
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
