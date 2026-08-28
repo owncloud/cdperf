@@ -153,6 +153,14 @@ export const envValues = () => {
       get app_name() {
         return ENV('ONLY_OFFICE_APP_NAME', 'OnlyOffice')
       }
+    },
+    cool: {
+      get wss_url() {
+        return ENV('COOL_WSS_URL', 'wss://localhost:9980/')
+      },
+      get app_name() {
+        return ENV('COOL_APP_NAME', 'Collabora')
+      }
     }
   }
 
