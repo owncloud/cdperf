@@ -146,6 +146,16 @@ importers:
         specifier: ^2.0.5
         version: 2.0.5(@types/node@22.3.0)
 
+  packages/k6-tdk/lib/auth: {}
+
+  packages/k6-tdk/lib/client: {}
+
+  packages/k6-tdk/lib/endpoints: {}
+
+  packages/k6-tdk/lib/utils: {}
+
+  packages/k6-tdk/lib/values: {}
+
   packages/k6-tests:
     dependencies:
       '@ownclouders/k6-tdk':
