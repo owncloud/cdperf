@@ -8,3 +8,5 @@ tmp
 node_modules
 cache
 /packages/k6-tests/artifacts
+.DS_Store
+.claude
